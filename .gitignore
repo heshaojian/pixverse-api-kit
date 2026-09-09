@@ -1,0 +1,7 @@
+.env
+node_modules/
+coverage/
+*.log
+jobs/
+.agents/skills/skill-creator/
+skills-lock.json
