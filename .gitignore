@@ -2,6 +2,12 @@
 node_modules/
 coverage/
 *.log
+.wrangler/
+deploy/
+!deploy/
+deploy/*
+!deploy/brand-pitches/
+!deploy/brand-pitches/**
 jobs/
 .agents/skills/skill-creator/
 skills-lock.json
