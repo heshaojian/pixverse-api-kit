@@ -230,17 +230,17 @@ function traceId(prefix) {
 
 function printHelp() {
   console.log(`Usage:
-  growth-studio avatars
-  growth-studio folders
-  growth-studio ensure-folder <name>
-  growth-studio upload-image /absolute/path/product.webp
-  growth-studio create-from-url https://shop.example.com/products/item [--folder-id <folder_id> | --folder-name <name> | --auto-folder]
-  growth-studio create-from-json /absolute/path/payload.json [--folder-id <folder_id> | --folder-name <name> | --auto-folder]
-  growth-studio get <video_id>
-  growth-studio poll <video_id>
-  growth-studio list [--limit 20] [--status succeeded] [--cursor <cursor>]
-  growth-studio edit <video_id> <clip_index> <instruction>
-  growth-studio run-job --payload /absolute/path/payload.json [--folder-id <folder_id> | --folder-name <name> | --auto-folder] [--jobs-dir jobs] [--job-name product-name] [--no-poll]`);
+  pixverse-api avatars
+  pixverse-api folders
+  pixverse-api ensure-folder <name>
+  pixverse-api upload-image /absolute/path/product.webp
+  pixverse-api create-from-url https://shop.example.com/products/item [--folder-id <folder_id> | --folder-name <name> | --auto-folder]
+  pixverse-api create-from-json /absolute/path/payload.json [--folder-id <folder_id> | --folder-name <name> | --auto-folder]
+  pixverse-api get <video_id>
+  pixverse-api poll <video_id>
+  pixverse-api list [--limit 20] [--status succeeded] [--cursor <cursor>]
+  pixverse-api edit <video_id> <clip_index> <instruction>
+  pixverse-api run-job --payload /absolute/path/payload.json [--folder-id <folder_id> | --folder-name <name> | --auto-folder] [--jobs-dir jobs] [--job-name product-name] [--no-poll]`);
 }
 
 main(process.argv.slice(2)).catch((error) => {

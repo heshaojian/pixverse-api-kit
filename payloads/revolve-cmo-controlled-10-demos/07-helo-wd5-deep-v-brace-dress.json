@@ -38,7 +38,7 @@
     "creative_ad_clone": "Silent fashion lookbook, not a presenter advertisement. The model maintains a relaxed closed-mouth expression and never speaks, lip-syncs, or gestures as if explaining. Use uninterrupted full-body framing. She walks slowly, pauses, and makes one controlled half-turn to reveal the deep V front, halterneck, cross-back straps, fluid maxi length, and black fabric drape. Use steady premium ecommerce lighting and natural body movement. Preserve the exact product shown in the supplied images. No dialogue, captions, text, added accessories, extra garments, invented details, color changes, body distortion, dramatic camera cuts, or framing that hides the product."
   },
   "metadata": {
-    "source": "codex-growth-studio-agent-kit",
+    "source": "pixverse-api-kit",
     "pitch": "revolve-cmo-controlled-page",
     "shelf_id": "new-arrivals",
     "shelf_title": "5 new arrivals / fresh-drop candidates",

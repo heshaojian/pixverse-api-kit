@@ -2,13 +2,14 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import test from "node:test";
 
-const pitchPath = new URL("../pilot/revolve-growth-studio-5sku/index.html", import.meta.url);
-const videoDataPath = new URL("../pilot/revolve-growth-studio-5sku/demo-videos-silent.json", import.meta.url);
+const workspaceRoot = new URL("../", import.meta.url);
+const pitchPath = new URL("../deploy/brand-pitches/revolve/v4/index.html", import.meta.url);
+const releaseReportPath = new URL("../pixverse-cli-jobs/revolve-v4/qa-report.json", import.meta.url);
 
 test("REVOLVE pitch opens with customer proof instead of AI education", async () => {
   const html = await fs.readFile(pitchPath, "utf8");
 
-  assert.match(html, /Make Every New Drop Move At REVOLVE Speed/);
+  assert.match(html, /Make every new drop move at REVOLVE speed\./);
   assert.ok(html.indexOf('id="demos"') < html.indexOf('id="pilot"'));
   assert.doesNotMatch(html, /The Opportunity|Pilot Hypothesis|From Product Page To Video Concept|AI-generated billboard/);
   assert.doesNotMatch(html, /\$1\.2B|140K\+|1,600\+|81%|Gen Z/);
@@ -39,16 +40,15 @@ test("REVOLVE pitch presents 10 unique demos and a measurable pilot", async () =
 
 test("REVOLVE pitch exposes all regenerated PixVerse video links", async () => {
   const html = await fs.readFile(pitchPath, "utf8");
-  const videoData = JSON.parse(await fs.readFile(videoDataPath, "utf8"));
-  const expectedUrls = new Set(videoData.demos.map(({ video_url: videoUrl }) => videoUrl));
+  const releaseReport = JSON.parse(await fs.readFile(releaseReportPath, "utf8"));
+  const expectedUrls = new Set(releaseReport.records.map(({ final_url: finalUrl }) => finalUrl));
   const linkedUrls = new Set(
     [...html.matchAll(/<a class="pixverse-link" href="([^"]+)"/g)].map(([, href]) => href),
   );
 
-  assert.equal(videoData.demos.length, 10);
-  assert.ok(videoData.demos.every(({ status }) => status === "succeeded"));
-  assert.equal(new Set(videoData.demos.map(({ video_id: videoId }) => videoId)).size, 10);
-  assert.ok(videoData.demos.every(({ video_url: videoUrl }) => videoUrl.startsWith("https://media.pixverse.ai/")));
+  assert.equal(releaseReport.records.length, 10);
+  assert.equal(new Set(releaseReport.records.map(({ video_id: videoId }) => videoId)).size, 10);
+  assert.ok(releaseReport.records.every(({ final_url: finalUrl }) => finalUrl.startsWith("https://media.pixverse.ai/")));
   assert.deepEqual(linkedUrls, expectedUrls);
 });
 
@@ -74,6 +74,6 @@ test("REVOLVE pitch uses the real co-brand lockup without redundant hero pills",
   assert.match(html, /src="\.\/assets\/pixverse-logo\.svg"/);
   assert.doesNotMatch(html, /brand-mark|proof-caption|One-Click Product Video|Original REVOLVE Product|15s · 9:16/);
 
-  await fs.access(new URL("../pilot/revolve-growth-studio-5sku/assets/revolve-wordmark.png", import.meta.url));
-  await fs.access(new URL("../pilot/revolve-growth-studio-5sku/assets/pixverse-logo.svg", import.meta.url));
+  await fs.access(new URL("deploy/brand-pitches/revolve/v4/assets/revolve-wordmark.png", workspaceRoot));
+  await fs.access(new URL("deploy/brand-pitches/revolve/v4/assets/pixverse-logo.svg", workspaceRoot));
 });

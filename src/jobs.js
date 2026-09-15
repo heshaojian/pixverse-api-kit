@@ -66,7 +66,7 @@ export async function readJsonFile(filePath) {
 
 export async function createJobDir(rootDir, jobName) {
   await fs.mkdir(rootDir, { recursive: true });
-  const safeName = slugify(jobName || "growth-studio-job");
+  const safeName = slugify(jobName || "pixverse-api-job");
   const stamp = new Date().toISOString().replaceAll(/[:.]/g, "-");
   const jobDir = path.join(rootDir, `${stamp}-${safeName}`);
   await fs.mkdir(jobDir, { recursive: false });

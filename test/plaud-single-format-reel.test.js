@@ -79,10 +79,7 @@ test("Plaud single-format reel combines three honest formats in one controlled p
       record.deliverable_path,
       "projects/plaud-single-format-reel/deliverables/plaud-notepin-s-three-format-reel-30s.mp4",
     );
-    assert.equal(
-      record.pitch_video_path,
-      "pilot/plaud-growth-studio-pitch/assets/plaud-notepin-s-three-format-reel-30s.mp4",
-    );
+    assert.equal(record.pitch_page_path, "deploy/brand-pitches/plaud/plaud-pixverse-0914/index.html");
     assert.equal(Object.hasOwn(record, "video_url"), false, "the untrimmed provider asset must not be labeled final");
   });
 

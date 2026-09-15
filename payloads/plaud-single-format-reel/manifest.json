@@ -18,8 +18,7 @@
       "source_video_url": "https://media.pixverse.ai/pixverse/mp4/media/workflow-studio/concat_8179_20260911T214848Z_final_concat.mp4",
       "source_thumbnail_url": "https://media.pixverse.ai/marketing_hub_website/first_frames/pixverse/mp4/media/workflow-studio/concat_8179_20260911T214848Z_final_concat.mp4_first_frame.jpg",
       "deliverable_path": "projects/plaud-single-format-reel/deliverables/plaud-notepin-s-three-format-reel-30s.mp4",
-      "pitch_video_path": "pilot/plaud-growth-studio-pitch/assets/plaud-notepin-s-three-format-reel-30s.mp4",
-      "pitch_poster_path": "pilot/plaud-growth-studio-pitch/assets/plaud-notepin-s-three-format-reel-30s.jpg",
+      "pitch_page_path": "deploy/brand-pitches/plaud/plaud-pixverse-0914/index.html",
       "qa_report_path": "projects/plaud-single-format-reel/quality/qa-report.json",
       "qa_status": "passed",
       "duration_seconds": 30.089649

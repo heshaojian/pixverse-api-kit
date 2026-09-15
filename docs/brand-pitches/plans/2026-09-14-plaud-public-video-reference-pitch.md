@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- Edit only `pilot/plaud-growth-studio-pitch/index.html`, `test/plaud-pitch.test.js`, and the two scoped planning documents.
+- Edit only `deploy/brand-pitches/plaud/plaud-pixverse-0914/index.html`, `test/plaud-pitch.test.js`, and the two scoped planning documents.
 - Preserve all six existing PixVerse MP4 URLs and their poster URLs.
 - Keep only Plaud Note Pro, Plaud Note, Plaud NotePin S, Plaud NotePin, and Plaud One in the hardware range.
 - Keep public sources customer-visible but do not expose internal research, production, or generation mechanics.
@@ -55,7 +55,7 @@ Verify that failures describe missing customer requirements rather than syntax, 
 ### Task 2: Rebuild The Plaud Pitch
 
 **Files:**
-- Modify: `pilot/plaud-growth-studio-pitch/index.html`
+- Modify: `deploy/brand-pitches/plaud/plaud-pixverse-0914/index.html`
 - Test: `test/plaud-pitch.test.js`
 
 **Interfaces:**
@@ -88,7 +88,7 @@ Expected: all Plaud pitch tests pass.
 ### Task 3: Verify Customer Readiness
 
 **Files:**
-- Inspect: `pilot/plaud-growth-studio-pitch/index.html`
+- Inspect: `deploy/brand-pitches/plaud/plaud-pixverse-0914/index.html`
 - Inspect: `test/plaud-pitch.test.js`
 
 **Interfaces:**

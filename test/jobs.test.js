@@ -6,7 +6,7 @@ import test from "node:test";
 import { runVideoJob } from "../src/jobs.js";
 
 test("runVideoJob writes durable job artifacts and returns final output", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "growth-studio-job-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-api-job-"));
   const payload = {
     product: { source_url: "https://shop.example.com/products/running-shoes" },
     video: { aspect_ratio: "9:16" },
@@ -69,7 +69,7 @@ test("runVideoJob writes durable job artifacts and returns final output", async 
 });
 
 test("runVideoJob can save create result without polling", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "growth-studio-job-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-api-job-"));
   const client = {
     async createVideo() {
       return { body: { video_id: "627410861853514292", status: "processing" } };
@@ -93,7 +93,7 @@ test("runVideoJob can save create result without polling", async () => {
 });
 
 test("runVideoJob can inject a folder_id override into the submitted payload", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "growth-studio-job-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-api-job-"));
   const originalPayload = {
     product: { source_url: "https://shop.example.com/products/running-shoes" },
     video: { aspect_ratio: "9:16" },
@@ -123,7 +123,7 @@ test("runVideoJob can inject a folder_id override into the submitted payload", a
 });
 
 test("runVideoJob resolves an auto folder before creating the video", async () => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "growth-studio-job-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-api-job-"));
   const originalPayload = {
     metadata: { customer: "REVOLVE" },
     product: { source_url: "https://www.revolve.com/item" },

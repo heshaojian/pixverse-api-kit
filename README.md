@@ -84,7 +84,7 @@ Create into a customer/topic folder by name, creating it first when it does not 
 npm run cli -- create-from-url https://shop.example.com/products/running-shoes --folder-name "REVOLVE"
 ```
 
-Let the agent kit infer the folder from payload metadata, merchant URL, or brand:
+Let the API kit infer the folder from payload metadata, merchant URL, or brand:
 
 ```bash
 npm run cli -- run-job --payload /absolute/path/payload.json --auto-folder

@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Agent-safe PixVerse API tools for Growth Studio generation and brand pitch assets.",
   "bin": {
-    "growth-studio": "./src/cli.js"
+    "pixverse-api": "./src/cli.js"
   },
   "scripts": {
     "cli": "node ./src/cli.js",

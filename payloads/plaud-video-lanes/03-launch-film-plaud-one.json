@@ -19,7 +19,7 @@
     "creative_ad_clone": "Hardware-only launch film focused on premium hardware desire through a restrained studio reveal. In a dark studio, let controlled light reveal the compact case silhouette, use a realistic cropped hand to open the case, move into deliberate macro views of the ribbed case and rounded white and silver device, then build through a slow orbit and subtle light sweep to a final case-and-device hero stage. Keep pacing cinematic and deliberate, reflections tactile, motion physically plausible, and the visual language premium rather than sci-fi. Preserve the exact case and device geometry, white and silver finish, ribbed detail, logo placement, rounded form, proportions, and real-world scale. No app screens, software UI, transcript overlays, captions, subtitles, text overlays, floating graphics, presenters, talking heads, speaking, narration, voiceover, or lip movement. Do not add invented claims, invented accessories, invented logos, unsupported features, morphing, floating hardware, or sci-fi effects. Show only a cropped hand when opening the case; show no faces."
   },
   "metadata": {
-    "source": "codex-growth-studio-agent-kit",
+    "source": "pixverse-api-kit",
     "pitch": "plaud-hardware-marketer-page",
     "lane": "launch-film",
     "product_url": "https://www.plaud.ai/products/plaud-one",
