@@ -1,0 +1,37 @@
+{
+  "batch": "plaud-video-lanes",
+  "purpose": "Three hardware-only Plaud samples with factual product descriptions separated from lane-specific creative direction.",
+  "created_at": "2026-09-11T21:00:00Z",
+  "records": [
+    {
+      "lane": "pdp-motion",
+      "product_id": "plaud-note-pro",
+      "payload": "payloads/plaud-video-lanes/01-pdp-motion-plaud-note-pro.json",
+      "video_id": "636915329066337523",
+      "job_dir": "jobs/plaud-video-lanes/2026-09-11T21-05-16-354Z-01-pdp-motion-plaud-note-pro",
+      "status": "succeeded",
+      "video_url": "https://media.pixverse.ai/pixverse/mp4/media/workflow-studio/concat_8157_20260911T211419Z_final_concat.mp4",
+      "thumbnail_url": "https://media.pixverse.ai/marketing_hub_website/first_frames/pixverse/mp4/media/workflow-studio/concat_8157_20260911T211419Z_final_concat.mp4_first_frame.jpg"
+    },
+    {
+      "lane": "performance-ads",
+      "product_id": "plaud-notepin-s",
+      "payload": "payloads/plaud-video-lanes/02-performance-ads-plaud-notepin-s.json",
+      "video_id": "636915338998449312",
+      "job_dir": "jobs/plaud-video-lanes/2026-09-11T21-05-22-795Z-02-performance-ads-plaud-notepin-s",
+      "status": "succeeded",
+      "video_url": "https://media.pixverse.ai/pixverse/mp4/media/workflow-studio/concat_8158_20260911T211312Z_final_concat.mp4",
+      "thumbnail_url": "https://media.pixverse.ai/marketing_hub_website/first_frames/pixverse/mp4/media/workflow-studio/concat_8158_20260911T211312Z_final_concat.mp4_first_frame.jpg"
+    },
+    {
+      "lane": "launch-film",
+      "product_id": "plaud-one",
+      "payload": "payloads/plaud-video-lanes/03-launch-film-plaud-one.json",
+      "video_id": "636915347487720691",
+      "job_dir": "jobs/plaud-video-lanes/2026-09-11T21-05-28-282Z-03-launch-film-plaud-one",
+      "status": "succeeded",
+      "video_url": "https://media.pixverse.ai/pixverse/mp4/media/workflow-studio/concat_8159_20260911T211322Z_final_concat.mp4",
+      "thumbnail_url": "https://media.pixverse.ai/marketing_hub_website/first_frames/pixverse/mp4/media/workflow-studio/concat_8159_20260911T211322Z_final_concat.mp4_first_frame.jpg"
+    }
+  ]
+}

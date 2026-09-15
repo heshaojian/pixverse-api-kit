@@ -1,0 +1,35 @@
+{
+  "product": {
+    "source_url": "https://www.revolve.com/all-the-ways-madley-mini-dress-in-black/dp/AAYR-WD195/",
+    "title": "Madley Mini Dress",
+    "description": "ALL THE WAYS Madley Mini Dress in Black is an unlined pull-on mini with an off-the-shoulder design, a viscose-elastane jersey top, and a polyester-cotton poplin skirt. The neckline-to-hem length is approximately 25 inches. Hand wash.",
+    "brand": "ALL THE WAYS",
+    "price": {
+      "amount": "76",
+      "currency": "USD"
+    }
+  },
+  "video": {
+    "aspect_ratio": "9:16",
+    "duration_seconds": 15,
+    "resolution": "1080p",
+    "language": "en-US",
+    "voiceover": false,
+    "captions": false,
+    "background_music": true,
+    "avatar": {
+      "mode": "auto"
+    }
+  },
+  "metadata": {
+    "source": "codex-growth-studio-agent-kit",
+    "pitch": "revolve-cmo-silent-page",
+    "shelf_id": "new-arrivals",
+    "shelf_title": "5 new arrivals / fresh-drop candidates",
+    "product_url": "https://www.revolve.com/all-the-ways-madley-mini-dress-in-black/dp/AAYR-WD195/",
+    "product_id": "AAYR-WD195",
+    "product_name": "ALL THE WAYS Madley Mini Dress in Black",
+    "generation_path": "growth_studio_agent_kit_product_url",
+    "product_description_source": "https://www.revolve.com/all-the-ways-madley-mini-dress-in-black/dp/AAYR-WD195/"
+  }
+}

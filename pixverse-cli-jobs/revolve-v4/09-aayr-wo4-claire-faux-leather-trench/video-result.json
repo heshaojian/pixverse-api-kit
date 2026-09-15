@@ -1,0 +1,11 @@
+{
+  "id": 423726084567065,
+  "type": "video",
+  "status": "completed",
+  "video_url": "https://media.pixverse.ai/pixverse%2Fmp4%2Fmedia%2Fweb%2Fori%2F80503924-954a-468c-a160-17dae007bc86_seed0.mp4",
+  "cover_url": "https://media.pixverse.ai/pixverse%2Fvideo%2Fframe%2Fdf4cc8e8-69b8-4621-8223-9d8dd20682d5.jpg",
+  "prompt": "Create a natural 10-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos. Show one consistent synthetic fashion model wearing the exact ALL THE WAYS Claire Faux Leather Trench in Black from the product photos, styled with the same understated dark base outfit. Preserve the glossy black faux-leather finish, wide notched lapels, long sleeves, calf-length straight trench silhouette, optional self-tie belt, side pouch pockets, and back vent. Follow this motion: walk in from the left, pause front-facing, make one slow relaxed turn to show the side, belt, and back vent, then walk out toward the right. Let the coat move with realistic weight and restrained shine. Stable full-body camera, clean white studio, premium soft lighting, and natural material physics. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, new accessories, garment changes, morphing, duplicate people, abrupt cuts, or framing that hides the coat.",
+  "model": "minimax-h3",
+  "duration": 10,
+  "created_at": "2026-09-10T05:57:36Z"
+}

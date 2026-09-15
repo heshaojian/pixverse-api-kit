@@ -1,0 +1,23 @@
+{
+  "audio_id": 423724362238867,
+  "asset_id": 423724362238867,
+  "trace_id": "9010f185-5447-4891-8aee-e5c7856659f9",
+  "asset_type": 2,
+  "asset_source": 1,
+  "create_mode": "music",
+  "status": "finish",
+  "audio_status": 1,
+  "audio_url": "https://media.pixverse.ai/pixverse/audio/music/423724362238867.mp3",
+  "audio_path": "pixverse/audio/music/423724362238867.mp3",
+  "duration": 155,
+  "file_size": 2475039,
+  "format": "mp3",
+  "provider": "minimax",
+  "model": "music-3.0",
+  "prompt": "Instrumental fashion lookbook cue for a black satin lace-trim halter mini dress. Sleek nocturnal electro-pop at 112 BPM, muted kick, poised bass pulse, fine crystalline synth shimmer suggesting satin, flirtatious but restrained runway confidence. Immediate groove from the first beat, no intro silence, no vocals, no spoken words, no choir, no dramatic impacts, no sound effects.",
+  "lyrics": null,
+  "instrumental": true,
+  "auto_lyrics": false,
+  "credits": 50,
+  "local_path": "pixverse-cli-jobs/revolve-v4/01-lior-wd140-stars-align-mini-dress/music-source.mp3"
+}

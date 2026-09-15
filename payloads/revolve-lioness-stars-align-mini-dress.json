@@ -1,0 +1,22 @@
+{
+  "product": {
+    "source_url": "https://www.revolve.com/lioness-stars-align-mini-dress-in-onyx/dp/LIOR-WD140/?d=Womens&navsrc=hp_nav_2col&itrownum=1&itcurrpage=1&itview=01"
+  },
+  "video": {
+    "aspect_ratio": "9:16",
+    "duration_seconds": 30,
+    "resolution": "1080p",
+    "language": "en-US",
+    "voiceover": true,
+    "captions": true,
+    "background_music": true,
+    "avatar": {
+      "mode": "auto"
+    }
+  },
+  "metadata": {
+    "source": "codex",
+    "product_id": "LIOR-WD140",
+    "product_name": "Lioness Stars Align Mini Dress in Onyx"
+  }
+}

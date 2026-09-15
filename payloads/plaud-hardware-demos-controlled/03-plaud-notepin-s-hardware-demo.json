@@ -1,0 +1,35 @@
+{
+  "product": {
+    "source_url": "https://www.plaud.ai/products/plaud-notepin-s",
+    "title": "Plaud NotePin S",
+    "description": "Plaud NotePin S is a compact black oval wearable recorder with a smooth finish, visible button placement, small body scale, and accessory-ready form factor for jacket, collar, wristband, and desk use.",
+    "brand": "Plaud",
+    "price": {
+      "amount": "179",
+      "currency": "USD"
+    }
+  },
+  "video": {
+    "aspect_ratio": "9:16",
+    "duration_seconds": 15,
+    "resolution": "1080p",
+    "language": "en-US",
+    "voiceover": false,
+    "captions": false,
+    "background_music": true,
+    "avatar": {
+      "mode": "auto"
+    },
+    "creative_ad_clone": "Silent hardware product demo, not a presenter advertisement. No narration, captions, subtitles, floating UI, app screens, sci-fi effects, invented logos, text overlays, talking heads, speaking, or lip movement. Show Plaud NotePin S in a professional day: oval device close-up, hand scale, clipped to a jacket or worn with a wristband, light tap on the button, then placed neatly on a desk beside a notebook. Preserve the black oval shape, button placement, compact size, smooth finish, and wearable accessory feel. Keep motion subtle, realistic, and premium."
+  },
+  "metadata": {
+    "source": "codex-growth-studio-agent-kit",
+    "pitch": "plaud-hardware-marketer-page",
+    "product_url": "https://www.plaud.ai/products/plaud-notepin-s",
+    "product_id": "plaud-notepin-s",
+    "product_name": "Plaud NotePin S",
+    "product_description_source": "https://www.plaud.ai/products/plaud-notepin-s",
+    "generation_path": "growth_studio_agent_kit_controlled_product_facts",
+    "supersedes_payload": "payloads/plaud-hardware-demos/03-plaud-notepin-s-hardware-demo.json"
+  }
+}

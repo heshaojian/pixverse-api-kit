@@ -22,6 +22,8 @@ export function loadDotEnv(path = ".env") {
 
 export function getConfig(env = process.env) {
   const apiKey = env.PIXVERSE_GROWTH_API_KEY;
+  const folderApiKey = env.PIXVERSE_GROWTH_FOLDER_API_KEY || apiKey;
+  const folderApiPrefix = env.PIXVERSE_GROWTH_FOLDER_API_PREFIX;
   const baseUrl = env.PIXVERSE_GROWTH_BASE_URL || DEFAULT_BASE_URL;
 
   if (!apiKey) {
@@ -32,5 +34,5 @@ export function getConfig(env = process.env) {
     throw new Error("PIXVERSE_GROWTH_API_KEY must be a production key starting with mh_live_.");
   }
 
-  return { apiKey, baseUrl };
+  return { apiKey, folderApiKey, folderApiPrefix, baseUrl };
 }

@@ -1,0 +1,25 @@
+{
+  "video_id": 423726053333787,
+  "trace_id": "1af5cae4-accb-4915-b46b-2b042fa28dfb",
+  "status": "submitted",
+  "cost_credits": 450,
+  "params": {
+    "prompt": "Create a natural 10-second vertical ecommerce fashion video. @image1 is the corrected four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos and override every other reference for garment construction. Show one consistent synthetic adult fashion model wearing the exact LIONESS Stars Align Midi Dress in Honey Check. Preserve the pale honey micro-check chiffon, self-tie halter, lace-edged deep V neckline, fitted upper body, low open back, one uninterrupted gently flared A-line skirt, translucent chiffon over full lining, ankle length, and lace only at the bottom hem. Critical: no tiers, no gathered bands, no horizontal seams, and no lace rows across the skirt. The model walks in from the left, pauses front-facing, makes one slow relaxed turn to show the side and open back, then walks out toward the right. Stable full-body camera, clean white studio, premium soft lighting, and natural chiffon movement. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, accessories, extra garments, color changes, morphing, duplicate people, abrupt cuts, or product-obscuring framing.",
+    "model": "minimax-h3",
+    "create_count": 1,
+    "quality": "1440p",
+    "customer_img_paths": [
+      "upload/1b49a81b-e21a-40f2-a001-e0e53f6956c6.png",
+      "upload/1e98d33e-d032-4830-a50a-23117f62c61b.jpg",
+      "upload/fba57fcc-78c9-4df1-a1fd-9e049b21fb11.jpg",
+      "upload/1d58897d-e05d-4897-9d65-ae808b5e9920.jpg",
+      "upload/82b81ba9-30a3-4034-a83c-e27be2e4f005.jpg"
+    ],
+    "customer_audio_paths": [
+      "upload/87541e8f-e919-4a38-9141-e2a22dcf7387.mp3"
+    ],
+    "aspect_ratio": "9:16",
+    "duration": 10,
+    "idempotency_key": "revolve-v4-04-lior-wd229-stars-align-midi-dress-h3-1440p"
+  }
+}

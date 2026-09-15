@@ -1,0 +1,283 @@
+{
+  "title": "REVOLVE V3 vs V4",
+  "products": [
+    {
+      "productId": "LIOR-WD140",
+      "brand": "LIONESS",
+      "name": "Stars Align Mini Dress",
+      "color": "Onyx",
+      "price": "$79",
+      "productUrl": "https://www.revolve.com/lioness-stars-align-mini-dress-in-onyx/dp/LIOR-WD140/",
+      "v3": {
+        "model": "Seedance 2.5",
+        "resolution": "720 x 1280",
+        "duration": 8,
+        "video": "/pixverse-cli-jobs/revolve-v3/01-lior-wd140-stars-align-mini-dress/video-with-music.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v3/assets/posters/LIOR-WD140.jpg"
+      },
+      "v4": {
+        "model": "MiniMax H3",
+        "resolution": "1440 x 2560",
+        "duration": 8,
+        "video": "/pixverse-cli-jobs/revolve-v4/01-lior-wd140-stars-align-mini-dress/video-final.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v4/assets/posters/LIOR-WD140.jpg"
+      },
+      "references": [
+        "/assets/revolve-pilot-controlled-images/LIOR-WD140/LIOR-WD140_V1.jpg",
+        "/assets/revolve-pilot-controlled-images/LIOR-WD140/LIOR-WD140_V2.jpg",
+        "/assets/revolve-pilot-controlled-images/LIOR-WD140/LIOR-WD140_V3.jpg"
+      ]
+    },
+    {
+      "productId": "BARD-WS308",
+      "brand": "Bardot",
+      "name": "Eva Poplin Top",
+      "color": "Orchid White",
+      "price": "$119",
+      "productUrl": "https://www.revolve.com/bardot-eva-poplin-top-in-orchid-white/dp/BARD-WS308/",
+      "v3": {
+        "model": "Seedance 2.5",
+        "resolution": "720 x 1280",
+        "duration": 8,
+        "video": "/pixverse-cli-jobs/revolve-v3/02-bard-ws308-eva-poplin-top/video.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v3/assets/posters/BARD-WS308.jpg"
+      },
+      "v4": {
+        "model": "MiniMax H3",
+        "resolution": "1440 x 2560",
+        "duration": 8,
+        "video": "/pixverse-cli-jobs/revolve-v4/02-bard-ws308-eva-poplin-top/video-final.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v4/assets/posters/BARD-WS308.jpg"
+      },
+      "references": [
+        "/assets/revolve-pilot-controlled-images/BARD-WS308/BARD-WS308_V1.jpg",
+        "/assets/revolve-pilot-controlled-images/BARD-WS308/BARD-WS308_V2.jpg",
+        "/assets/revolve-pilot-controlled-images/BARD-WS308/BARD-WS308_V3.jpg",
+        "/assets/revolve-pilot-controlled-images/BARD-WS308/BARD-WS308_V4.jpg"
+      ]
+    },
+    {
+      "productId": "SPDW-WP244",
+      "brand": "superdown",
+      "name": "Chaya Capri",
+      "color": "Black",
+      "price": "$60",
+      "productUrl": "https://www.revolve.com/superdown-chaya-capri-in-black/dp/SPDW-WP244/",
+      "v3": {
+        "model": "Seedance 2.5",
+        "resolution": "720 x 1280",
+        "duration": 8,
+        "video": "/pixverse-cli-jobs/revolve-v3/03-spdw-wp244-chaya-capri/video.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v3/assets/posters/SPDW-WP244.jpg"
+      },
+      "v4": {
+        "model": "MiniMax H3",
+        "resolution": "1440 x 2560",
+        "duration": 8,
+        "video": "/pixverse-cli-jobs/revolve-v4/03-spdw-wp244-chaya-capri/video-final.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v4/assets/posters/SPDW-WP244.jpg"
+      },
+      "references": [
+        "/assets/revolve-pilot-controlled-images/SPDW-WP244/SPDW-WP244_V1.jpg",
+        "/assets/revolve-pilot-controlled-images/SPDW-WP244/SPDW-WP244_V2.jpg",
+        "/assets/revolve-pilot-controlled-images/SPDW-WP244/SPDW-WP244_V3.jpg",
+        "/assets/revolve-pilot-controlled-images/SPDW-WP244/SPDW-WP244_V4.jpg"
+      ]
+    },
+    {
+      "productId": "LIOR-WD229",
+      "brand": "LIONESS",
+      "name": "Stars Align Midi Dress",
+      "color": "Honey Check",
+      "price": "$100",
+      "productUrl": "https://www.revolve.com/lioness-stars-align-midi-dress-in-honey-check/dp/LIOR-WD229/",
+      "v3": {
+        "model": "Seedance 2.5",
+        "resolution": "720 x 1280",
+        "duration": 8,
+        "video": "/pixverse-cli-jobs/revolve-v3/04-lior-wd229-stars-align-midi-dress/video.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v3/assets/posters/LIOR-WD229.jpg"
+      },
+      "v4": {
+        "model": "MiniMax H3",
+        "resolution": "1440 x 2560",
+        "duration": 10,
+        "video": "/pixverse-cli-jobs/revolve-v4/04-lior-wd229-stars-align-midi-dress/video-final.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v4/assets/posters/LIOR-WD229.jpg"
+      },
+      "references": [
+        "/assets/revolve-pilot-controlled-images/LIOR-WD229/LIOR-WD229_V1.jpg",
+        "/assets/revolve-pilot-controlled-images/LIOR-WD229/LIOR-WD229_V2.jpg",
+        "/assets/revolve-pilot-controlled-images/LIOR-WD229/LIOR-WD229_V3.jpg",
+        "/assets/revolve-pilot-controlled-images/LIOR-WD229/LIOR-WD229_V4.jpg"
+      ]
+    },
+    {
+      "productId": "LEIV-WO65",
+      "brand": "LEVI'S",
+      "name": "90s Trucker",
+      "color": "Soft As Butter",
+      "price": "$110",
+      "productUrl": "https://www.revolve.com/levis-90s-trucker-in-soft-as-butter/dp/LEIV-WO65/",
+      "v3": {
+        "model": "Seedance 2.5",
+        "resolution": "720 x 1280",
+        "duration": 8,
+        "video": "/pixverse-cli-jobs/revolve-v3/05-leiv-wo65-90s-trucker/video.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v3/assets/posters/LEIV-WO65.jpg"
+      },
+      "v4": {
+        "model": "MiniMax H3",
+        "resolution": "1440 x 2560",
+        "duration": 8,
+        "video": "/pixverse-cli-jobs/revolve-v4/05-leiv-wo65-90s-trucker/video-final.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v4/assets/posters/LEIV-WO65.jpg"
+      },
+      "references": [
+        "/assets/revolve-pilot-controlled-images/LEIV-WO65/LEIV-WO65_V1.jpg",
+        "/assets/revolve-pilot-controlled-images/LEIV-WO65/LEIV-WO65_V2.jpg",
+        "/assets/revolve-pilot-controlled-images/LEIV-WO65/LEIV-WO65_V3.jpg",
+        "/assets/revolve-pilot-controlled-images/LEIV-WO65/LEIV-WO65_V4.jpg"
+      ]
+    },
+    {
+      "productId": "HELO-WD29",
+      "brand": "HAELO",
+      "name": "Braided Tubular Dress",
+      "color": "White",
+      "price": "$280",
+      "productUrl": "https://www.revolve.com/haelo-braided-tubular-dress-in-white/dp/HELO-WD29/",
+      "v3": {
+        "model": "Seedance 2.5",
+        "resolution": "720 x 1280",
+        "duration": 8,
+        "video": "/pixverse-cli-jobs/revolve-v3/06-helo-wd29-braided-tubular-dress/video.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v3/assets/posters/HELO-WD29.jpg"
+      },
+      "v4": {
+        "model": "MiniMax H3",
+        "resolution": "1440 x 2560",
+        "duration": 8,
+        "video": "/pixverse-cli-jobs/revolve-v4/06-helo-wd29-braided-tubular-dress/video-final.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v4/assets/posters/HELO-WD29.jpg"
+      },
+      "references": [
+        "/assets/revolve-pilot-controlled-images/HELO-WD29/HELO-WD29_V1.jpg",
+        "/assets/revolve-pilot-controlled-images/HELO-WD29/HELO-WD29_V2.jpg",
+        "/assets/revolve-pilot-controlled-images/HELO-WD29/HELO-WD29_V3.jpg",
+        "/assets/revolve-pilot-controlled-images/HELO-WD29/HELO-WD29_V4.jpg"
+      ]
+    },
+    {
+      "productId": "HELO-WD5",
+      "brand": "HAELO",
+      "name": "Deep-v Brace Dress",
+      "color": "Black",
+      "price": "$275",
+      "productUrl": "https://www.revolve.com/haelo-deepv-brace-dress-in-black/dp/HELO-WD5/",
+      "v3": {
+        "model": "Seedance 2.5",
+        "resolution": "720 x 1280",
+        "duration": 8,
+        "video": "/pixverse-cli-jobs/revolve-v3/07-helo-wd5-deep-v-brace-dress/video.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v3/assets/posters/HELO-WD5.jpg"
+      },
+      "v4": {
+        "model": "MiniMax H3",
+        "resolution": "1440 x 2560",
+        "duration": 10,
+        "video": "/pixverse-cli-jobs/revolve-v4/07-helo-wd5-deep-v-brace-dress/video-final.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v4/assets/posters/HELO-WD5.jpg"
+      },
+      "references": [
+        "/assets/revolve-pilot-controlled-images/HELO-WD5/HELO-WD5_V1.jpg",
+        "/assets/revolve-pilot-controlled-images/HELO-WD5/HELO-WD5_V2.jpg",
+        "/assets/revolve-pilot-controlled-images/HELO-WD5/HELO-WD5_V3.jpg",
+        "/assets/revolve-pilot-controlled-images/HELO-WD5/HELO-WD5_V4.jpg"
+      ]
+    },
+    {
+      "productId": "HELO-WD27",
+      "brand": "HAELO",
+      "name": "Gradient Studded Dress",
+      "color": "Fog Grey",
+      "price": "",
+      "productUrl": "https://www.revolve.com/haelo-gradient-studded-dress-in-fog-grey/dp/HELO-WD27/",
+      "v3": {
+        "model": "Seedance 2.5",
+        "resolution": "720 x 1280",
+        "duration": 8,
+        "video": "/pixverse-cli-jobs/revolve-v3/08-helo-wd27-gradient-studded-dress/video.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v3/assets/posters/HELO-WD27.jpg"
+      },
+      "v4": {
+        "model": "MiniMax H3",
+        "resolution": "1440 x 2560",
+        "duration": 8,
+        "video": "/pixverse-cli-jobs/revolve-v4/08-helo-wd27-gradient-studded-dress/video-final.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v4/assets/posters/HELO-WD27.jpg"
+      },
+      "references": [
+        "/assets/revolve-pilot-controlled-images/HELO-WD27/HELO-WD27_V1.jpg",
+        "/assets/revolve-pilot-controlled-images/HELO-WD27/HELO-WD27_V2.jpg",
+        "/assets/revolve-pilot-controlled-images/HELO-WD27/HELO-WD27_V3.jpg",
+        "/assets/revolve-pilot-controlled-images/HELO-WD27/HELO-WD27_V4.jpg"
+      ]
+    },
+    {
+      "productId": "AAYR-WO4",
+      "brand": "ALL THE WAYS",
+      "name": "Claire Faux Leather Trench",
+      "color": "Black",
+      "price": "$108",
+      "productUrl": "https://www.revolve.com/all-the-ways-claire-faux-leather-trench-in-black/dp/AAYR-WO4/",
+      "v3": {
+        "model": "Seedance 2.5",
+        "resolution": "720 x 1280",
+        "duration": 8,
+        "video": "/pixverse-cli-jobs/revolve-v3/09-aayr-wo4-claire-faux-leather-trench/video.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v3/assets/posters/AAYR-WO4.jpg"
+      },
+      "v4": {
+        "model": "MiniMax H3",
+        "resolution": "1440 x 2560",
+        "duration": 10,
+        "video": "/pixverse-cli-jobs/revolve-v4/09-aayr-wo4-claire-faux-leather-trench/video-final.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v4/assets/posters/AAYR-WO4.jpg"
+      },
+      "references": [
+        "/assets/revolve-pilot-controlled-images/AAYR-WO4/AAYR-WO4_V1.jpg",
+        "/assets/revolve-pilot-controlled-images/AAYR-WO4/AAYR-WO4_V2.jpg",
+        "/assets/revolve-pilot-controlled-images/AAYR-WO4/AAYR-WO4_V3.jpg",
+        "/assets/revolve-pilot-controlled-images/AAYR-WO4/AAYR-WO4_V4.jpg"
+      ]
+    },
+    {
+      "productId": "AAYR-WD195",
+      "brand": "ALL THE WAYS",
+      "name": "Madley Mini Dress",
+      "color": "Black",
+      "price": "$76",
+      "productUrl": "https://www.revolve.com/all-the-ways-madley-mini-dress-in-black/dp/AAYR-WD195/",
+      "v3": {
+        "model": "Seedance 2.5",
+        "resolution": "720 x 1280",
+        "duration": 8,
+        "video": "/pixverse-cli-jobs/revolve-v3/10-aayr-wd195-madley-mini-dress/video.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v3/assets/posters/AAYR-WD195.jpg"
+      },
+      "v4": {
+        "model": "MiniMax H3",
+        "resolution": "1440 x 2560",
+        "duration": 8,
+        "video": "/pixverse-cli-jobs/revolve-v4/10-aayr-wd195-madley-mini-dress/video-final.mp4",
+        "poster": "/deploy/brand-pitches/revolve/v4/assets/posters/AAYR-WD195.jpg"
+      },
+      "references": [
+        "/assets/revolve-pilot-controlled-images/AAYR-WD195/AAYR-WD195_V1.jpg",
+        "/assets/revolve-pilot-controlled-images/AAYR-WD195/AAYR-WD195_V2.jpg",
+        "/assets/revolve-pilot-controlled-images/AAYR-WD195/AAYR-WD195_V3.jpg"
+      ]
+    }
+  ]
+}

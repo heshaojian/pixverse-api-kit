@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 import { GrowthStudioClient, createProductUrlPayload } from "./client.js";
 import { getConfig, loadDotEnv } from "./config.js";
+import { resolveFolderForPayload } from "./folders.js";
 import { readJsonFile, runVideoJob } from "./jobs.js";
 
 loadDotEnv();
 
 const commands = new Set([
   "avatars",
+  "folders",
+  "ensure-folder",
   "upload-image",
   "create-from-url",
   "create-from-json",
@@ -33,6 +36,17 @@ async function main(argv) {
 async function runCommand(client, command, args) {
   if (command === "avatars") return (await client.listAvatars({ traceId: traceId("list-avatars") })).body;
 
+  if (command === "folders") return (await client.listFolders({ traceId: traceId("list-folders") })).body;
+
+  if (command === "ensure-folder") {
+    const options = parseEnsureFolderOptions(args);
+    if (!options.folderName) throw new Error("ensure-folder requires a folder name.");
+    return await resolveFolderForPayload(client, {}, {
+      folderName: options.folderName,
+      traceId: traceId("ensure-folder"),
+    });
+  }
+
   if (command === "upload-image") {
     const [filePath] = args;
     if (!filePath) throw new Error("upload-image requires a file path.");
@@ -40,15 +54,21 @@ async function runCommand(client, command, args) {
   }
 
   if (command === "create-from-url") {
-    const [sourceUrl] = args;
-    if (!sourceUrl) throw new Error("create-from-url requires a product URL.");
-    return (await client.createVideo(createProductUrlPayload(sourceUrl), { traceId: traceId("create-video") })).body;
+    const options = parseCreateFromUrlOptions(args);
+    if (!options.sourceUrl) throw new Error("create-from-url requires a product URL.");
+    const payload = createProductUrlPayload(options.sourceUrl);
+    const prepared = await prepareCreatePayload(client, payload, options, traceId("create-video"));
+    const result = (await client.createVideo(prepared.payload, { traceId: prepared.traceId })).body;
+    return withFolderResult(result, prepared.folder);
   }
 
   if (command === "create-from-json") {
-    const [payloadPath] = args;
-    if (!payloadPath) throw new Error("create-from-json requires a JSON payload path.");
-    return (await client.createVideo(await readJsonFile(payloadPath), { traceId: traceId("create-video") })).body;
+    const options = parseCreateFromJsonOptions(args);
+    if (!options.payloadPath) throw new Error("create-from-json requires a JSON payload path.");
+    const payload = await readJsonFile(options.payloadPath);
+    const prepared = await prepareCreatePayload(client, payload, options, traceId("create-video"));
+    const result = (await client.createVideo(prepared.payload, { traceId: prepared.traceId })).body;
+    return withFolderResult(result, prepared.folder);
   }
 
   if (command === "get") {
@@ -80,6 +100,9 @@ async function runCommand(client, command, args) {
     const options = parseRunJobOptions(args);
     if (!options.payloadPath) throw new Error("run-job requires --payload <path>.");
     return runVideoJob(client, await readJsonFile(options.payloadPath), {
+      folderId: options.folderId,
+      folderName: options.folderName,
+      autoFolder: options.autoFolder,
       jobsDir: options.jobsDir,
       jobName: options.jobName,
       poll: options.poll,
@@ -93,13 +116,74 @@ async function runCommand(client, command, args) {
   throw new Error(`Unknown command: ${command}`);
 }
 
+async function prepareCreatePayload(client, payload, options, createTraceId) {
+  const folder = await resolveFolderForPayload(client, payload, {
+    autoFolder: options.autoFolder,
+    folderId: options.folderId,
+    folderName: options.folderName,
+    traceId: createTraceId,
+  });
+  return {
+    folder,
+    payload: withFolderId(payload, folder?.folderId),
+    traceId: createTraceId,
+  };
+}
+
+function withFolderResult(result, folder) {
+  if (!folder) return result;
+  return {
+    ...result,
+    folder_id: folder.folderId,
+    folder_name: folder.folderName,
+    folder_created: folder.folderCreated,
+  };
+}
+
+function parseCreateFromUrlOptions(args) {
+  const options = {};
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === "--folder-id") options.folderId = readOptionValue(args, ++index, arg);
+    else if (arg === "--folder-name") options.folderName = readOptionValue(args, ++index, arg);
+    else if (arg === "--auto-folder") options.autoFolder = true;
+    else if (!options.sourceUrl) options.sourceUrl = arg;
+    else throw new Error(`Unknown create-from-url option: ${arg}`);
+  }
+  return options;
+}
+
+function parseCreateFromJsonOptions(args) {
+  const options = {};
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === "--folder-id") options.folderId = readOptionValue(args, ++index, arg);
+    else if (arg === "--folder-name") options.folderName = readOptionValue(args, ++index, arg);
+    else if (arg === "--auto-folder") options.autoFolder = true;
+    else if (!options.payloadPath) options.payloadPath = arg;
+    else throw new Error(`Unknown create-from-json option: ${arg}`);
+  }
+  return options;
+}
+
+function parseEnsureFolderOptions(args) {
+  const options = {};
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === "--folder-name") options.folderName = readOptionValue(args, ++index, arg);
+    else if (!options.folderName) options.folderName = arg;
+    else throw new Error(`Unknown ensure-folder option: ${arg}`);
+  }
+  return options;
+}
+
 function parseListOptions(args) {
   const options = {};
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
-    if (arg === "--limit") options.limit = args[++index];
-    else if (arg === "--status") options.status = args[++index];
-    else if (arg === "--cursor") options.cursor = args[++index];
+    if (arg === "--limit") options.limit = readOptionValue(args, ++index, arg);
+    else if (arg === "--status") options.status = readOptionValue(args, ++index, arg);
+    else if (arg === "--cursor") options.cursor = readOptionValue(args, ++index, arg);
     else throw new Error(`Unknown list option: ${arg}`);
   }
   return options;
@@ -111,16 +195,33 @@ function parseRunJobOptions(args) {
   };
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
-    if (arg === "--payload") options.payloadPath = args[++index];
-    else if (arg === "--jobs-dir") options.jobsDir = args[++index];
-    else if (arg === "--job-name") options.jobName = args[++index];
-    else if (arg === "--timeout-minutes") options.timeoutMinutes = args[++index];
-    else if (arg === "--initial-delay-seconds") options.initialDelaySeconds = args[++index];
-    else if (arg === "--fallback-delay-seconds") options.fallbackDelaySeconds = args[++index];
+    if (arg === "--payload") options.payloadPath = readOptionValue(args, ++index, arg);
+    else if (arg === "--folder-id") options.folderId = readOptionValue(args, ++index, arg);
+    else if (arg === "--folder-name") options.folderName = readOptionValue(args, ++index, arg);
+    else if (arg === "--auto-folder") options.autoFolder = true;
+    else if (arg === "--jobs-dir") options.jobsDir = readOptionValue(args, ++index, arg);
+    else if (arg === "--job-name") options.jobName = readOptionValue(args, ++index, arg);
+    else if (arg === "--timeout-minutes") options.timeoutMinutes = readOptionValue(args, ++index, arg);
+    else if (arg === "--initial-delay-seconds") options.initialDelaySeconds = readOptionValue(args, ++index, arg);
+    else if (arg === "--fallback-delay-seconds") options.fallbackDelaySeconds = readOptionValue(args, ++index, arg);
     else if (arg === "--no-poll") options.poll = false;
     else throw new Error(`Unknown run-job option: ${arg}`);
   }
   return options;
+}
+
+function readOptionValue(args, index, optionName) {
+  const value = args[index];
+  if (!value || value.startsWith("--")) throw new Error(`${optionName} requires a value.`);
+  return value;
+}
+
+function withFolderId(payload, folderId) {
+  if (!folderId) return payload;
+  return {
+    ...payload,
+    folder_id: folderId,
+  };
 }
 
 function traceId(prefix) {
@@ -130,14 +231,16 @@ function traceId(prefix) {
 function printHelp() {
   console.log(`Usage:
   growth-studio avatars
+  growth-studio folders
+  growth-studio ensure-folder <name>
   growth-studio upload-image /absolute/path/product.webp
-  growth-studio create-from-url https://shop.example.com/products/item
-  growth-studio create-from-json /absolute/path/payload.json
+  growth-studio create-from-url https://shop.example.com/products/item [--folder-id <folder_id> | --folder-name <name> | --auto-folder]
+  growth-studio create-from-json /absolute/path/payload.json [--folder-id <folder_id> | --folder-name <name> | --auto-folder]
   growth-studio get <video_id>
   growth-studio poll <video_id>
   growth-studio list [--limit 20] [--status succeeded] [--cursor <cursor>]
   growth-studio edit <video_id> <clip_index> <instruction>
-  growth-studio run-job --payload /absolute/path/payload.json [--jobs-dir jobs] [--job-name product-name] [--no-poll]`);
+  growth-studio run-job --payload /absolute/path/payload.json [--folder-id <folder_id> | --folder-name <name> | --auto-folder] [--jobs-dir jobs] [--job-name product-name] [--no-poll]`);
 }
 
 main(process.argv.slice(2)).catch((error) => {

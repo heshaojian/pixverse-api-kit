@@ -1,0 +1,55 @@
+{
+  "folder_id": "630251570268735431",
+  "product": {
+    "title": "Gradient Studded Dress",
+    "description": "HAELO Gradient Studded Dress in Fog Grey is a fully lined dress in 100% viscose, with lightweight silver-tone studded jersey fabric, adjustable straps, and a hidden back zipper with hook-and-eye closure. Dry clean.",
+    "brand": "HAELO",
+    "images": [
+      {
+        "url": "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/c4884a1281531c436119871566ce3f0d80613a9784007bdefe8f1af7b3f3b813.jpg"
+      },
+      {
+        "url": "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/a5dfd27b7cf09357348927753b57210ab408155aec848708acbf7efccb1a6df6.jpg"
+      },
+      {
+        "url": "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/2eb9bf6b55dffb15c197f243a10bc2bab5a73f7b4c5ee1ecb97cfc708d22cbd0.jpg"
+      },
+      {
+        "url": "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/15eec86e9760bcf4bfbe15ec11b7e080a452c4776905d35a0e946adb6064ec94.jpg"
+      }
+    ]
+  },
+  "video": {
+    "aspect_ratio": "9:16",
+    "duration_seconds": 15,
+    "resolution": "1080p",
+    "language": "en-US",
+    "voiceover": true,
+    "captions": true,
+    "background_music": true,
+    "avatar": {
+      "mode": "auto"
+    }
+  },
+  "metadata": {
+    "source": "codex-growth-studio-agent-kit",
+    "pitch": "revolve-cmo-controlled-page",
+    "shelf_id": "new-arrivals",
+    "shelf_title": "5 new arrivals / fresh-drop candidates",
+    "product_url": "https://www.revolve.com/haelo-gradient-studded-dress-in-fog-grey/dp/HELO-WD27/",
+    "product_id": "HELO-WD27",
+    "product_name": "HAELO Gradient Studded Dress in Fog Grey",
+    "generation_path": "growth_studio_agent_kit_v2_folder_id_ugc_auto_script",
+    "product_description_source": "https://www.revolve.com/haelo-gradient-studded-dress-in-fog-grey/dp/HELO-WD27/",
+    "generation_batch": "revolve-10-product-v2-ugc-tryon-auto-script",
+    "avatar_name": "Sophie Lin",
+    "controlled_image_count": "4",
+    "pilot_version": "revolve-v2-ugc-tryon-auto",
+    "script_mode": "auto",
+    "creative_type": "ugc_try_on",
+    "folder_id": "630251570268735431",
+    "voiceover": "true",
+    "captions": "true",
+    "product_source_mode": "uploaded_images_only"
+  }
+}

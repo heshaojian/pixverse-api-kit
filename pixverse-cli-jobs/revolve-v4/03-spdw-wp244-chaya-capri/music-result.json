@@ -1,0 +1,23 @@
+{
+  "audio_id": 423724362223130,
+  "asset_id": 423724362223130,
+  "trace_id": "dbba0186-17fb-4694-a20e-31a6f7caf12e",
+  "asset_type": 2,
+  "asset_source": 1,
+  "create_mode": "music",
+  "status": "finish",
+  "audio_status": 1,
+  "audio_url": "https://media.pixverse.ai/pixverse/audio/music/423724362223130.mp3",
+  "audio_path": "pixverse/audio/music/423724362223130.mp3",
+  "duration": 31,
+  "file_size": 497256,
+  "format": "mp3",
+  "provider": "minimax",
+  "model": "music-3.0",
+  "prompt": "Instrumental fashion lookbook cue for fitted black capri pants with a sharp Y2K downtown attitude. Minimal electro at 120 BPM, tight dry kick, compact rubber bass, precise clicks, restrained glossy synth stab, confident and clean. Immediate groove from the first beat, no vocals, no spoken words, no choir, no dramatic impacts, no sound effects.",
+  "lyrics": null,
+  "instrumental": true,
+  "auto_lyrics": false,
+  "credits": 50,
+  "local_path": "pixverse-cli-jobs/revolve-v4/03-spdw-wp244-chaya-capri/music-source.mp3"
+}

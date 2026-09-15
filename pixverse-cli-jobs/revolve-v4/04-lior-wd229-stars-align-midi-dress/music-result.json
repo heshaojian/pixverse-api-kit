@@ -1,0 +1,23 @@
+{
+  "audio_id": 423724706725185,
+  "asset_id": 423724706725185,
+  "trace_id": "aadcb8cb-e8bd-4912-bee3-a2b609e2a04d",
+  "asset_type": 2,
+  "asset_source": 1,
+  "create_mode": "music",
+  "status": "finish",
+  "audio_status": 1,
+  "audio_url": "https://media.pixverse.ai/pixverse/audio/music/423724706725185.mp3",
+  "audio_path": "pixverse/audio/music/423724706725185.mp3",
+  "duration": 155,
+  "file_size": 2472531,
+  "format": "mp3",
+  "provider": "minimax",
+  "model": "music-3.0",
+  "prompt": "Instrumental fashion lookbook cue for a pale honey-check chiffon halter midi dress. Warm indie-electronic at 108 BPM, soft brushed beat, rounded bass, delicate muted guitar harmonics and translucent synth air, romantic movement with modern restraint. Immediate groove from the first beat, no vocals, no spoken words, no choir, no dramatic impacts, no sound effects.",
+  "lyrics": null,
+  "instrumental": true,
+  "auto_lyrics": false,
+  "credits": 50,
+  "local_path": "pixverse-cli-jobs/revolve-v4/04-lior-wd229-stars-align-midi-dress/music-source.mp3"
+}

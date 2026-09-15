@@ -1,0 +1,35 @@
+{
+  "product": {
+    "source_url": "https://www.revolve.com/haelo-braided-tubular-dress-in-white/dp/HELO-WD29/",
+    "title": "Braided Tubular Dress",
+    "description": "HAELO Braided Tubular Dress in White is an unlined stretch double-jersey mini dress in 82% cotton and 18% elastane, with side cut-out details and a back zipper. The neckline-to-hem length is approximately 25 inches. Hand wash cold; made in China.",
+    "brand": "HAELO",
+    "price": {
+      "amount": "280",
+      "currency": "USD"
+    }
+  },
+  "video": {
+    "aspect_ratio": "9:16",
+    "duration_seconds": 15,
+    "resolution": "1080p",
+    "language": "en-US",
+    "voiceover": false,
+    "captions": false,
+    "background_music": true,
+    "avatar": {
+      "mode": "auto"
+    }
+  },
+  "metadata": {
+    "source": "codex-growth-studio-agent-kit",
+    "pitch": "revolve-public-pitch-page",
+    "shelf_id": "new-arrivals",
+    "shelf_title": "5 new arrivals / fresh-drop candidates",
+    "product_url": "https://www.revolve.com/haelo-braided-tubular-dress-in-white/dp/HELO-WD29/",
+    "product_id": "HELO-WD29",
+    "product_name": "HAELO Braided Tubular Dress in White",
+    "generation_path": "growth_studio_agent_kit_product_url",
+    "product_description_source": "https://www.revolve.com/haelo-braided-tubular-dress-in-white/dp/HELO-WD29/"
+  }
+}

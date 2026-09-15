@@ -1,0 +1,55 @@
+{
+  "created_at": "2026-09-09T21:47:23.661Z",
+  "records": [
+    {
+      "product_id": "LIOR-WD140",
+      "title": "LIONESS Stars Align Mini Dress",
+      "payload": "payloads/revolve-cmo-silent-10-demos/01-lior-wd140-stars-align-mini-dress.json"
+    },
+    {
+      "product_id": "BARD-WS308",
+      "title": "Bardot Eva Poplin Top",
+      "payload": "payloads/revolve-cmo-silent-10-demos/02-bard-ws308-eva-poplin-top.json"
+    },
+    {
+      "product_id": "SPDW-WP244",
+      "title": "superdown Chaya Capri",
+      "payload": "payloads/revolve-cmo-silent-10-demos/03-spdw-wp244-chaya-capri.json"
+    },
+    {
+      "product_id": "LIOR-WD229",
+      "title": "LIONESS Stars Align Midi Dress",
+      "payload": "payloads/revolve-cmo-silent-10-demos/04-lior-wd229-stars-align-midi-dress.json"
+    },
+    {
+      "product_id": "LEIV-WO65",
+      "title": "LEVI'S 90s Trucker",
+      "payload": "payloads/revolve-cmo-silent-10-demos/05-leiv-wo65-90s-trucker.json"
+    },
+    {
+      "product_id": "HELO-WD29",
+      "title": "HAELO Braided Tubular Dress",
+      "payload": "payloads/revolve-cmo-silent-10-demos/06-helo-wd29-braided-tubular-dress.json"
+    },
+    {
+      "product_id": "HELO-WD5",
+      "title": "HAELO Deep-v Brace Dress",
+      "payload": "payloads/revolve-cmo-silent-10-demos/07-helo-wd5-deep-v-brace-dress.json"
+    },
+    {
+      "product_id": "HELO-WD27",
+      "title": "HAELO Gradient Studded Dress",
+      "payload": "payloads/revolve-cmo-silent-10-demos/08-helo-wd27-gradient-studded-dress.json"
+    },
+    {
+      "product_id": "AAYR-WO4",
+      "title": "ALL THE WAYS Claire Faux Leather Trench",
+      "payload": "payloads/revolve-cmo-silent-10-demos/09-aayr-wo4-claire-faux-leather-trench.json"
+    },
+    {
+      "product_id": "AAYR-WD195",
+      "title": "ALL THE WAYS Madley Mini Dress",
+      "payload": "payloads/revolve-cmo-silent-10-demos/10-aayr-wd195-madley-mini-dress.json"
+    }
+  ]
+}

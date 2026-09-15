@@ -1,0 +1,42 @@
+{
+  "product": {
+    "title": "Stars Align Mini Dress",
+    "description": "Creative direction for Growth Studio: make a natural 15 second vertical fashion product video for the LIONESS Stars Align Mini Dress in Onyx. The model enters from the left with a relaxed confident walk, wearing the exact black mini dress from the reference images. She reaches center, pauses naturally, performs one casual smooth spin to show the front, side, and back, then walks out of frame. Respect and preserve the product details: onyx black color, halter neckline, scalloped lace trim, mini length, fitted bodice, skirt drape, fabric texture, proportions, and clean e-commerce styling. Keep hands empty. No bag, boa, feather prop, jewelry, extra accessories, color changes, logos, text overlays, subtitles, or invented garment details. Avoid body distortion, warped limbs, exaggerated runway posing, or camera cuts that hide the dress details.",
+    "brand": "LIONESS",
+    "price": {
+      "amount": "79.00",
+      "currency": "USD"
+    },
+    "images": [
+      {
+        "url": "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/9154cf8f0e73f12ea1da3e2492c40c3777d9eb41a7b2061d04edc4d6021f6c2f.jpg"
+      },
+      {
+        "url": "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/48a74eab44e4a0547452b1ea6c64e6d317bb3a19dd896a8d968494a7e9158dda.jpg"
+      },
+      {
+        "url": "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/fbc2a546f6bda1d60a725e8103e517afda37e16a4862fae72fa5a749f4dc4bd0.jpg"
+      }
+    ]
+  },
+  "video": {
+    "aspect_ratio": "9:16",
+    "duration_seconds": 15,
+    "resolution": "1080p",
+    "language": "en-US",
+    "voiceover": false,
+    "captions": false,
+    "background_music": true,
+    "avatar": {
+      "mode": "auto"
+    }
+  },
+  "metadata": {
+    "source": "codex-growth-studio-agent-kit",
+    "product_url": "https://www.revolve.com/lioness-stars-align-mini-dress-in-onyx/dp/LIOR-WD140/?d=Womens&navsrc=hp_nav_2col&itrownum=1&itcurrpage=1&itview=01",
+    "product_id": "LIOR-WD140",
+    "product_name": "Lioness Stars Align Mini Dress in Onyx",
+    "creative_brief": "15s-walk-in-left-casual-spin-walk-out-no-props-preserve-details",
+    "generation_path": "growth_studio_agent_kit_manual_uploaded_images"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "product_id": "LEIV-WO65",
+  "product_name": "LEVI'S 90s Trucker in Soft As Butter",
+  "product_url": "https://www.revolve.com/levis-90s-trucker-in-soft-as-butter/dp/LEIV-WO65/",
+  "shelf_id": "top-sellers",
+  "type": "outerwear",
+  "source_images": [
+    "assets/revolve-pilot-controlled-images/LEIV-WO65/LEIV-WO65_V1.jpg",
+    "assets/revolve-pilot-controlled-images/LEIV-WO65/LEIV-WO65_V2.jpg",
+    "assets/revolve-pilot-controlled-images/LEIV-WO65/LEIV-WO65_V3.jpg",
+    "assets/revolve-pilot-controlled-images/LEIV-WO65/LEIV-WO65_V4.jpg"
+  ],
+  "storyboard": {
+    "model": "gpt-image-2.5-flare",
+    "quality": "1440p",
+    "aspect_ratio": "9:16",
+    "detail_level": "high",
+    "local_file": "pixverse-cli-jobs/revolve-v4/05-leiv-wo65-90s-trucker/storyboard.png",
+    "provenance": "approved storyboard reused byte-for-byte",
+    "sha256": "385ab129da997f3c2514da1839014a9d0c39bebc7e721a80f83daae27a08ac4a"
+  },
+  "video": {
+    "model": "minimax-h3",
+    "quality": "1440p",
+    "duration": 8,
+    "aspect_ratio": "9:16",
+    "prompt_file": "pixverse-cli-jobs/revolve-v4/05-leiv-wo65-90s-trucker/video-prompt.txt"
+  },
+  "job_dir": "pixverse-cli-jobs/revolve-v4/05-leiv-wo65-90s-trucker",
+  "music": {
+    "model": "music-3.0",
+    "prompt_file": "pixverse-cli-jobs/revolve-v4/05-leiv-wo65-90s-trucker/music-prompt.txt",
+    "master_file": "pixverse-cli-jobs/revolve-v4/05-leiv-wo65-90s-trucker/music-master.mp3"
+  }
+}

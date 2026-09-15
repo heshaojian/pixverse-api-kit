@@ -1,0 +1,35 @@
+{
+  "product_id": "AAYR-WO4",
+  "product_name": "ALL THE WAYS Claire Faux Leather Trench in Black",
+  "product_url": "https://www.revolve.com/all-the-ways-claire-faux-leather-trench-in-black/dp/AAYR-WO4/",
+  "shelf_id": "new-arrivals",
+  "type": "outerwear",
+  "source_images": [
+    "assets/revolve-pilot-controlled-images/AAYR-WO4/AAYR-WO4_V1.jpg",
+    "assets/revolve-pilot-controlled-images/AAYR-WO4/AAYR-WO4_V2.jpg",
+    "assets/revolve-pilot-controlled-images/AAYR-WO4/AAYR-WO4_V3.jpg",
+    "assets/revolve-pilot-controlled-images/AAYR-WO4/AAYR-WO4_V4.jpg"
+  ],
+  "storyboard": {
+    "model": "gpt-image-2.5-flare",
+    "quality": "1440p",
+    "aspect_ratio": "9:16",
+    "detail_level": "high",
+    "local_file": "pixverse-cli-jobs/revolve-v4/09-aayr-wo4-claire-faux-leather-trench/storyboard.png",
+    "provenance": "approved storyboard reused byte-for-byte",
+    "sha256": "a1330f38858f7a0570a10a153c93c0eb2b8f9766f1efa136718ef4f6fe88b69d"
+  },
+  "video": {
+    "model": "minimax-h3",
+    "quality": "1440p",
+    "duration": 10,
+    "aspect_ratio": "9:16",
+    "prompt_file": "pixverse-cli-jobs/revolve-v4/09-aayr-wo4-claire-faux-leather-trench/video-prompt.txt"
+  },
+  "job_dir": "pixverse-cli-jobs/revolve-v4/09-aayr-wo4-claire-faux-leather-trench",
+  "music": {
+    "model": "music-3.0",
+    "prompt_file": "pixverse-cli-jobs/revolve-v4/09-aayr-wo4-claire-faux-leather-trench/music-prompt.txt",
+    "master_file": "pixverse-cli-jobs/revolve-v4/09-aayr-wo4-claire-faux-leather-trench/music-master.mp3"
+  }
+}

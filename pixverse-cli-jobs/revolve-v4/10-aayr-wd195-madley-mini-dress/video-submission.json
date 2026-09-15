@@ -1,0 +1,24 @@
+{
+  "video_id": 423727474091098,
+  "trace_id": "a36fe81a-36d6-4f1b-b0c1-8e0e4eaea029",
+  "status": "submitted",
+  "cost_credits": 360,
+  "params": {
+    "prompt": "Create a natural 8-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos. Show one consistent synthetic fashion model wearing the exact ALL THE WAYS Madley Mini Dress in Black from the product photos. Preserve the black off-the-shoulder foldover neckline, fitted long-sleeve jersey bodice, defined waist, structured flared poplin mini skirt, pull-on construction, and exact mini length. Follow this motion: walk in from the left, pause front-facing, make one slow relaxed turn to show the side and back, then walk out toward the right. Keep arms relaxed so the neckline and waist remain clear. Stable full-body camera, clean white studio, premium soft lighting, and natural fabric physics. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, accessories, extra garments, color changes, morphing, duplicate people, abrupt cuts, or framing that hides the dress.",
+    "model": "minimax-h3",
+    "create_count": 1,
+    "quality": "1440p",
+    "customer_img_paths": [
+      "upload/e759dbcb-d14a-4802-b2b6-1924d1f12e54.png",
+      "upload/49ab5b45-76fa-4b57-a72a-06fd6a95d125.jpg",
+      "upload/5c6b6e89-0236-41f4-bdad-6b8f86d05521.jpg",
+      "upload/b5f7be19-94b0-4a91-97f6-ca77a8e05a1f.jpg"
+    ],
+    "customer_audio_paths": [
+      "upload/70a67088-05c1-4515-a403-cc99c37508ec.mp3"
+    ],
+    "aspect_ratio": "9:16",
+    "duration": 8,
+    "idempotency_key": "revolve-v4-10-aayr-wd195-madley-mini-dress-h3-1440p"
+  }
+}

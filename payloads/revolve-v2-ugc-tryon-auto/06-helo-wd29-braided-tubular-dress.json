@@ -1,0 +1,59 @@
+{
+  "folder_id": "630251570268735431",
+  "product": {
+    "title": "Braided Tubular Dress",
+    "description": "HAELO Braided Tubular Dress in White is an unlined stretch double-jersey mini dress in 82% cotton and 18% elastane, with side cut-out details and a back zipper. The neckline-to-hem length is approximately 25 inches. Hand wash cold; made in China.",
+    "brand": "HAELO",
+    "price": {
+      "amount": "280",
+      "currency": "USD"
+    },
+    "images": [
+      {
+        "url": "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/c189b02322e0bbe2f6f1c0cb5e84cdb6b7ce4db2cd1018900b41cae25a0b525a.jpg"
+      },
+      {
+        "url": "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/28012d860cdf7b744d6b03b384d23a6fff58af8723abf4e00ec499ab8686507b.jpg"
+      },
+      {
+        "url": "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/cb00dd53ddfe5835cc43d564448a3cc2381d6641cb930459be9153e6b33b9b44.jpg"
+      },
+      {
+        "url": "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/5828c4e36457f36234ad0b73d5b41f3a01255d9bee37ebe53bc59ddd34a9c225.jpg"
+      }
+    ]
+  },
+  "video": {
+    "aspect_ratio": "9:16",
+    "duration_seconds": 15,
+    "resolution": "1080p",
+    "language": "en-US",
+    "voiceover": true,
+    "captions": true,
+    "background_music": true,
+    "avatar": {
+      "mode": "auto"
+    }
+  },
+  "metadata": {
+    "source": "codex-growth-studio-agent-kit",
+    "pitch": "revolve-cmo-controlled-page",
+    "shelf_id": "new-arrivals",
+    "shelf_title": "5 new arrivals / fresh-drop candidates",
+    "product_url": "https://www.revolve.com/haelo-braided-tubular-dress-in-white/dp/HELO-WD29/",
+    "product_id": "HELO-WD29",
+    "product_name": "HAELO Braided Tubular Dress in White",
+    "generation_path": "growth_studio_agent_kit_v2_folder_id_ugc_auto_script",
+    "product_description_source": "https://www.revolve.com/haelo-braided-tubular-dress-in-white/dp/HELO-WD29/",
+    "generation_batch": "revolve-10-product-v2-ugc-tryon-auto-script",
+    "avatar_name": "Sophie Lin",
+    "controlled_image_count": "4",
+    "pilot_version": "revolve-v2-ugc-tryon-auto",
+    "script_mode": "auto",
+    "creative_type": "ugc_try_on",
+    "folder_id": "630251570268735431",
+    "voiceover": "true",
+    "captions": "true",
+    "product_source_mode": "uploaded_images_only"
+  }
+}

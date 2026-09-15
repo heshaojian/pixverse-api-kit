@@ -1,0 +1,23 @@
+{
+  "audio_id": 423725476302117,
+  "asset_id": 423725476302117,
+  "trace_id": "79032bf3-5794-4f15-a801-b8f11a099542",
+  "asset_type": 2,
+  "asset_source": 1,
+  "create_mode": "music",
+  "status": "finish",
+  "audio_status": 1,
+  "audio_url": "https://media.pixverse.ai/pixverse/audio/music/423725476302117.mp3",
+  "audio_path": "pixverse/audio/music/423725476302117.mp3",
+  "duration": 240,
+  "file_size": 3834242,
+  "format": "mp3",
+  "provider": "minimax",
+  "model": "music-3.0",
+  "prompt": "Instrumental fashion lookbook cue for a black off-shoulder mini dress with a flared poplin skirt. Playful monochrome fashion-house groove at 117 BPM, crisp soft claps, buoyant bass, short piano-house chords and polished synth flickers, youthful but sophisticated. Immediate groove from the first beat, no vocals, no spoken words, no choir, no dramatic impacts, no sound effects.",
+  "lyrics": null,
+  "instrumental": true,
+  "auto_lyrics": false,
+  "credits": 50,
+  "local_path": "pixverse-cli-jobs/revolve-v4/10-aayr-wd195-madley-mini-dress/music-source.mp3"
+}

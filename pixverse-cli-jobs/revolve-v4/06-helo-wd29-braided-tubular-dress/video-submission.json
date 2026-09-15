@@ -1,0 +1,25 @@
+{
+  "video_id": 423727382472206,
+  "trace_id": "b505c69e-79bf-44d0-84a5-381577fbed53",
+  "status": "submitted",
+  "cost_credits": 360,
+  "params": {
+    "prompt": "Create a natural 8-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos. Show one consistent synthetic adult fashion model wearing the exact HAELO Braided Tubular Dress in White. Preserve the bright white double-jersey, straight neckline, fitted mini silhouette, signature braided horizontal bands, geometric side openings, solid back, and back zipper exactly as photographed. The model walks in from the left, pauses front-facing, makes one slow relaxed turn to show the side construction and back, then walks out toward the right. Keep arms relaxed and the complete dress visible. Stable full-body camera, softly contrasting light-grey studio, premium diffused lighting, and realistic fabric movement. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, accessories, extra garments, design changes, morphing, duplicate people, abrupt cuts, or product-obscuring framing.",
+    "model": "minimax-h3",
+    "create_count": 1,
+    "quality": "1440p",
+    "customer_img_paths": [
+      "upload/4a27902f-e06b-4084-bf7f-3d015ddc5151.png",
+      "upload/d930cd32-101a-42bc-8f71-33b10ba69484.jpg",
+      "upload/0d2c7db1-e3c4-40de-b64d-0ab8068ea163.jpg",
+      "upload/11d752f4-46f4-4aa2-a788-e273a0e2b386.jpg",
+      "upload/7a449a9c-0242-4817-9e20-c67068e19eaa.jpg"
+    ],
+    "customer_audio_paths": [
+      "upload/db98d303-7648-4a41-9c45-5f39efb12bb8.mp3"
+    ],
+    "aspect_ratio": "9:16",
+    "duration": 8,
+    "idempotency_key": "revolve-v4-06-helo-wd29-braided-tubular-dress-h3-1440p"
+  }
+}

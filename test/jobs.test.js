@@ -92,6 +92,74 @@ test("runVideoJob can save create result without polling", async () => {
   assert.equal(await fileExists(path.join(result.job_dir, "polling.jsonl")), false);
 });
 
+test("runVideoJob can inject a folder_id override into the submitted payload", async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "growth-studio-job-"));
+  const originalPayload = {
+    product: { source_url: "https://shop.example.com/products/running-shoes" },
+    video: { aspect_ratio: "9:16" },
+  };
+  const client = {
+    async createVideo(receivedPayload) {
+      assert.deepEqual(receivedPayload, {
+        ...originalPayload,
+        folder_id: "630251570268735431",
+      });
+      return { body: { video_id: "627410861853514292", status: "processing" } };
+    },
+    async pollVideo() {
+      throw new Error("pollVideo should not be called");
+    },
+  };
+
+  const result = await runVideoJob(client, originalPayload, {
+    jobsDir: root,
+    folderId: "630251570268735431",
+    poll: false,
+  });
+  const request = JSON.parse(await fs.readFile(path.join(result.job_dir, "request.json"), "utf8"));
+
+  assert.equal(request.payload.folder_id, "630251570268735431");
+  assert.equal(originalPayload.folder_id, undefined);
+});
+
+test("runVideoJob resolves an auto folder before creating the video", async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "growth-studio-job-"));
+  const originalPayload = {
+    metadata: { customer: "REVOLVE" },
+    product: { source_url: "https://www.revolve.com/item" },
+    video: { aspect_ratio: "9:16" },
+  };
+  const client = {
+    async listFolders() {
+      return { body: { folders: [{ folder_id: "636771263750078906", name: "REVOLVE" }] } };
+    },
+    async createFolder() {
+      throw new Error("createFolder should not be called");
+    },
+    async createVideo(receivedPayload) {
+      assert.equal(receivedPayload.folder_id, "636771263750078906");
+      return { body: { video_id: "627410861853514292", status: "processing" } };
+    },
+    async pollVideo() {
+      throw new Error("pollVideo should not be called");
+    },
+  };
+
+  const result = await runVideoJob(client, originalPayload, {
+    jobsDir: root,
+    autoFolder: true,
+    poll: false,
+  });
+  const request = JSON.parse(await fs.readFile(path.join(result.job_dir, "request.json"), "utf8"));
+  const folder = JSON.parse(await fs.readFile(path.join(result.job_dir, "folder.json"), "utf8"));
+
+  assert.equal(request.payload.folder_id, "636771263750078906");
+  assert.equal(result.folder_id, "636771263750078906");
+  assert.equal(result.folder_name, "REVOLVE");
+  assert.equal(folder.source, "existing-folder");
+  assert.equal(originalPayload.folder_id, undefined);
+});
+
 async function fileExists(filePath) {
   try {
     await fs.access(filePath);

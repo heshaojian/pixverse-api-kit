@@ -1,0 +1,24 @@
+{
+  "video_id": 423727249996269,
+  "trace_id": "b417f0a8-650b-4a28-95d9-2be3b3b8e0ea",
+  "status": "submitted",
+  "cost_credits": 360,
+  "params": {
+    "prompt": "Create a natural 8-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos. Show one consistent synthetic fashion model wearing the exact black satin halter mini dress from the product photos. Preserve the lace-trim halter neckline, self-tie neck, fitted satin silhouette, mini hem, lace hem trim, and hidden back zipper. Follow this motion: walk in from the left, pause front-facing, make one slow relaxed turn to show the side and back, then walk out toward the right. Stable full-body camera, clean white studio, premium soft lighting, natural fabric physics. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, accessories, extra garments, morphing, duplicate people, abrupt cuts, or product changes.",
+    "model": "minimax-h3",
+    "create_count": 1,
+    "quality": "1440p",
+    "customer_img_paths": [
+      "upload/1ff8f328-29d5-44ec-88fb-e8ee014d4c80.png",
+      "upload/8fb247bc-d9a0-4fdd-8f63-a1e90b508baf.jpg",
+      "upload/4906422d-b5cf-4abb-803c-d7e38172251d.jpg",
+      "upload/d73afe3e-e427-4f39-ae5b-07c55942b726.jpg"
+    ],
+    "customer_audio_paths": [
+      "upload/377043ce-9d04-49d8-bd29-ab2eca4b5b13.mp3"
+    ],
+    "aspect_ratio": "9:16",
+    "duration": 8,
+    "idempotency_key": "revolve-v4-01-lior-wd140-stars-align-mini-dress-h3-1440p"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "audio_id": 423724706750036,
+  "asset_id": 423724706750036,
+  "trace_id": "ca9b23d6-b05b-468f-b993-a8862077a5a8",
+  "asset_type": 2,
+  "asset_source": 1,
+  "create_mode": "music",
+  "status": "finish",
+  "audio_status": 1,
+  "audio_url": "https://media.pixverse.ai/pixverse/audio/music/423724706750036.mp3",
+  "audio_path": "pixverse/audio/music/423724706750036.mp3",
+  "duration": 228,
+  "file_size": 3639891,
+  "format": "mp3",
+  "provider": "minimax",
+  "model": "music-3.0",
+  "prompt": "Instrumental fashion lookbook cue for a relaxed light-wash vintage denim trucker jacket. Cool indie-dance at 110 BPM, dry live-feel drums, warm bass guitar, muted clean guitar chop, subtle analog texture, effortless Los Angeles daylight attitude. Immediate groove from the first beat, no vocals, no spoken words, no choir, no dramatic impacts, no sound effects.",
+  "lyrics": null,
+  "instrumental": true,
+  "auto_lyrics": false,
+  "credits": 50,
+  "local_path": "pixverse-cli-jobs/revolve-v4/05-leiv-wo65-90s-trucker/music-source.mp3"
+}

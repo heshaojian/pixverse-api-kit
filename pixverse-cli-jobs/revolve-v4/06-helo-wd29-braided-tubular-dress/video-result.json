@@ -1,0 +1,11 @@
+{
+  "id": 423727382472206,
+  "type": "video",
+  "status": "completed",
+  "video_url": "https://media.pixverse.ai/pixverse%2Fmp4%2Fmedia%2Fweb%2Fori%2F87d3a580-c813-41ff-9d53-c468b9344435_seed0.mp4",
+  "cover_url": "https://media.pixverse.ai/pixverse%2Fvideo%2Fframe%2F3ba98004-bc8a-4153-ab99-d4b4a6163ea9.jpg",
+  "prompt": "Create a natural 8-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos. Show one consistent synthetic adult fashion model wearing the exact HAELO Braided Tubular Dress in White. Preserve the bright white double-jersey, straight neckline, fitted mini silhouette, signature braided horizontal bands, geometric side openings, solid back, and back zipper exactly as photographed. The model walks in from the left, pauses front-facing, makes one slow relaxed turn to show the side construction and back, then walks out toward the right. Keep arms relaxed and the complete dress visible. Stable full-body camera, softly contrasting light-grey studio, premium diffused lighting, and realistic fabric movement. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, accessories, extra garments, design changes, morphing, duplicate people, abrupt cuts, or product-obscuring framing.",
+  "model": "minimax-h3",
+  "duration": 8,
+  "created_at": "2026-09-10T06:08:10Z"
+}

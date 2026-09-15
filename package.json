@@ -1,16 +1,17 @@
 {
-  "name": "pixverse-growth-studio-agent-kit",
+  "name": "pixverse-api-kit",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Agent-safe PixVerse Growth Studio OpenAPI skill and CLI.",
+  "description": "Agent-safe PixVerse API tools for Growth Studio generation and brand pitch assets.",
   "bin": {
     "growth-studio": "./src/cli.js"
   },
   "scripts": {
     "cli": "node ./src/cli.js",
+    "compare:revolve": "node ./qa/revolve-v3-v4-comparison/server.js",
     "test": "node --test",
-    "check": "node --check src/*.js test/*.test.js"
+    "check": "node --check src/*.js qa/revolve-v3-v4-comparison/*.js test/*.test.js"
   },
   "engines": {
     "node": ">=20"

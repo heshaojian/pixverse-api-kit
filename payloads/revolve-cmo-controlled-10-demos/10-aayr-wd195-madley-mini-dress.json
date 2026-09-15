@@ -1,0 +1,51 @@
+{
+  "product": {
+    "source_url": "https://www.revolve.com/all-the-ways-madley-mini-dress-in-black/dp/AAYR-WD195/",
+    "title": "Madley Mini Dress",
+    "description": "ALL THE WAYS Madley Mini Dress in Black is an unlined pull-on mini with an off-the-shoulder design, a viscose-elastane jersey top, and a polyester-cotton poplin skirt. The neckline-to-hem length is approximately 25 inches. Hand wash.",
+    "brand": "ALL THE WAYS",
+    "price": {
+      "amount": "76",
+      "currency": "USD"
+    },
+    "images": [
+      {
+        "url": "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/c759819448ad51aafa2802ed3ab05981484fbca93a70c572cb7d94d8729c044f.jpg"
+      },
+      {
+        "url": "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/b1f89d1e6e76cb8ff514d092fecf8be19b88e14d6e779de252c0e96112bd0c91.jpg"
+      },
+      {
+        "url": "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/97241df665f93fb1bbffd955755f5b9a8fc21855377d8165aed56bffc44793cd.jpg"
+      }
+    ]
+  },
+  "video": {
+    "aspect_ratio": "9:16",
+    "duration_seconds": 15,
+    "resolution": "1080p",
+    "language": "en-US",
+    "voiceover": false,
+    "captions": false,
+    "background_music": true,
+    "avatar": {
+      "mode": "custom",
+      "url": "https://media.pixverse.ai/pan-marketing/muse/avatar_d2ac4d126dee_1787730610154.png"
+    },
+    "creative_ad_clone": "Silent fashion lookbook, not a presenter advertisement. The model maintains a relaxed closed-mouth expression and never speaks, lip-syncs, or gestures as if explaining. Use uninterrupted full-body framing. She walks into position and makes one gentle turn to show the off-shoulder jersey top, black poplin skirt, mini length, and pull-on silhouette without hiding the neckline or hem. Use steady premium ecommerce lighting and natural body movement. Preserve the exact product shown in the supplied images. No dialogue, captions, text, added accessories, extra garments, invented details, color changes, body distortion, dramatic camera cuts, or framing that hides the product."
+  },
+  "metadata": {
+    "source": "codex-growth-studio-agent-kit",
+    "pitch": "revolve-cmo-controlled-page",
+    "shelf_id": "new-arrivals",
+    "shelf_title": "5 new arrivals / fresh-drop candidates",
+    "product_url": "https://www.revolve.com/all-the-ways-madley-mini-dress-in-black/dp/AAYR-WD195/",
+    "product_id": "AAYR-WD195",
+    "product_name": "ALL THE WAYS Madley Mini Dress in Black",
+    "generation_path": "growth_studio_agent_kit_controlled_product_images",
+    "product_description_source": "https://www.revolve.com/all-the-ways-madley-mini-dress-in-black/dp/AAYR-WD195/",
+    "generation_batch": "controlled-lookbook-v2",
+    "avatar_name": "Sophie Lin",
+    "controlled_image_count": "3"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "product": {
+    "source_url": "https://www.plaud.ai/products/plaud-note-pro",
+    "title": "Plaud Note Pro",
+    "description": "Create a trustworthy silent 15 second vertical hardware product demo for a Plaud marketer-facing page. This is not a talking avatar video. Do not show narration, captions, subtitles, floating UI, app screens, exaggerated sci-fi effects, invented logos, or text overlays. Keep the product physically credible and premium. Show Plaud Note Pro as a slim card-sized recorder in a clean professional setting: close-up on ribbed metal surface, hand scale, placed beside a phone, one-button recording moment, then a calm desk setup hero shot. Preserve the device shape, dark grey finish, ridged texture, black top band, logo placement, and proportions from the product page. Camera movement should be smooth and realistic, with soft studio lighting and no dramatic fantasy elements.",
+    "brand": "Plaud",
+    "price": {
+      "amount": "189",
+      "currency": "USD"
+    }
+  },
+  "video": {
+    "aspect_ratio": "9:16",
+    "duration_seconds": 15,
+    "resolution": "1080p",
+    "language": "en-US",
+    "voiceover": false,
+    "captions": false,
+    "background_music": true,
+    "avatar": {
+      "mode": "auto"
+    }
+  },
+  "metadata": {
+    "source": "codex-growth-studio-agent-kit",
+    "pitch": "plaud-hardware-marketer-page",
+    "product_url": "https://www.plaud.ai/products/plaud-note-pro",
+    "product_id": "plaud-note-pro",
+    "product_name": "Plaud Note Pro",
+    "creative_brief": "15s-silent-hardware-demo-card-recorder-premium-closeups",
+    "generation_path": "growth_studio_agent_kit_product_url"
+  }
+}

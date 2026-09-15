@@ -1,0 +1,23 @@
+{
+  "audio_id": 423724362489133,
+  "asset_id": 423724362489133,
+  "trace_id": "9a840fbb-f60c-4ff8-be98-28fd4b42a8d8",
+  "asset_type": 2,
+  "asset_source": 1,
+  "create_mode": "music",
+  "status": "finish",
+  "audio_status": 1,
+  "audio_url": "https://media.pixverse.ai/pixverse/audio/music/423724362489133.mp3",
+  "audio_path": "pixverse/audio/music/423724362489133.mp3",
+  "duration": 161,
+  "file_size": 2575767,
+  "format": "mp3",
+  "provider": "minimax",
+  "model": "music-3.0",
+  "prompt": "Instrumental fashion lookbook cue for a crisp white sculptural poplin top. Airy modern French-house at 116 BPM, clean hand percussion, light elastic bass, bright plucked synth accents, polished daytime editorial energy. Immediate groove from the first beat, elegant and uncluttered, no vocals, no spoken words, no choir, no dramatic impacts, no sound effects.",
+  "lyrics": null,
+  "instrumental": true,
+  "auto_lyrics": false,
+  "credits": 50,
+  "local_path": "pixverse-cli-jobs/revolve-v4/02-bard-ws308-eva-poplin-top/music-source.mp3"
+}

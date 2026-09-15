@@ -1,0 +1,35 @@
+{
+  "product": {
+    "source_url": "https://www.revolve.com/levis-90s-trucker-in-soft-as-butter/dp/LEIV-WO65/",
+    "title": "90s Trucker",
+    "description": "LEVI'S 90s Trucker in Soft As Butter is a faded denim jacket in 79% cotton and 21% lyocell, with a front button closure, buttoned cuffs, buttoned hem tabs, chest patch pockets, and side welt pockets. Machine wash.",
+    "brand": "LEVI'S",
+    "price": {
+      "amount": "110",
+      "currency": "USD"
+    }
+  },
+  "video": {
+    "aspect_ratio": "9:16",
+    "duration_seconds": 15,
+    "resolution": "1080p",
+    "language": "en-US",
+    "voiceover": false,
+    "captions": false,
+    "background_music": true,
+    "avatar": {
+      "mode": "auto"
+    }
+  },
+  "metadata": {
+    "source": "codex-growth-studio-agent-kit",
+    "pitch": "revolve-cmo-silent-page",
+    "shelf_id": "top-sellers",
+    "shelf_title": "5 public category top sellers",
+    "product_url": "https://www.revolve.com/levis-90s-trucker-in-soft-as-butter/dp/LEIV-WO65/",
+    "product_id": "LEIV-WO65",
+    "product_name": "LEVI'S 90s Trucker in Soft As Butter",
+    "generation_path": "growth_studio_agent_kit_product_url",
+    "product_description_source": "https://www.revolve.com/levis-90s-trucker-in-soft-as-butter/dp/LEIV-WO65/"
+  }
+}

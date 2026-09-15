@@ -1,0 +1,25 @@
+{
+  "video_id": 423727419495694,
+  "trace_id": "5b5eae0d-f1e9-436d-8e8c-f0961d89151c",
+  "status": "submitted",
+  "cost_credits": 450,
+  "params": {
+    "prompt": "Create a natural 10-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos. Show one consistent synthetic fashion model wearing the exact HAELO Deep-v Brace Dress in Black from the product photos. Preserve the fluid black viscose jersey, adjustable halterneck, very deep V front, slim brace details across the front opening, fitted waist, long column maxi skirt, thigh-high front slit, cross-back straps, and back zipper. Follow this motion: walk in from the left, pause front-facing, make one slow controlled turn to show the side and cross-back, then walk out toward the right. Let the skirt drape and move naturally without exposing more than the product photos. Stable full-body camera, clean white studio, premium soft lighting, and natural fabric physics. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, accessories, extra garments, color changes, morphing, duplicate people, abrupt cuts, or framing that hides the dress.",
+    "model": "minimax-h3",
+    "create_count": 1,
+    "quality": "1440p",
+    "customer_img_paths": [
+      "upload/ea6fe362-89d0-4814-92df-9d4f22b53c7a.png",
+      "upload/e2631ec1-8e4a-47ae-b866-61eab3cabc46.jpg",
+      "upload/a1004544-d8bf-4b63-869a-3e47c493cf50.jpg",
+      "upload/dbac6ae7-3242-43da-b035-b8b208e28c4c.jpg",
+      "upload/79a4441c-d590-4c69-8fe4-13285d36ea4e.jpg"
+    ],
+    "customer_audio_paths": [
+      "upload/e07aee06-1968-4357-9f47-98359fe338ca.mp3"
+    ],
+    "aspect_ratio": "9:16",
+    "duration": 10,
+    "idempotency_key": "revolve-v4-07-helo-wd5-deep-v-brace-dress-h3-1440p"
+  }
+}

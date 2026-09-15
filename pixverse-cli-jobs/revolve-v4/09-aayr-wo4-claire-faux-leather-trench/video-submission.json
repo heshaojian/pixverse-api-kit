@@ -1,0 +1,25 @@
+{
+  "video_id": 423726084567065,
+  "trace_id": "7eaab1e4-87f0-412e-aa7e-a1ac0eb785b1",
+  "status": "submitted",
+  "cost_credits": 450,
+  "params": {
+    "prompt": "Create a natural 10-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos. Show one consistent synthetic fashion model wearing the exact ALL THE WAYS Claire Faux Leather Trench in Black from the product photos, styled with the same understated dark base outfit. Preserve the glossy black faux-leather finish, wide notched lapels, long sleeves, calf-length straight trench silhouette, optional self-tie belt, side pouch pockets, and back vent. Follow this motion: walk in from the left, pause front-facing, make one slow relaxed turn to show the side, belt, and back vent, then walk out toward the right. Let the coat move with realistic weight and restrained shine. Stable full-body camera, clean white studio, premium soft lighting, and natural material physics. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, new accessories, garment changes, morphing, duplicate people, abrupt cuts, or framing that hides the coat.",
+    "model": "minimax-h3",
+    "create_count": 1,
+    "quality": "1440p",
+    "customer_img_paths": [
+      "upload/b4701f3f-c181-4d9a-955e-61f420b16fed.png",
+      "upload/6ff79f82-2694-4bf5-90bb-6f691715fa0f.jpg",
+      "upload/d7942eb9-6fb7-402e-9de2-c3c3479b69c3.jpg",
+      "upload/32947e58-de49-450b-a5e2-a53bb7f8e691.jpg",
+      "upload/8d2a8f5e-9a86-4230-ba13-fbb3d4c90912.jpg"
+    ],
+    "customer_audio_paths": [
+      "upload/71c0bda8-7905-4726-9be6-e85be6bd3c36.mp3"
+    ],
+    "aspect_ratio": "9:16",
+    "duration": 10,
+    "idempotency_key": "revolve-v4-09-aayr-wo4-claire-faux-leather-trench-h3-1440p"
+  }
+}

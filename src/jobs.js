@@ -1,19 +1,29 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { resolveFolderForPayload } from "./folders.js";
 
 const DEFAULT_JOBS_DIR = "jobs";
 
 export async function runVideoJob(client, payload, options = {}) {
   const jobDir = await createJobDir(options.jobsDir || DEFAULT_JOBS_DIR, options.jobName);
   const traceBase = options.traceId || path.basename(jobDir);
+  const folder = await resolveFolderForPayload(client, payload, {
+    autoFolder: options.autoFolder,
+    folderId: options.folderId,
+    folderName: options.folderName,
+    traceId: traceBase,
+  });
+  const createPayload = withFolderId(payload, folder?.folderId);
+
+  if (folder) await writeJson(path.join(jobDir, "folder.json"), folder);
 
   await writeJson(path.join(jobDir, "request.json"), {
     trace_id: traceBase,
     created_at: new Date().toISOString(),
-    payload,
+    payload: createPayload,
   });
 
-  const createResult = await client.createVideo(payload, { traceId: `${traceBase}-create` });
+  const createResult = await client.createVideo(createPayload, { traceId: `${traceBase}-create` });
   await writeJson(path.join(jobDir, "create-response.json"), createResult.body);
 
   const videoId = createResult.body.video_id;
@@ -45,6 +55,8 @@ export async function runVideoJob(client, payload, options = {}) {
     video_url: final.output?.video_url,
     thumbnail_url: final.output?.thumbnail_url,
     request_id: final.request_id,
+    folder_id: folder?.folderId,
+    folder_name: folder?.folderName,
   };
 }
 
@@ -75,4 +87,12 @@ function slugify(value) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 80) || "job";
+}
+
+function withFolderId(payload, folderId) {
+  if (!folderId) return payload;
+  return {
+    ...payload,
+    folder_id: folderId,
+  };
 }

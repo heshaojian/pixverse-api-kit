@@ -1,4 +1,5 @@
 .env
+.DS_Store
 node_modules/
 coverage/
 *.log
@@ -9,5 +10,20 @@ deploy/*
 !deploy/brand-pitches/
 !deploy/brand-pitches/**
 jobs/
+assets/
+pilot/
+projects/
+research/
+tmp/
+zeelool-vooglam-growth-studio-research-2026-09-14.html
+qa/*
+!qa/
+!qa/revolve-v3-v4-comparison/
+!qa/revolve-v3-v4-comparison/**
+pixverse-cli-jobs/**/*
+!pixverse-cli-jobs/
+!pixverse-cli-jobs/revolve-v4/
+!pixverse-cli-jobs/revolve-v4/**/
+!pixverse-cli-jobs/revolve-v4/**/*.json
 .agents/skills/skill-creator/
 skills-lock.json

@@ -5,6 +5,7 @@ import {
   createProductUrlPayload,
   validateCreatePayload,
   validateEditPayload,
+  validateFolderPayload,
 } from "../src/client.js";
 import { GrowthStudioApiError, buildUrl, parseResponse } from "../src/http.js";
 
@@ -36,6 +37,27 @@ test("createProductUrlPayload follows default guide settings", () => {
       avatar: { mode: "auto" },
     },
   });
+});
+
+test("createProductUrlPayload can target a Growth Studio folder", () => {
+  const payload = createProductUrlPayload("https://shop.example.com/products/running-shoes", {
+    folderId: "630251570268735431",
+  });
+
+  assert.equal(payload.folder_id, "630251570268735431");
+});
+
+test("validateCreatePayload requires folder_id to stay a numeric string", () => {
+  assert.doesNotThrow(() => validateCreatePayload({
+    folder_id: "630251570268735431",
+    product: { source_url: "https://shop.example.com/products/running-shoes" },
+    video: { avatar: { mode: "auto" } },
+  }));
+  assert.throws(() => validateCreatePayload({
+    folder_id: 630251570268735431,
+    product: { source_url: "https://shop.example.com/products/running-shoes" },
+    video: { avatar: { mode: "auto" } },
+  }), /folder_id must be a numeric string/);
 });
 
 test("validateCreatePayload accepts uploaded PixVerse image URLs", () => {
@@ -105,6 +127,83 @@ test("client keeps video IDs as strings and sends bearer auth", async () => {
   assert.equal(result.body.video_id, "627410861853514292");
   assert.equal(calls[0].url, "https://growth-api.pixverse.ai/openapi/v1/videos/627410861853514292");
   assert.equal(calls[0].init.headers.get("Authorization"), "Bearer test-api-key");
+});
+
+test("client lists and creates folders through Growth Studio folder endpoints", async () => {
+  const calls = [];
+  const credentials = { ["api" + "Key"]: "test-api-key" };
+  const responses = [
+    new Response(JSON.stringify({ ErrCode: 0, Resp: { folders: [{ folder_id: "636771263750078906", name: "REVOLVE" }] } }), { status: 200 }),
+    new Response(JSON.stringify({ ErrCode: 0, Resp: { folder_id: "636771263750078906" } }), { status: 200 }),
+  ];
+  const client = new GrowthStudioClient({
+    ...credentials,
+    baseUrl: "https://growth-api.pixverse.ai",
+    fetchImpl: async (url, init) => {
+      calls.push({ url: url.toString(), init });
+      return responses.shift();
+    },
+  });
+
+  const listResult = await client.listFolders();
+  const createResult = await client.createFolder({ name: "REVOLVE" });
+
+  assert.deepEqual(listResult.body.folders, [{ folder_id: "636771263750078906", name: "REVOLVE" }]);
+  assert.deepEqual(createResult.body, { folder_id: "636771263750078906" });
+  assert.equal(calls[0].url, "https://growth-api.pixverse.ai/marketing_hub/folder/list");
+  assert.equal(calls[1].url, "https://growth-api.pixverse.ai/marketing_hub/folder/create");
+  assert.equal(calls[1].init.headers.get("Authorization"), "Bearer test-api-key");
+  assert.equal(calls[1].init.body, JSON.stringify({ name: "REVOLVE" }));
+});
+
+test("client can point folder commands at a configured Growth Studio API prefix", async () => {
+  const calls = [];
+  const client = new GrowthStudioClient({
+    ["api" + "Key"]: "test-api-key",
+    folderApiPrefix: "/openapi/v1/growth-studio",
+    baseUrl: "https://growth-api.pixverse.ai",
+    fetchImpl: async (url, init) => {
+      calls.push({ url: url.toString(), init });
+      return new Response(JSON.stringify({ folders: [] }), { status: 200 });
+    },
+  });
+
+  await client.listFolders();
+
+  assert.equal(calls[0].url, "https://growth-api.pixverse.ai/openapi/v1/growth-studio/folder/list");
+});
+
+test("client can use a separate folder API token for folder endpoints", async () => {
+  const calls = [];
+  const client = new GrowthStudioClient({
+    ["api" + "Key"]: "video-api-key",
+    folderApiKey: "folder-api-key",
+    baseUrl: "https://growth-api.pixverse.ai",
+    fetchImpl: async (url, init) => {
+      calls.push({ url: url.toString(), init });
+      return new Response(JSON.stringify({ ErrCode: 0, Resp: { folders: [] } }), { status: 200 });
+    },
+  });
+
+  await client.listFolders();
+
+  assert.equal(calls[0].init.headers.get("Authorization"), "Bearer folder-api-key");
+});
+
+test("client rejects Marketing Hub folder envelope errors", async () => {
+  const credentials = { ["api" + "Key"]: "test-api-key" };
+  const client = new GrowthStudioClient({
+    ...credentials,
+    baseUrl: "https://growth-api.pixverse.ai",
+    fetchImpl: async () => new Response(JSON.stringify({ ErrCode: 10001, ErrMsg: "Token is invalid", Resp: {} }), { status: 200 }),
+  });
+
+  await assert.rejects(client.listFolders(), /Token is invalid/);
+});
+
+test("validateFolderPayload requires a folder name", () => {
+  assert.doesNotThrow(() => validateFolderPayload({ name: "REVOLVE" }));
+  assert.throws(() => validateFolderPayload({ name: "" }), /non-empty name/);
 });
 
 test("pollVideo honors Retry-After and stops on succeeded", async () => {

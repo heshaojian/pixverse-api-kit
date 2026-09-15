@@ -1,0 +1,17 @@
+{
+  "path": "upload/22b7b7fa-ca86-4eb5-8bc5-a1bafc66053e.mp4",
+  "url": "https://media.pixverse.ai/upload%2F22b7b7fa-ca86-4eb5-8bc5-a1bafc66053e.mp4",
+  "name": "video-final-upload",
+  "asset_id": 423729031069155,
+  "asset_type": 1,
+  "asset_source": 0,
+  "duration": 10.084,
+  "file_size": 8349231,
+  "format": "mov",
+  "sample_rate": 48000,
+  "bitrate": 200872,
+  "channel": 2,
+  "width": 1440,
+  "height": 2560,
+  "type": "video"
+}

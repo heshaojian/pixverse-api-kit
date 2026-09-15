@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>REVOLVE V3 vs V4 | PixVerse</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand-lockup" aria-label="REVOLVE and PixVerse comparison">
+        <img class="revolve-wordmark" src="/deploy/brand-pitches/revolve/v4/assets/revolve-wordmark.png" width="126" height="16" alt="REVOLVE" />
+        <span class="brand-divider" aria-hidden="true">&times;</span>
+        <span class="pixverse-lockup">
+          <img class="pixverse-logo" src="/deploy/brand-pitches/revolve/v4/assets/pixverse-logo.svg" width="24" height="24" alt="" />
+          <span class="pixverse-wordmark">PixVerse</span>
+        </span>
+      </div>
+      <div class="header-context">
+        <span>V3 vs V4</span>
+        <span class="header-dot" aria-hidden="true"></span>
+        <span>10 products</span>
+      </div>
+    </header>
+
+    <main class="comparison-shell">
+      <aside class="product-rail" aria-label="Product selection">
+        <div class="rail-heading">
+          <span>Products</span>
+          <span id="product-position" aria-live="polite">01 / 10</span>
+        </div>
+        <nav id="product-list" class="product-list" aria-label="REVOLVE products"></nav>
+      </aside>
+
+      <section class="workspace" aria-labelledby="product-title">
+        <div class="product-bar">
+          <div class="product-copy">
+            <p id="product-brand" class="product-brand">LIONESS</p>
+            <h1 id="product-title">Stars Align Mini Dress</h1>
+            <div class="product-subline">
+              <span id="product-meta">LIOR-WD140 &middot; Onyx &middot; $79</span>
+              <a id="product-link" href="#" target="_blank" rel="noreferrer">View product</a>
+            </div>
+          </div>
+          <div class="product-navigation" aria-label="Browse products">
+            <button id="previous-product" class="icon-button" type="button" aria-label="Previous product" title="Previous product">
+              <span aria-hidden="true">&#8592;</span>
+            </button>
+            <button id="next-product" class="icon-button" type="button" aria-label="Next product" title="Next product">
+              <span aria-hidden="true">&#8594;</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="stage-grid" aria-label="Side-by-side video comparison">
+          <article class="version-stage">
+            <header class="stage-header">
+              <div>
+                <span class="version-label">V3</span>
+                <span id="v3-model" class="model-label">Seedance 2.5</span>
+              </div>
+              <span id="v3-spec" class="stage-spec">720 x 1280 &middot; 8s</span>
+            </header>
+            <div class="video-frame">
+              <video id="v3-video" playsinline preload="metadata" aria-label="V3 product video"></video>
+              <button class="video-toggle" type="button" aria-label="Play or pause both videos" title="Play or pause both videos"></button>
+              <div id="v3-error" class="media-error" role="status" hidden>
+                <strong>V3 video unavailable</strong>
+                <span>Check that the local media file is present.</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="version-stage">
+            <header class="stage-header">
+              <div>
+                <span class="version-label">V4</span>
+                <span id="v4-model" class="model-label">MiniMax H3</span>
+              </div>
+              <span id="v4-spec" class="stage-spec">1440 x 2560 &middot; 8s</span>
+            </header>
+            <div class="video-frame">
+              <video id="v4-video" playsinline preload="metadata" aria-label="V4 product video"></video>
+              <button class="video-toggle" type="button" aria-label="Play or pause both videos" title="Play or pause both videos"></button>
+              <div id="v4-error" class="media-error" role="status" hidden>
+                <strong>V4 video unavailable</strong>
+                <span>Check that the local media file is present.</span>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <section class="transport" aria-label="Shared playback controls">
+          <div class="transport-controls">
+            <button id="play-toggle" class="transport-button" type="button" aria-label="Play both videos" title="Play both videos" disabled>
+              <span aria-hidden="true">&#9654;</span>
+            </button>
+            <button id="restart" class="transport-button" type="button" aria-label="Restart both videos" title="Restart both videos" disabled>
+              <span aria-hidden="true">&#8635;</span>
+            </button>
+          </div>
+
+          <div class="timeline-group">
+            <input id="timeline" type="range" min="0" max="1000" value="0" step="1" aria-label="Shared playback position" disabled />
+            <div class="timeline-meta">
+              <span id="time-readout">00:00 / 00:08</span>
+              <span id="sync-status" class="sync-status" role="status"><i aria-hidden="true"></i> Loading media</span>
+            </div>
+          </div>
+
+          <fieldset class="audio-selector">
+            <legend>Listen to</legend>
+            <div class="segmented-control">
+              <label>
+                <input type="radio" name="audio-mode" value="v3" />
+                <span>V3</span>
+              </label>
+              <label>
+                <input type="radio" name="audio-mode" value="v4" checked />
+                <span>V4</span>
+              </label>
+              <label>
+                <input type="radio" name="audio-mode" value="muted" />
+                <span>Muted</span>
+              </label>
+            </div>
+          </fieldset>
+        </section>
+
+        <details class="reference-panel" open>
+          <summary>
+            <span>Product references</span>
+            <span id="reference-count">4 images</span>
+          </summary>
+          <div id="reference-strip" class="reference-strip"></div>
+        </details>
+      </section>
+    </main>
+
+    <div id="page-error" class="page-error" role="alert" hidden>
+      The comparison data could not be loaded. Start the local server from the workspace root and refresh.
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

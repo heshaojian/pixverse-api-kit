@@ -1,0 +1,35 @@
+{
+  "product": {
+    "source_url": "https://www.revolve.com/haelo-deepv-brace-dress-in-black/dp/HELO-WD5/",
+    "title": "Deep-v Brace Dress",
+    "description": "HAELO Deep-v Brace Dress in Black is an unlined fluid maxi dress in 96% viscose and 4% elastane, with an adjustable halterneck, deep V neckline, cross-back straps, and a back zipper. The shoulder-to-hem length is approximately 60 inches. Dry clean; made in China.",
+    "brand": "HAELO",
+    "price": {
+      "amount": "275",
+      "currency": "USD"
+    }
+  },
+  "video": {
+    "aspect_ratio": "9:16",
+    "duration_seconds": 15,
+    "resolution": "1080p",
+    "language": "en-US",
+    "voiceover": false,
+    "captions": false,
+    "background_music": true,
+    "avatar": {
+      "mode": "auto"
+    }
+  },
+  "metadata": {
+    "source": "codex-growth-studio-agent-kit",
+    "pitch": "revolve-public-pitch-page",
+    "shelf_id": "new-arrivals",
+    "shelf_title": "5 new arrivals / fresh-drop candidates",
+    "product_url": "https://www.revolve.com/haelo-deepv-brace-dress-in-black/dp/HELO-WD5/",
+    "product_id": "HELO-WD5",
+    "product_name": "HAELO Deep-v Brace Dress in Black",
+    "generation_path": "growth_studio_agent_kit_product_url",
+    "product_description_source": "https://www.revolve.com/haelo-deepv-brace-dress-in-black/dp/HELO-WD5/"
+  }
+}

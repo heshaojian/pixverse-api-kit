@@ -1,0 +1,35 @@
+{
+  "product_id": "SPDW-WP244",
+  "product_name": "superdown Chaya Capri in Black",
+  "product_url": "https://www.revolve.com/superdown-chaya-capri-in-black/dp/SPDW-WP244/",
+  "shelf_id": "top-sellers",
+  "type": "pants",
+  "source_images": [
+    "assets/revolve-pilot-controlled-images/SPDW-WP244/SPDW-WP244_V1.jpg",
+    "assets/revolve-pilot-controlled-images/SPDW-WP244/SPDW-WP244_V2.jpg",
+    "assets/revolve-pilot-controlled-images/SPDW-WP244/SPDW-WP244_V3.jpg",
+    "assets/revolve-pilot-controlled-images/SPDW-WP244/SPDW-WP244_V4.jpg"
+  ],
+  "storyboard": {
+    "model": "gpt-image-2.5-flare",
+    "quality": "1440p",
+    "aspect_ratio": "9:16",
+    "detail_level": "high",
+    "local_file": "pixverse-cli-jobs/revolve-v4/03-spdw-wp244-chaya-capri/storyboard.png",
+    "provenance": "approved storyboard reused byte-for-byte",
+    "sha256": "cec30e18052646b85c672fc4e33e1faf1261693ef364d5eff9a5fb2640d2e814"
+  },
+  "video": {
+    "model": "minimax-h3",
+    "quality": "1440p",
+    "duration": 8,
+    "aspect_ratio": "9:16",
+    "prompt_file": "pixverse-cli-jobs/revolve-v4/03-spdw-wp244-chaya-capri/video-prompt.txt"
+  },
+  "job_dir": "pixverse-cli-jobs/revolve-v4/03-spdw-wp244-chaya-capri",
+  "music": {
+    "model": "music-3.0",
+    "prompt_file": "pixverse-cli-jobs/revolve-v4/03-spdw-wp244-chaya-capri/music-prompt.txt",
+    "master_file": "pixverse-cli-jobs/revolve-v4/03-spdw-wp244-chaya-capri/music-master.mp3"
+  }
+}

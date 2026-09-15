@@ -1,0 +1,35 @@
+{
+  "product_id": "HELO-WD5",
+  "product_name": "HAELO Deep-v Brace Dress in Black",
+  "product_url": "https://www.revolve.com/haelo-deepv-brace-dress-in-black/dp/HELO-WD5/",
+  "shelf_id": "new-arrivals",
+  "type": "dress",
+  "source_images": [
+    "assets/revolve-pilot-controlled-images/HELO-WD5/HELO-WD5_V1.jpg",
+    "assets/revolve-pilot-controlled-images/HELO-WD5/HELO-WD5_V2.jpg",
+    "assets/revolve-pilot-controlled-images/HELO-WD5/HELO-WD5_V3.jpg",
+    "assets/revolve-pilot-controlled-images/HELO-WD5/HELO-WD5_V4.jpg"
+  ],
+  "storyboard": {
+    "model": "gpt-image-2.5-flare",
+    "quality": "1440p",
+    "aspect_ratio": "9:16",
+    "detail_level": "high",
+    "local_file": "pixverse-cli-jobs/revolve-v4/07-helo-wd5-deep-v-brace-dress/storyboard.png",
+    "provenance": "approved storyboard reused byte-for-byte",
+    "sha256": "64cdd9edbb2b9e97fd73afb3c086145ca0bb4fec2f9975b3774f05a5481ac66c"
+  },
+  "video": {
+    "model": "minimax-h3",
+    "quality": "1440p",
+    "duration": 10,
+    "aspect_ratio": "9:16",
+    "prompt_file": "pixverse-cli-jobs/revolve-v4/07-helo-wd5-deep-v-brace-dress/video-prompt.txt"
+  },
+  "job_dir": "pixverse-cli-jobs/revolve-v4/07-helo-wd5-deep-v-brace-dress",
+  "music": {
+    "model": "music-3.0",
+    "prompt_file": "pixverse-cli-jobs/revolve-v4/07-helo-wd5-deep-v-brace-dress/music-prompt.txt",
+    "master_file": "pixverse-cli-jobs/revolve-v4/07-helo-wd5-deep-v-brace-dress/music-master.mp3"
+  }
+}

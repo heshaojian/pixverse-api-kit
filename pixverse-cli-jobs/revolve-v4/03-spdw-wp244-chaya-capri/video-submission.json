@@ -1,0 +1,25 @@
+{
+  "video_id": 423727319986924,
+  "trace_id": "1f709bc6-d08d-4a15-bdb5-d0eb6c75a7c2",
+  "status": "submitted",
+  "cost_credits": 360,
+  "params": {
+    "prompt": "Create a natural 8-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos. Show one consistent synthetic fashion model wearing the exact superdown Chaya Capri in Black from the product photos, styled with the same simple black bandeau top. Preserve the smooth black ponte fabric, high fitted waist, clean front, close leg fit, below-knee capri length, narrow leg opening, and hidden side zipper. Follow this motion: walk in from the left, pause front-facing, make one slow relaxed turn to show the side and back fit, then walk out toward the right. Keep the waist and lower legs visible throughout. Stable full-body camera, clean white studio, premium soft lighting, and natural fabric physics. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, new accessories, garment changes, morphing, duplicate people, abrupt cuts, or framing that hides the capris.",
+    "model": "minimax-h3",
+    "create_count": 1,
+    "quality": "1440p",
+    "customer_img_paths": [
+      "upload/c6ea3eba-995c-48e8-8fbc-a358a48e3150.png",
+      "upload/029fd856-0301-48db-8041-53f0c0c514e6.jpg",
+      "upload/f6a83ea9-1d83-487c-9b64-9020cd63e6cf.jpg",
+      "upload/89692573-9c53-4847-a3be-72ef9b36f7ab.jpg",
+      "upload/d86a90fd-4dc1-4e11-8da7-6408dbd54fe4.jpg"
+    ],
+    "customer_audio_paths": [
+      "upload/fa0d4a8b-1ea9-47d8-97ac-fc0e17a2abba.mp3"
+    ],
+    "aspect_ratio": "9:16",
+    "duration": 8,
+    "idempotency_key": "revolve-v4-03-spdw-wp244-chaya-capri-h3-1440p"
+  }
+}

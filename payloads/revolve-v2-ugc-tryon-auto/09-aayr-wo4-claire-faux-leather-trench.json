@@ -1,0 +1,59 @@
+{
+  "folder_id": "630251570268735431",
+  "product": {
+    "title": "Claire Faux Leather Trench",
+    "description": "ALL THE WAYS Claire Faux Leather Trench in Black has a polyurethane outer, viscose secondary fabric, and polyester lining. It features an optional front tie closure, side pouch pockets, and a back vent. Hand wash; made in China.",
+    "brand": "ALL THE WAYS",
+    "price": {
+      "amount": "108",
+      "currency": "USD"
+    },
+    "images": [
+      {
+        "url": "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/d49b8f418f5958b5275aedb16e92b530fec4f9e5341c260c0f8866b97c4dbd27.jpg"
+      },
+      {
+        "url": "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/0effd2d467eeec394f4a5e33b473c57f09ecc9a44a71f0d148f623f2ff252ac9.jpg"
+      },
+      {
+        "url": "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/77e0befcbf1f144f1ebcd1a7b07a794cb335e454235c384a9a0187f5d7a879bc.jpg"
+      },
+      {
+        "url": "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/7c691a46150baaa2003f3011072ce6a26c3ad7d0b0d6251895acb01dcbbf3381.jpg"
+      }
+    ]
+  },
+  "video": {
+    "aspect_ratio": "9:16",
+    "duration_seconds": 15,
+    "resolution": "1080p",
+    "language": "en-US",
+    "voiceover": true,
+    "captions": true,
+    "background_music": true,
+    "avatar": {
+      "mode": "auto"
+    }
+  },
+  "metadata": {
+    "source": "codex-growth-studio-agent-kit",
+    "pitch": "revolve-cmo-controlled-page",
+    "shelf_id": "new-arrivals",
+    "shelf_title": "5 new arrivals / fresh-drop candidates",
+    "product_url": "https://www.revolve.com/all-the-ways-claire-faux-leather-trench-in-black/dp/AAYR-WO4/",
+    "product_id": "AAYR-WO4",
+    "product_name": "ALL THE WAYS Claire Faux Leather Trench in Black",
+    "generation_path": "growth_studio_agent_kit_v2_folder_id_ugc_auto_script",
+    "product_description_source": "https://www.revolve.com/all-the-ways-claire-faux-leather-trench-in-black/dp/AAYR-WO4/",
+    "generation_batch": "revolve-10-product-v2-ugc-tryon-auto-script",
+    "avatar_name": "Sophie Lin",
+    "controlled_image_count": "4",
+    "pilot_version": "revolve-v2-ugc-tryon-auto",
+    "script_mode": "auto",
+    "creative_type": "ugc_try_on",
+    "folder_id": "630251570268735431",
+    "voiceover": "true",
+    "captions": "true",
+    "product_source_mode": "uploaded_images_only"
+  }
+}
