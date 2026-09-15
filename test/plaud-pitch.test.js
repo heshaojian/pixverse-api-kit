@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import test from "node:test";
 
-const pitchPath = new URL("../deploy/brand-pitches/plaud-pixverse-0914/index.html", import.meta.url);
+const pitchPath = new URL("../deploy/brand-pitches/plaud/plaud-pixverse-0914/index.html", import.meta.url);
 
 const formatVideos = Object.freeze([
   Object.freeze({

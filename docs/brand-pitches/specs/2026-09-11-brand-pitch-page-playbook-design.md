@@ -12,7 +12,7 @@ Create a reusable PixVerse playbook for building customer-specific brand pitch p
 
 ## Deliverable
 
-Publish one practical Markdown playbook at `docs/brand-pitch-page-playbook.md`. It will be organized as a six-stage workflow:
+Publish one practical Markdown playbook at `docs/brand-pitches/playbook.md`. It will be organized as a six-stage workflow:
 
 1. Strategy
 2. Research

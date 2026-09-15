@@ -1,0 +1,140 @@
+{
+  "created_at": "2026-09-09T12:55:00-07:00",
+  "source_note": "Shortlist selected from current REVOLVE public pages and indexed product snippets visible on 2026-09-09. REVOLVE does not expose complete internal sales velocity publicly, so Top Sellers here means products with public #1 or strong Best Seller/category-rank signals. New Arrivals means current Just In/New Arrivals/New From HAELO visibility or recently surfaced product pages.",
+  "shelves": [
+    {
+      "id": "top-sellers",
+      "title": "5 public category top sellers",
+      "description": "Products with visible REVOLVE category-rank proof, modeled after the original LIONESS Stars Align Mini Dress signal.",
+      "products": [
+        {
+          "rank": 1,
+          "brand": "LIONESS",
+          "title": "Stars Align Mini Dress",
+          "color": "Onyx",
+          "price": "$79",
+          "product_id": "LIOR-WD140",
+          "url": "https://www.revolve.com/lioness-stars-align-mini-dress-in-onyx/dp/LIOR-WD140/",
+          "image": "https://is4.revolveassets.com/images/p4/n/uv/LIOR-WD140_V1.jpg",
+          "evidence": ["#1 Best Seller in Mini Dresses", "Original reference SKU", "Multiple product views"],
+          "video_angle": "Walk in from the left, relaxed center pause, casual spin, then walk out while preserving black Onyx lace details."
+        },
+        {
+          "rank": 2,
+          "brand": "Bardot",
+          "title": "Eva Poplin Top",
+          "color": "Orchid White",
+          "price": "$119",
+          "product_id": "BARD-WS308",
+          "url": "https://www.revolve.com/bardot-eva-poplin-top-in-orchid-white/dp/BARD-WS308/",
+          "image": "https://is4.revolveassets.com/images/p4/n/uv/BARD-WS308_V1.jpg",
+          "evidence": ["#1 Best Seller in Puff Sleeve Tops", "66 visible reviews", "Only 1 left signal"],
+          "video_angle": "Close shoulder framing, gentle turn, sleeve volume movement, crisp cotton texture preservation."
+        },
+        {
+          "rank": 3,
+          "brand": "superdown",
+          "title": "Chaya Capri",
+          "color": "Black",
+          "price": "$60",
+          "product_id": "SPDW-WP244",
+          "url": "https://www.revolve.com/superdown-chaya-capri-in-black/dp/SPDW-WP244/",
+          "image": "https://is4.revolveassets.com/images/p4/n/uv/SPDW-WP244_V1.jpg",
+          "evidence": ["#1 Best Seller in Black Pants", "4.8 rating from 54 reviews", "Only 1 left signal"],
+          "video_angle": "Walk-cycle fit test, side profile, seated-to-standing stretch cue, clean black fabric detail."
+        },
+        {
+          "rank": 4,
+          "brand": "LIONESS",
+          "title": "Stars Align Midi Dress",
+          "color": "Honey Check",
+          "price": "$100",
+          "product_id": "LIOR-WD229",
+          "url": "https://www.revolve.com/lioness-stars-align-midi-dress-in-honey-check/dp/LIOR-WD229/",
+          "image": "https://is4.revolveassets.com/images/p4/n/uv/LIOR-WD229_V1.jpg",
+          "evidence": ["#1 Best Seller in Cut-out Dresses", "12 visible reviews", "Only 1 left signal"],
+          "video_angle": "Slow full-body turn, cut-out visibility, check pattern stability, careful waist and hem preservation."
+        },
+        {
+          "rank": 5,
+          "brand": "LEVI'S",
+          "title": "90s Trucker",
+          "color": "Soft As Butter",
+          "price": "$110",
+          "product_id": "LEIV-WO65",
+          "url": "https://www.revolve.com/levis-90s-trucker-in-soft-as-butter/dp/LEIV-WO65/",
+          "image": "https://is4.revolveassets.com/images/p4/n/uv/LEIV-WO65_V1.jpg",
+          "evidence": ["#1 Best Seller in Denim Jackets & Vests", "Classic denim category", "Only 1 left signal"],
+          "video_angle": "Layered street walk, button and pocket detail, denim swing, medium-wash texture preservation."
+        }
+      ]
+    },
+    {
+      "id": "new-arrivals",
+      "title": "5 new arrivals / fresh-drop candidates",
+      "description": "Fresh items where rapid product-to-video turnaround is the value proposition.",
+      "products": [
+        {
+          "rank": 1,
+          "brand": "HAELO",
+          "title": "Braided Tubular Dress",
+          "color": "White",
+          "price": "$280",
+          "product_id": "HELO-WD29",
+          "url": "https://www.revolve.com/haelo-braided-tubular-dress-in-white/dp/HELO-WD29/",
+          "image": "https://is4.revolveassets.com/images/p4/n/uv/HELO-WD29_V1.jpg",
+          "evidence": ["New From HAELO", "Just In/New Arrivals context", "Cut-out/fringe detail"],
+          "video_angle": "Editorial slow turn, braided detail close-up, white fabric and fringe movement."
+        },
+        {
+          "rank": 2,
+          "brand": "HAELO",
+          "title": "Deep-v Brace Dress",
+          "color": "Black",
+          "price": "$275",
+          "product_id": "HELO-WD5",
+          "url": "https://www.revolve.com/haelo-deepv-brace-dress-in-black/dp/HELO-WD5/",
+          "image": "https://is4.revolveassets.com/images/p4/n/uv/HELO-WD5_V1.jpg",
+          "evidence": ["New From HAELO adjacency", "Black dress detail test", "Premium markdown candidate"],
+          "video_angle": "Minimal black-background walk, neckline preservation, slow waistline reveal."
+        },
+        {
+          "rank": 3,
+          "brand": "HAELO",
+          "title": "Gradient Studded Dress",
+          "color": "Fog Grey",
+          "price": "Price on page",
+          "product_id": "HELO-WD27",
+          "url": "https://www.revolve.com/haelo-gradient-studded-dress-in-fog-grey/dp/HELO-WD27/",
+          "image": "https://is4.revolveassets.com/images/p4/n/uv/HELO-WD27_V1.jpg",
+          "evidence": ["New From HAELO adjacency", "Studded texture", "High visual-motion value"],
+          "video_angle": "Light-catching studio turn, studded gradient shimmer, no invented jewelry."
+        },
+        {
+          "rank": 4,
+          "brand": "ALL THE WAYS",
+          "title": "Claire Faux Leather Trench",
+          "color": "Black",
+          "price": "$108",
+          "product_id": "AAYR-WO4",
+          "url": "https://www.revolve.com/all-the-ways-claire-faux-leather-trench-in-black/dp/AAYR-WO4/",
+          "image": "https://is4.revolveassets.com/images/p4/n/uv/AAYR-WO4_V1.jpg",
+          "evidence": ["New Arrivals placement", "#30 Best Seller in Long Jackets & Coats", "Fall outerwear"],
+          "video_angle": "Street-style walk, belt and lapel detail, coat swing without distorting the leather."
+        },
+        {
+          "rank": 5,
+          "brand": "ALL THE WAYS",
+          "title": "Madley Mini Dress",
+          "color": "Black",
+          "price": "$76",
+          "product_id": "AAYR-WD195",
+          "url": "https://www.revolve.com/all-the-ways-madley-mini-dress-in-black/dp/AAYR-WD195/",
+          "image": "https://is4.revolveassets.com/images/p4/n/uv/AAYR-WD195_V1.jpg",
+          "evidence": ["New Arrivals placement", "BEST SELLER badge", "Low-stock signal"],
+          "video_angle": "Going-out mini-dress walk, shoulder turn, sleeve and hem motion, black fabric preservation."
+        }
+      ]
+    }
+  ]
+}
