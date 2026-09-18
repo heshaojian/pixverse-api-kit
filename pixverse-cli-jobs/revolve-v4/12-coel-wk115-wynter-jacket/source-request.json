@@ -1,0 +1,35 @@
+{
+  "product_id": "COEL-WK115",
+  "product_name": "Camila Coelho Wynter Boiled Knit Jacket in Dark Taupe",
+  "product_url": "https://www.revolve.com/camila-coelho-wynter-boiled-knit-jacket-in-dark-taupe/dp/COEL-WK115/",
+  "shelf_id": "customer-requested-detail-test",
+  "type": "outerwear",
+  "source_images": [
+    "assets/revolve-pilot-controlled-images/COEL-WK115/COEL-WK115_V1.jpg",
+    "assets/revolve-pilot-controlled-images/COEL-WK115/COEL-WK115_V2.jpg",
+    "assets/revolve-pilot-controlled-images/COEL-WK115/COEL-WK115_V3.jpg",
+    "assets/revolve-pilot-controlled-images/COEL-WK115/COEL-WK115_V4.jpg"
+  ],
+  "storyboard": {
+    "model": "gpt-image-2.5-flare",
+    "quality": "1440p",
+    "aspect_ratio": "9:16",
+    "detail_level": "high",
+    "local_file": "pixverse-cli-jobs/revolve-v4/12-coel-wk115-wynter-jacket/pixverse_image_425100347943026_1789690908838.png",
+    "provenance": "texture-neutral camera plan generated from official product photographs and visually approved",
+    "sha256": "c6560dc025cddc0e7168c0355316d5197bee16dd2d4ab8f2910fc8323f2c550a"
+  },
+  "video": {
+    "model": "minimax-h3",
+    "quality": "1440p",
+    "duration": 8,
+    "aspect_ratio": "9:16",
+    "prompt_file": "pixverse-cli-jobs/revolve-v4/12-coel-wk115-wynter-jacket/video-prompt-authority-v2.txt"
+  },
+  "job_dir": "pixverse-cli-jobs/revolve-v4/12-coel-wk115-wynter-jacket",
+  "music": {
+    "model": "music-3.0",
+    "prompt_file": "pixverse-cli-jobs/revolve-v4/12-coel-wk115-wynter-jacket/music-prompt.txt",
+    "master_file": "pixverse-cli-jobs/revolve-v4/12-coel-wk115-wynter-jacket/music-master.mp3"
+  }
+}

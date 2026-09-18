@@ -6,12 +6,12 @@
   "quality": "1440p",
   "aspect_ratio": "9:16",
   "summary": {
-    "approved": 10,
+    "approved": 14,
     "review": 0,
     "rejected": 0
   },
   "audio": {
-    "unique_music_assets": 10,
+    "unique_music_assets": 14,
     "instrumental": true,
     "silent_gap_events": 0,
     "mean_volume_range_db": [
@@ -239,6 +239,102 @@
       "directory": "10-aayr-wd195-madley-mini-dress",
       "final_url": "https://media.pixverse.ai/upload%2F3f92268d-13f0-4237-9e84-2a6439fcbb6b.mp4",
       "motion_sheet": "10-aayr-wd195-madley-mini-dress/motion-sheet.jpg",
+      "technical_result": "passed",
+      "checks": {
+        "public_http_200_video_mp4": true,
+        "visual_contact_sheet_reviewed": true,
+        "product_details_preserved": true,
+        "natural_motion": true,
+        "closed_mouth_no_speaking": true,
+        "no_captions_or_logos": true,
+        "unique_instrumental_music_audible": true
+      }
+    },
+    {
+      "product_id": "SDYS-WD257",
+      "duration_seconds": 8,
+      "video_id": 425096240881149,
+      "music_id": 425095659566041,
+      "published_asset_id": 425097729438717,
+      "status": "approved",
+      "generation_order": 11,
+      "display_order": 11,
+      "directory": "11-sdys-wd257-avani-dress",
+      "final_url": "https://media.pixverse.ai/upload%2F9f2dd7a8-d87a-48fd-b12e-e504fa25ac33.mp4",
+      "motion_sheet": "11-sdys-wd257-avani-dress/motion-sheet.jpg",
+      "technical_result": "passed",
+      "checks": {
+        "public_http_200_video_mp4": true,
+        "visual_contact_sheet_reviewed": true,
+        "product_details_preserved": true,
+        "natural_motion": true,
+        "closed_mouth_no_speaking": true,
+        "no_unrequested_captions_or_logos": true,
+        "unique_instrumental_music_audible": true
+      }
+    },
+    {
+      "product_id": "COEL-WK115",
+      "duration_seconds": 8,
+      "video_id": 425100461879401,
+      "music_id": 425095659561685,
+      "published_asset_id": 425101499058245,
+      "status": "approved",
+      "generation_order": 12,
+      "display_order": 12,
+      "directory": "12-coel-wk115-wynter-jacket",
+      "final_url": "https://media.pixverse.ai/upload%2Fefc3c9e0-795f-49d7-b12f-b441bd0c0644.mp4",
+      "motion_sheet": "12-coel-wk115-wynter-jacket/motion-sheet-authority-v2.jpg",
+      "technical_result": "passed",
+      "checks": {
+        "public_http_200_video_mp4": true,
+        "visual_contact_sheet_reviewed": true,
+        "product_details_preserved": true,
+        "color_and_texture_authority_preserved": true,
+        "natural_motion": true,
+        "closed_mouth_no_speaking": true,
+        "no_unrequested_captions_or_logos": true,
+        "unique_instrumental_music_audible": true
+      }
+    },
+    {
+      "product_id": "PCHR-WS7",
+      "duration_seconds": 8,
+      "video_id": 425239695741845,
+      "music_id": 425095659574578,
+      "published_asset_id": 425242575814476,
+      "status": "approved",
+      "generation_order": 13,
+      "display_order": 13,
+      "directory": "13-pchr-ws7-959-jersey",
+      "final_url": "https://media.pixverse.ai/upload%2F8b39670e-3820-4f2f-a4be-e38945ca9615.mp4",
+      "motion_sheet": "13-pchr-ws7-959-jersey/full-body-no-bag-composition-lock-v16.png",
+      "technical_result": "passed",
+      "checks": {
+        "public_http_200_video_mp4": true,
+        "visual_contact_sheet_reviewed": true,
+        "product_details_preserved": true,
+        "brand_text_and_logos_preserved": true,
+        "approved_full_body_reference_pipeline_used": true,
+        "approved_enter_pause_turn_exit_choreography_preserved": true,
+        "natural_motion": true,
+        "closed_mouth_no_speaking": true,
+        "no_unrequested_captions_or_logos": true,
+        "unique_instrumental_music_audible": true
+      }
+    },
+    {
+      "product_id": "LIOR-WS152",
+      "duration_seconds": 8,
+      "video_id": 425247324924994,
+      "music_id": 425246818455424,
+      "published_asset_id": 425248656871915,
+      "status": "approved",
+      "generation_order": 14,
+      "display_order": 14,
+      "directory": "14-lior-ws152-palisades-halter",
+      "final_url": "https://media.pixverse.ai/upload%2F2ad879aa-5754-495b-bc90-211193b5898f.mp4",
+      "motion_sheet": "14-lior-ws152-palisades-halter/contact-sheet.jpg",
       "technical_result": "passed",
       "checks": {
         "public_http_200_video_mp4": true,

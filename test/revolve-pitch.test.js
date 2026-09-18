@@ -19,15 +19,18 @@ test("REVOLVE pitch loads one flagship preview and defers the rest", async () =>
   const html = await fs.readFile(pitchPath, "utf8");
 
   assert.equal((html.match(/preload="metadata"/g) ?? []).length, 1);
-  assert.equal((html.match(/preload="none"/g) ?? []).length, 9);
+  assert.equal((html.match(/preload="none"/g) ?? []).length, 13);
 });
 
-test("REVOLVE pitch presents 10 unique demos and a measurable pilot", async () => {
+test("REVOLVE pitch presents 14 unique demos and a measurable pilot", async () => {
   const html = await fs.readFile(pitchPath, "utf8");
 
-  assert.equal((html.match(/class="demo-card/g) ?? []).length, 10);
-  assert.equal((html.match(/<video /g) ?? []).length, 10);
-  assert.equal(new Set([...html.matchAll(/<video[^>]+src="([^"]+)"/g)].map(([, src]) => src)).size, 10);
+  assert.equal((html.match(/class="demo-card/g) ?? []).length, 14);
+  assert.equal((html.match(/<video /g) ?? []).length, 14);
+  assert.equal(new Set([...html.matchAll(/<video[^>]+src="([^"]+)"/g)].map(([, src]) => src)).size, 14);
+  assert.match(html, /Featured Demos<\/h2><span>01–06 \/ 14<\/span>/);
+  assert.match(html, /Eight additional products across dresses, tops, pants, and outerwear\./);
+  assert.doesNotMatch(html, /Additional REVOLVE Demos/);
   assert.match(html, /A Focused 1-Week REVOLVE Pilot/);
   assert.match(html, /10 Priority Products/);
   assert.match(html, /Fidelity Pass Rate/);
@@ -46,8 +49,8 @@ test("REVOLVE pitch exposes all regenerated PixVerse video links", async () => {
     [...html.matchAll(/<a class="pixverse-link" href="([^"]+)"/g)].map(([, href]) => href),
   );
 
-  assert.equal(releaseReport.records.length, 10);
-  assert.equal(new Set(releaseReport.records.map(({ video_id: videoId }) => videoId)).size, 10);
+  assert.equal(releaseReport.records.length, 14);
+  assert.equal(new Set(releaseReport.records.map(({ video_id: videoId }) => videoId)).size, 14);
   assert.ok(releaseReport.records.every(({ final_url: finalUrl }) => finalUrl.startsWith("https://media.pixverse.ai/")));
   assert.deepEqual(linkedUrls, expectedUrls);
 });

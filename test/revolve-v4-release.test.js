@@ -36,17 +36,24 @@ test("V4 customer-facing order matches the batch display order", async () => {
     .map(({ product_id: productId }) => productId);
 
   assert.deepEqual(pageOrder, displayOrder);
-  assert.deepEqual(displayOrder.slice(0, 3), ["LIOR-WD140", "BARD-WS308", "HELO-WD29"]);
+  assert.deepEqual(displayOrder.slice(0, 6), [
+    "SDYS-WD257",
+    "COEL-WK115",
+    "PCHR-WS7",
+    "LIOR-WD140",
+    "BARD-WS308",
+    "HELO-WD29",
+  ]);
 });
 
 test("V4 release report traces every published video and soundtrack", async () => {
   const html = await fs.readFile(pagePath, "utf8");
   const report = await readJson(new URL("qa-report.json", v4Root));
 
-  assert.equal(report.records.length, 10);
-  assert.equal(new Set(report.records.map(({ video_id: videoId }) => videoId)).size, 10);
-  assert.equal(new Set(report.records.map(({ music_id: musicId }) => musicId)).size, 10);
-  assert.equal(new Set(report.records.map(({ final_url: finalUrl }) => finalUrl)).size, 10);
+  assert.equal(report.records.length, 14);
+  assert.equal(new Set(report.records.map(({ video_id: videoId }) => videoId)).size, 14);
+  assert.equal(new Set(report.records.map(({ music_id: musicId }) => musicId)).size, 14);
+  assert.equal(new Set(report.records.map(({ final_url: finalUrl }) => finalUrl)).size, 14);
   assert.ok(report.records.every(({ final_url: finalUrl }) => html.includes(finalUrl)));
   assert.ok(report.records.every(({ checks }) => Object.values(checks).every(Boolean)));
   assert.ok(Object.values(report.release_gate).every(Boolean));
@@ -55,16 +62,16 @@ test("V4 release report traces every published video and soundtrack", async () =
 test("V4 videos are controlled, audible, and described accessibly", async () => {
   const html = await fs.readFile(pagePath, "utf8");
 
-  assert.equal((html.match(/<video\b/g) ?? []).length, 10);
-  assert.equal((html.match(/aria-describedby="motion-/g) ?? []).length, 10);
-  assert.equal((html.match(/class="sr-only" id="motion-/g) ?? []).length, 10);
+  assert.equal((html.match(/<video\b/g) ?? []).length, 14);
+  assert.equal((html.match(/aria-describedby="motion-/g) ?? []).length, 14);
+  assert.equal((html.match(/class="sr-only" id="motion-/g) ?? []).length, 14);
   assert.doesNotMatch(html, /\bautoplay\b|\bmuted\b/);
   assert.doesNotMatch(html, /mh_live_|PIXVERSE_API_KEY|Authorization:\s*Bearer|127\.0\.0\.1|localhost/i);
 
   await fs.access(new URL("deploy/brand-pitches/revolve/v4/assets/posters/LIOR-WD140.jpg", workspaceRoot));
 });
 
-test("V4 featured videos fit complete portrait frames across viewports", async () => {
+test("V4 videos preserve complete portrait frames across viewports", async () => {
   const html = await fs.readFile(pagePath, "utf8");
 
   assert.match(html, /--featured-card-width/);
@@ -73,7 +80,8 @@ test("V4 featured videos fit complete portrait frames across viewports", async (
   assert.match(html, /@media \(min-width: 821px\) and \(max-width: 1100px\)/);
   assert.match(html, /@media \(max-width: 820px\)[\s\S]*--featured-card-width:\s*min\(100%,\s*calc\(56\.25svh\s*-\s*70px\),\s*607px\)/);
   assert.match(html, /@media \(max-width: 520px\)[\s\S]*\.pixverse-lockup > span\s*{\s*display:\s*none/);
-  assert.match(html, /\.featured-grid \.demo-media video\s*{[^}]*object-fit:\s*contain/);
+  assert.match(html, /\.demo-media video\s*{[^}]*object-fit:\s*contain[^}]*object-position:\s*center/);
+  assert.doesNotMatch(html, /object-fit:\s*cover/);
 });
 
 test("V4 uses the PixVerse logo as its page icon", async () => {
@@ -100,7 +108,7 @@ test("V4 eagerly loads only visible posters and defers the rest", async () => {
   const html = await fs.readFile(pagePath, "utf8");
 
   const posterPaths = [...html.matchAll(/data-poster="(\.\/assets\/posters\/[^"]+)"/g)].map(([, path]) => path);
-  assert.equal(posterPaths.length, 10);
+  assert.equal(posterPaths.length, 14);
   assert.equal((html.match(/\sposter="\.\/assets\/posters\//g) ?? []).length, 1);
   assert.match(html, /matchMedia\("\(min-width: 821px\)"\)\.matches \? 3 : 1/);
   assert.match(html, /new IntersectionObserver/);
