@@ -56,6 +56,8 @@ Customer visual signals:
 Approved customer assets:
 Relevant channels:
 Creative formats to demonstrate:
+Target video duration:
+Target audio duration: match video / approved edit handle
 Product details that must remain exact:
 Disallowed visual changes:
 Pilot scope:
@@ -91,6 +93,8 @@ SKU or stable identifier:
 Canonical product URL:
 Source checked on:
 Color or variant:
+Visual color authority from official photos:
+Texture authority from official photos:
 Materials and construction:
 Shape, geometry, or silhouette:
 Logos, labels, controls, or packaging:
@@ -138,6 +142,76 @@ Motion should reveal the product, not compete with it. Preserve the details that
 
 Use natural human motion where people appear. Avoid visual speaking when dialogue is not part of the concept. Do not invent props, accessories, packaging, product functions, or garment details.
 
+### Establish color and texture authority
+
+Official product photographs are the authority for color and texture. A catalog color name is merchandising metadata, not visual authority; names such as "Dark Taupe," "Pear," or "Soft White" must not cause the model to reinterpret the photographed appearance.
+
+Apply this authority twice: first when creating the storyboard, then again when generating the final video.
+
+**Storyboard generation**
+
+- Supply the official product photos to the storyboard model.
+- Describe the photographed color in plain visual terms, including warmth, brightness, undertone, and finish. Keep the catalog name only as identification.
+- State explicitly that the official product photos override the catalog name for visible color and exposure.
+- Match the source photography's lighting intent; forbid underexposure, crushed shadows, and named unwanted color shifts.
+- For texture-sensitive products, prefer a texture-neutral storyboard made from outlines, silhouettes, framing boxes, and motion arrows. The storyboard should control camera behavior without inventing a competing fabric, finish, label, or surface.
+- If a rendered garment is unavoidable, compare the storyboard against the official photos and reject it before video generation when its color or texture diverges.
+
+**Final video generation**
+
+- Put the official product photos first in the reference order and the camera storyboard last when the model accepts ordered references.
+- State: "Official product photographs override the storyboard for product color, texture, material finish, construction, and branding. The storyboard controls camera and motion only."
+- Repeat the photographed color description and prohibit the specific observed failure modes, such as dark-brown shift, charcoal shift, cool-gray cast, underexposure, excessive gloss, coarse loops, or flattened texture.
+- Hold lighting and exposure consistent across front, side, and back views so a turn does not change the apparent product color.
+
+**Release review**
+
+- Compare representative front, side, back, collar, sleeve, and material-detail frames beside the official photos.
+- Judge visible color and surface character, not whether the result matches the catalog color name.
+- Reject materially darker, lighter, warmer, cooler, glossier, rougher, smoother, or structurally different output. Do not rely on color grading to repair a texture mismatch.
+
+### Protect logos, labels, and readable text
+
+Treat visible branding as exact product geometry, not as decorative texture. A model can preserve broad color blocking while replacing small letters with plausible-looking but incorrect characters.
+
+For any product with a wordmark, patch, label, number, or other readable mark, use this reference order:
+
+1. Place official front product views first so the main wordmark and overall product remain authoritative.
+2. Place official logo and label close-up details next, including every sleeve, back, collar, package, or hardware area the motion may reveal.
+3. Place side and rear product views after the branded detail references.
+4. Place the storyboard last. It controls framing and motion only and must never override photographed lettering.
+
+Transcribe expected text into the product-truth record, including capitalization, spacing, numbers, and placement. In the generation prompt, require exact preservation and prohibit substituted, mirrored, pseudo-letter, or newly invented characters.
+
+Perform character-level QA on representative frames at 100% scale. Compare every visible wordmark, number, and patch against the corresponding official close-up. A missing, malformed, mirrored, or invented character is an automatic rejection even when motion, silhouette, and colors otherwise pass. When the model cannot preserve very small lettering reliably, change the shot so the detail is not presented as readable proof or use a controlled compositing workflow; never publish corrupted branding as a product-fidelity demo.
+
+### Match generated media length to the deliverable
+
+Treat duration as a billable production parameter, not merely a creative suggestion. For an eight-second video, request an eight-second music cue unless the approved edit explicitly needs additional handles.
+
+For PixVerse CLI music generation, pass the target duration directly:
+
+```bash
+pixverse create music \
+  --model music-3.0 \
+  --instrumental \
+  --duration-seconds "$TARGET_SECONDS" \
+  --prompt "$PROMPT_FILE" \
+  --output "$OUTPUT_FILE" \
+  --json
+```
+
+`--duration-seconds` sets `duration_auto=false`. Prompt wording such as "the first eight seconds must feel complete" does not replace the duration parameter.
+
+Apply these safeguards before a music request is submitted:
+
+- Set `TARGET_SECONDS` from the approved final video duration.
+- Keep automatic duration disabled for short-form deliverables.
+- If the selected model cannot generate the exact length, use the shortest supported duration and disclose the difference before spending credits.
+- Do not generate a full song and trim it as the default workflow.
+- After download, verify the source duration with `ffprobe`; stop the pipeline if it exceeds the requested duration by more than normal encoding tolerance.
+- Trim or master only for frame-accurate packaging, fades, loudness, or codec alignment, not to discard minutes of unused generated music.
+
 ### Give each demo a reason to exist
 
 For each video, define:
@@ -159,10 +233,10 @@ Score each candidate from 1 to 5:
 | Human motion | Movement, anatomy, expression, and interaction feel natural |
 | Camera and framing | Product remains legible and important details stay visible |
 | Brand fit | Setting, styling, pace, and music suit the customer's visual world |
-| Technical quality | No warping, flicker, broken transitions, missing audio, or compression failures |
+| Technical quality | No warping, flicker, broken transitions, missing audio, duration mismatch, or compression failures |
 | Pitch usefulness | The video adds evidence that supports the requested decision |
 
-Reject a demo regardless of average score if it contains a critical failure: mutated branding, invented product features, materially wrong construction, severe anatomy problems, unintended visible speaking, unsafe claims, or unusable media.
+Reject a demo regardless of average score if it contains a critical failure: mutated branding or lettering, invented product features, materially wrong construction, severe anatomy problems, unintended visible speaking, unsafe claims, or unusable media.
 
 ## 4. Page Design
 
@@ -303,6 +377,7 @@ Only public releases should carry customer-specific social previews by default. 
 Scale loading behavior to the collection and viewport. For a typical small gallery, use these defaults:
 
 - Give the first video a real poster fallback in HTML.
+- Choose every poster frame deliberately from the first clean product-readability moment, not automatically from `0:00`. The product should be centered, mostly visible, and still or near-still enough to read material, color, silhouette, logos, text, and key construction. Avoid walk-in and walk-out frames, motion blur, awkward crops, empty background, and transitional poses.
 - Load only the visible first set of posters: commonly one on mobile and up to three on desktop.
 - Assign remaining posters shortly before their cards enter the viewport.
 - Use `preload="metadata"` only for the flagship video and `preload="none"` for the rest.
@@ -464,6 +539,7 @@ Record who owns:
 - [ ] Text and controls fit at narrow, standard, and wide viewports.
 - [ ] No horizontal overflow, hidden anchors, or unstable card resizing occurs.
 - [ ] Keyboard, focus, contrast, alt text, labels, and reduced motion are verified.
+- [ ] Poster frames come from clean product-readability moments, not default `0:00`, half-entry, or exit frames.
 - [ ] Poster and media-failure fallbacks remain useful.
 
 ### Performance, security, and release
@@ -491,7 +567,8 @@ The REVOLVE page became stronger as it moved closer to proof and further from ex
 7. **Prices become liabilities.** Product colors remained useful; volatile prices were removed.
 8. **Portrait media needs bounded, consistent sizing.** Use stable portrait frames and centered `contain` for every demo, including non-featured cards and fullscreen playback. Do not crop the product merely to fill a smaller card.
 9. **Lazy loading must be measured.** The final behavior loaded one initial poster on mobile, three on desktop, and the rest near the viewport.
-10. **A small measurable pilot is a better close than more persuasion.** The final page moved from proof directly to a focused next step.
+10. **Poster frames are proof, not decoration.** The poster should be selected from the first clean product-readability moment, not automatically from `0:00`, so the card opens with centered product evidence instead of a half-entry crop or empty background.
+11. **A small measurable pilot is a better close than more persuasion.** The final page moved from proof directly to a focused next step.
 
 ## Final Rule
 
