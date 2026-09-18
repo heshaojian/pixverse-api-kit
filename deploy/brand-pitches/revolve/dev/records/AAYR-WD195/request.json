@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "revolve-video-request.v1",
+  "product": {
+    "id": "AAYR-WD195",
+    "name": "ALL THE WAYS Madley Mini Dress in Black",
+    "type": "dress",
+    "productUrl": "https://www.revolve.com/all-the-ways-madley-mini-dress-in-black/dp/AAYR-WD195/",
+    "sourceImageFiles": [
+      "AAYR-WD195_V1.jpg",
+      "AAYR-WD195_V2.jpg",
+      "AAYR-WD195_V3.jpg"
+    ]
+  },
+  "generation": {
+    "settings": {
+      "storyboardModel": "gpt-image-2.5-flare",
+      "videoModel": "minimax-h3",
+      "musicModel": "music-3.0",
+      "quality": "1440p",
+      "aspectRatio": "9:16",
+      "durationSeconds": 8,
+      "sourceImageCount": 3
+    },
+    "promptFiles": {
+      "storyboard": null,
+      "video": "./records/AAYR-WD195/video-prompt.txt",
+      "music": "./records/AAYR-WD195/music-prompt.txt",
+      "command": "./records/AAYR-WD195/generation-command.sh"
+    }
+  },
+  "approvedResult": {
+    "status": "approved",
+    "outputUrl": "https://media.pixverse.ai/upload%2F3f92268d-13f0-4237-9e84-2a6439fcbb6b.mp4",
+    "videoJob": {
+      "id": 423727474091098,
+      "url": "https://app.pixverse.ai/video/423727474091098"
+    },
+    "storyboardJob": null,
+    "musicJobId": 423725476302117,
+    "publishedAssetId": 423729053977780
+  }
+}

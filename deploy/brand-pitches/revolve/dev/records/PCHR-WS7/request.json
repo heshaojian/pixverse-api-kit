@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "revolve-video-request.v1",
+  "product": {
+    "id": "PCHR-WS7",
+    "name": "Porsche x REVOLVE 959 Unisex Jersey in Blue & Red",
+    "type": "top",
+    "productUrl": "https://www.revolve.com/porsche-x-revolve-959-unisex-jersey-in-blue-red/dp/PCHR-WS7/",
+    "sourceImageFiles": [
+      "PCHR-WS7_V1.jpg",
+      "PCHR-WS7_V2.jpg",
+      "PCHR-WS7_V3.jpg",
+      "PCHR-WS7_V4.jpg",
+      "PCHR-WS7_V5.jpg",
+      "PCHR-WS7_V6.jpg",
+      "PCHR-WS7_V7.jpg"
+    ]
+  },
+  "generation": {
+    "settings": {
+      "storyboardModel": "gpt-image-2.5-flare",
+      "videoModel": "minimax-h3",
+      "musicModel": "music-3.0",
+      "quality": "1440p",
+      "aspectRatio": "9:16",
+      "durationSeconds": 10,
+      "sourceImageCount": 7
+    },
+    "promptFiles": {
+      "storyboard": "./records/PCHR-WS7/storyboard-prompt.txt",
+      "video": "./records/PCHR-WS7/video-prompt.txt",
+      "music": "./records/PCHR-WS7/music-prompt.txt",
+      "command": "./records/PCHR-WS7/generation-command.sh"
+    }
+  },
+  "approvedResult": {
+    "status": "approved",
+    "outputUrl": "https://media.pixverse.ai/upload%2Fd6a776de-0faa-4952-85b8-c38e558deb15.mp4",
+    "videoJob": {
+      "id": 425120861661973,
+      "url": "https://app.pixverse.ai/video/425120861661973"
+    },
+    "storyboardJob": {
+      "id": 425095659997530,
+      "kind": "image"
+    },
+    "musicJobId": 425095659574578,
+    "publishedAssetId": 425123531127289
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "revolve-video-request.v1",
+  "product": {
+    "id": "LIOR-WD140",
+    "name": "LIONESS Stars Align Mini Dress in Onyx",
+    "type": "dress",
+    "productUrl": "https://www.revolve.com/lioness-stars-align-mini-dress-in-onyx/dp/LIOR-WD140/",
+    "sourceImageFiles": [
+      "LIOR-WD140_V1.jpg",
+      "LIOR-WD140_V2.jpg",
+      "LIOR-WD140_V3.jpg"
+    ]
+  },
+  "generation": {
+    "settings": {
+      "storyboardModel": "gpt-image-2.5-flare",
+      "videoModel": "minimax-h3",
+      "musicModel": "music-3.0",
+      "quality": "1440p",
+      "aspectRatio": "9:16",
+      "durationSeconds": 8,
+      "sourceImageCount": 3
+    },
+    "promptFiles": {
+      "storyboard": null,
+      "video": "./records/LIOR-WD140/video-prompt.txt",
+      "music": "./records/LIOR-WD140/music-prompt.txt",
+      "command": "./records/LIOR-WD140/generation-command.sh"
+    }
+  },
+  "approvedResult": {
+    "status": "approved",
+    "outputUrl": "https://media.pixverse.ai/upload%2F777b564a-8390-4bb0-9b40-8fe679879d9f.mp4",
+    "videoJob": {
+      "id": 423727249996269,
+      "url": "https://app.pixverse.ai/video/423727249996269"
+    },
+    "storyboardJob": null,
+    "musicJobId": 423724362238867,
+    "publishedAssetId": 423728695626478
+  }
+}

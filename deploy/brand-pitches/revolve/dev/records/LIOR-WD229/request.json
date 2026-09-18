@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "revolve-video-request.v1",
+  "product": {
+    "id": "LIOR-WD229",
+    "name": "LIONESS Stars Align Midi Dress in Honey Check",
+    "type": "dress",
+    "productUrl": "https://www.revolve.com/lioness-stars-align-midi-dress-in-honey-check/dp/LIOR-WD229/",
+    "sourceImageFiles": [
+      "LIOR-WD229_V1.jpg",
+      "LIOR-WD229_V2.jpg",
+      "LIOR-WD229_V3.jpg",
+      "LIOR-WD229_V4.jpg"
+    ]
+  },
+  "generation": {
+    "settings": {
+      "storyboardModel": "gpt-image-2.5-flare",
+      "videoModel": "minimax-h3",
+      "musicModel": "music-3.0",
+      "quality": "1440p",
+      "aspectRatio": "9:16",
+      "durationSeconds": 10,
+      "sourceImageCount": 4
+    },
+    "promptFiles": {
+      "storyboard": null,
+      "video": "./records/LIOR-WD229/video-prompt.txt",
+      "music": "./records/LIOR-WD229/music-prompt.txt",
+      "command": "./records/LIOR-WD229/generation-command.sh"
+    }
+  },
+  "approvedResult": {
+    "status": "approved",
+    "outputUrl": "https://media.pixverse.ai/upload%2F7c6e7618-71f6-4c04-afcb-7a1de2f5bfe5.mp4",
+    "videoJob": {
+      "id": 423726053333787,
+      "url": "https://app.pixverse.ai/video/423726053333787"
+    },
+    "storyboardJob": null,
+    "musicJobId": 423724706725185,
+    "publishedAssetId": 423728742060767
+  }
+}

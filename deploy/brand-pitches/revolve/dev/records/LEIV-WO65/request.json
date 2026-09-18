@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "revolve-video-request.v1",
+  "product": {
+    "id": "LEIV-WO65",
+    "name": "LEVI'S 90s Trucker in Soft As Butter",
+    "type": "outerwear",
+    "productUrl": "https://www.revolve.com/levis-90s-trucker-in-soft-as-butter/dp/LEIV-WO65/",
+    "sourceImageFiles": [
+      "LEIV-WO65_V1.jpg",
+      "LEIV-WO65_V2.jpg",
+      "LEIV-WO65_V3.jpg",
+      "LEIV-WO65_V4.jpg"
+    ]
+  },
+  "generation": {
+    "settings": {
+      "storyboardModel": "gpt-image-2.5-flare",
+      "videoModel": "minimax-h3",
+      "musicModel": "music-3.0",
+      "quality": "1440p",
+      "aspectRatio": "9:16",
+      "durationSeconds": 8,
+      "sourceImageCount": 4
+    },
+    "promptFiles": {
+      "storyboard": null,
+      "video": "./records/LEIV-WO65/video-prompt.txt",
+      "music": "./records/LEIV-WO65/music-prompt.txt",
+      "command": "./records/LEIV-WO65/generation-command.sh"
+    }
+  },
+  "approvedResult": {
+    "status": "approved",
+    "outputUrl": "https://media.pixverse.ai/upload%2Fd557ed99-396a-415f-ba73-4f487baf2624.mp4",
+    "videoJob": {
+      "id": 423727349872554,
+      "url": "https://app.pixverse.ai/video/423727349872554"
+    },
+    "storyboardJob": null,
+    "musicJobId": 423724706750036,
+    "publishedAssetId": 423728769479304
+  }
+}

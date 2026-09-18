@@ -1,0 +1,734 @@
+{
+  "schemaVersion": "revolve-dev-catalog.v1",
+  "title": "REVOLVE Product Video Developer Handoff",
+  "generatedAt": "2026-09-18T05:38:17.508Z",
+  "workflow": {
+    "models": {
+      "storyboard": "gpt-image-2.5-flare",
+      "video": "minimax-h3",
+      "music": "music-3.0"
+    },
+    "stages": [
+      "Collect official product images and product-page facts.",
+      "Generate or reuse a four-panel camera storyboard.",
+      "Create a product-specific instrumental cue at the target duration.",
+      "Generate the 9:16 product video with storyboard, product, and audio references.",
+      "Review motion, product fidelity, color, texture, branding, audio, and duration.",
+      "Publish only the approved master and retain request and QA artifacts."
+    ],
+    "referenceCommand": "npx pixverse@latest --workspace-id \"$PIXVERSE_WORKSPACE_ID\" create reference \\\n  --images \\\n    ./inputs/storyboard.png \\\n    ./inputs/product-1.jpg \\\n    ./inputs/product-2.jpg \\\n    ./inputs/product-3.jpg \\\n  --audios ./inputs/music-master.mp3 \\\n  --prompt ./prompts/video-prompt.txt \\\n  --model minimax-h3 \\\n  --quality 1440p \\\n  --duration 8 \\\n  --aspect-ratio 9:16 \\\n  --idempotency-key \"$PRODUCT_ID-minimax-h3-v1\" \\\n  --no-wait --json",
+    "taskCommands": [
+      "npx pixverse@latest --workspace-id \"$PIXVERSE_WORKSPACE_ID\" task wait \"$VIDEO_ID\" --json",
+      "npx pixverse@latest --workspace-id \"$PIXVERSE_WORKSPACE_ID\" asset download \"$VIDEO_ID\" --dest ./outputs --json",
+      "npx pixverse@latest --workspace-id \"$PIXVERSE_WORKSPACE_ID\" asset upload ./outputs/final.mp4 --json"
+    ],
+    "qaGates": [
+      "Product silhouette, construction, fit, and styling match official photography.",
+      "Color and texture use product photos as the visual authority.",
+      "Visible logos, lettering, and numbers preserve exact characters and placement.",
+      "Motion is natural, closed-mouth, and follows the approved storyboard.",
+      "Instrumental audio is audible, continuous, and exactly matches the video duration.",
+      "Final media and job links return successfully before publication."
+    ]
+  },
+  "products": [
+    {
+      "displayOrder": 1,
+      "generationOrder": 1,
+      "productId": "LIOR-WD140",
+      "productName": "LIONESS Stars Align Mini Dress in Onyx",
+      "productType": "dress",
+      "shelf": "top-sellers",
+      "productUrl": "https://www.revolve.com/lioness-stars-align-mini-dress-in-onyx/dp/LIOR-WD140/",
+      "status": "approved",
+      "outputUrl": "https://media.pixverse.ai/upload%2F777b564a-8390-4bb0-9b40-8fe679879d9f.mp4",
+      "posterUrl": "./assets/posters/LIOR-WD140.jpg",
+      "settings": {
+        "storyboardModel": "gpt-image-2.5-flare",
+        "videoModel": "minimax-h3",
+        "musicModel": "music-3.0",
+        "quality": "1440p",
+        "aspectRatio": "9:16",
+        "durationSeconds": 8,
+        "sourceImageCount": 3
+      },
+      "jobs": {
+        "storyboard": null,
+        "video": {
+          "id": 423727249996269,
+          "url": "https://app.pixverse.ai/video/423727249996269"
+        },
+        "music": {
+          "id": 423724362238867
+        },
+        "publishedAsset": {
+          "id": 423728695626478
+        }
+      },
+      "prompts": {
+        "storyboard": "",
+        "video": "Create a natural 8-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos. Show one consistent synthetic fashion model wearing the exact black satin halter mini dress from the product photos. Preserve the lace-trim halter neckline, self-tie neck, fitted satin silhouette, mini hem, lace hem trim, and hidden back zipper. Follow this motion: walk in from the left, pause front-facing, make one slow relaxed turn to show the side and back, then walk out toward the right. Stable full-body camera, clean white studio, premium soft lighting, natural fabric physics. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, accessories, extra garments, morphing, duplicate people, abrupt cuts, or product changes.",
+        "music": "Instrumental fashion lookbook cue for a black satin lace-trim halter mini dress. Sleek nocturnal electro-pop at 112 BPM, muted kick, poised bass pulse, fine crystalline synth shimmer suggesting satin, flirtatious but restrained runway confidence. Immediate groove from the first beat, no intro silence, no vocals, no spoken words, no choir, no dramatic impacts, no sound effects."
+      },
+      "source": {
+        "imageFiles": [
+          "LIOR-WD140_V1.jpg",
+          "LIOR-WD140_V2.jpg",
+          "LIOR-WD140_V3.jpg"
+        ],
+        "promptUrl": "./records/LIOR-WD140/video-prompt.txt",
+        "requestUrl": "./records/LIOR-WD140/request.json",
+        "commandUrl": "./records/LIOR-WD140/generation-command.sh",
+        "musicPromptUrl": "./records/LIOR-WD140/music-prompt.txt",
+        "storyboardPromptUrl": null
+      },
+      "cliCommand": "npx pixverse@latest --workspace-id \"$PIXVERSE_WORKSPACE_ID\" create reference \\\n  --images \\\n    ./inputs/storyboard.png \\\n    ./inputs/product-1.jpg \\\n    ./inputs/product-2.jpg \\\n    ./inputs/product-3.jpg \\\n  --audios ./inputs/music-master.mp3 \\\n  --prompt ./prompts/video-prompt.txt \\\n  --model minimax-h3 \\\n  --quality 1440p \\\n  --duration 8 \\\n  --aspect-ratio 9:16 \\\n  --idempotency-key \"$PRODUCT_ID-minimax-h3-v1\" \\\n  --no-wait --json"
+    },
+    {
+      "displayOrder": 2,
+      "generationOrder": 2,
+      "productId": "BARD-WS308",
+      "productName": "Bardot Eva Poplin Top in Orchid White",
+      "productType": "top",
+      "shelf": "top-sellers",
+      "productUrl": "https://www.revolve.com/bardot-eva-poplin-top-in-orchid-white/dp/BARD-WS308/",
+      "status": "approved",
+      "outputUrl": "https://media.pixverse.ai/upload%2Fc69563f6-a367-4ef5-b463-26be6860b046.mp4",
+      "posterUrl": "./assets/posters/BARD-WS308.jpg",
+      "settings": {
+        "storyboardModel": "gpt-image-2.5-flare",
+        "videoModel": "minimax-h3",
+        "musicModel": "music-3.0",
+        "quality": "1440p",
+        "aspectRatio": "9:16",
+        "durationSeconds": 8,
+        "sourceImageCount": 4
+      },
+      "jobs": {
+        "storyboard": null,
+        "video": {
+          "id": 423727283303310,
+          "url": "https://app.pixverse.ai/video/423727283303310"
+        },
+        "music": {
+          "id": 423724362489133
+        },
+        "publishedAsset": {
+          "id": 423728710701255
+        }
+      },
+      "prompts": {
+        "storyboard": "",
+        "video": "Create a natural 8-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos. Show one consistent synthetic fashion model wearing the exact Bardot Eva Poplin Top in Orchid White from the product photos, styled with the same simple black bottoms. Preserve the crisp white cotton poplin, off-the-shoulder neckline, sweetheart-shaped ruched front, structured boned bodice, voluminous blouson sleeves, cropped length, and exposed back zipper. Follow this motion: walk in from the left, pause front-facing, make one slow relaxed turn to show the side and back, then walk out toward the right. Keep hands relaxed and away from the bodice. Stable full-body camera, clean white studio, premium soft lighting, and natural fabric physics. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, new accessories, garment changes, morphing, duplicate people, abrupt cuts, or framing that hides the top.",
+        "music": "Instrumental fashion lookbook cue for a crisp white sculptural poplin top. Airy modern French-house at 116 BPM, clean hand percussion, light elastic bass, bright plucked synth accents, polished daytime editorial energy. Immediate groove from the first beat, elegant and uncluttered, no vocals, no spoken words, no choir, no dramatic impacts, no sound effects."
+      },
+      "source": {
+        "imageFiles": [
+          "BARD-WS308_V1.jpg",
+          "BARD-WS308_V2.jpg",
+          "BARD-WS308_V3.jpg",
+          "BARD-WS308_V4.jpg"
+        ],
+        "promptUrl": "./records/BARD-WS308/video-prompt.txt",
+        "requestUrl": "./records/BARD-WS308/request.json",
+        "commandUrl": "./records/BARD-WS308/generation-command.sh",
+        "musicPromptUrl": "./records/BARD-WS308/music-prompt.txt",
+        "storyboardPromptUrl": null
+      },
+      "cliCommand": "npx pixverse@latest --workspace-id \"$PIXVERSE_WORKSPACE_ID\" create reference \\\n  --images \\\n    ./inputs/storyboard.png \\\n    ./inputs/product-1.jpg \\\n    ./inputs/product-2.jpg \\\n    ./inputs/product-3.jpg \\\n    ./inputs/product-4.jpg \\\n  --audios ./inputs/music-master.mp3 \\\n  --prompt ./prompts/video-prompt.txt \\\n  --model minimax-h3 \\\n  --quality 1440p \\\n  --duration 8 \\\n  --aspect-ratio 9:16 \\\n  --idempotency-key \"$PRODUCT_ID-minimax-h3-v1\" \\\n  --no-wait --json"
+    },
+    {
+      "displayOrder": 3,
+      "generationOrder": 6,
+      "productId": "HELO-WD29",
+      "productName": "HAELO Braided Tubular Dress in White",
+      "productType": "dress",
+      "shelf": "new-arrivals",
+      "productUrl": "https://www.revolve.com/haelo-braided-tubular-dress-in-white/dp/HELO-WD29/",
+      "status": "approved",
+      "outputUrl": "https://media.pixverse.ai/upload%2Fd0ea2b08-020e-4670-9658-f17db05fe35b.mp4",
+      "posterUrl": "./assets/posters/HELO-WD29.jpg",
+      "settings": {
+        "storyboardModel": "gpt-image-2.5-flare",
+        "videoModel": "minimax-h3",
+        "musicModel": "music-3.0",
+        "quality": "1440p",
+        "aspectRatio": "9:16",
+        "durationSeconds": 8,
+        "sourceImageCount": 4
+      },
+      "jobs": {
+        "storyboard": null,
+        "video": {
+          "id": 423727382472206,
+          "url": "https://app.pixverse.ai/video/423727382472206"
+        },
+        "music": {
+          "id": 423724706790984
+        },
+        "publishedAsset": {
+          "id": 423728782850986
+        }
+      },
+      "prompts": {
+        "storyboard": "",
+        "video": "Create a natural 8-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos. Show one consistent synthetic adult fashion model wearing the exact HAELO Braided Tubular Dress in White. Preserve the bright white double-jersey, straight neckline, fitted mini silhouette, signature braided horizontal bands, geometric side openings, solid back, and back zipper exactly as photographed. The model walks in from the left, pauses front-facing, makes one slow relaxed turn to show the side construction and back, then walks out toward the right. Keep arms relaxed and the complete dress visible. Stable full-body camera, softly contrasting light-grey studio, premium diffused lighting, and realistic fabric movement. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, accessories, extra garments, design changes, morphing, duplicate people, abrupt cuts, or product-obscuring framing.",
+        "music": "Instrumental fashion lookbook cue for an architectural white braided tubular mini dress. Futuristic minimal techno at 118 BPM, soft controlled kick, glassy synth droplets, precise sub pulse, spacious polished texture, gallery-clean and sculptural rather than aggressive. Immediate groove from the first beat, no vocals, no spoken words, no choir, no dramatic impacts, no sound effects."
+      },
+      "source": {
+        "imageFiles": [
+          "HELO-WD29_V1.jpg",
+          "HELO-WD29_V2.jpg",
+          "HELO-WD29_V3.jpg",
+          "HELO-WD29_V4.jpg"
+        ],
+        "promptUrl": "./records/HELO-WD29/video-prompt.txt",
+        "requestUrl": "./records/HELO-WD29/request.json",
+        "commandUrl": "./records/HELO-WD29/generation-command.sh",
+        "musicPromptUrl": "./records/HELO-WD29/music-prompt.txt",
+        "storyboardPromptUrl": null
+      },
+      "cliCommand": "npx pixverse@latest --workspace-id \"$PIXVERSE_WORKSPACE_ID\" create reference \\\n  --images \\\n    ./inputs/storyboard.png \\\n    ./inputs/product-1.jpg \\\n    ./inputs/product-2.jpg \\\n    ./inputs/product-3.jpg \\\n    ./inputs/product-4.jpg \\\n  --audios ./inputs/music-master.mp3 \\\n  --prompt ./prompts/video-prompt.txt \\\n  --model minimax-h3 \\\n  --quality 1440p \\\n  --duration 8 \\\n  --aspect-ratio 9:16 \\\n  --idempotency-key \"$PRODUCT_ID-minimax-h3-v1\" \\\n  --no-wait --json"
+    },
+    {
+      "displayOrder": 4,
+      "generationOrder": 3,
+      "productId": "SPDW-WP244",
+      "productName": "superdown Chaya Capri in Black",
+      "productType": "pants",
+      "shelf": "top-sellers",
+      "productUrl": "https://www.revolve.com/superdown-chaya-capri-in-black/dp/SPDW-WP244/",
+      "status": "approved",
+      "outputUrl": "https://media.pixverse.ai/upload%2Fcbb80fc9-3912-4bd8-a3fe-294da8469fdd.mp4",
+      "posterUrl": "./assets/posters/SPDW-WP244.jpg",
+      "settings": {
+        "storyboardModel": "gpt-image-2.5-flare",
+        "videoModel": "minimax-h3",
+        "musicModel": "music-3.0",
+        "quality": "1440p",
+        "aspectRatio": "9:16",
+        "durationSeconds": 8,
+        "sourceImageCount": 4
+      },
+      "jobs": {
+        "storyboard": null,
+        "video": {
+          "id": 423727319986924,
+          "url": "https://app.pixverse.ai/video/423727319986924"
+        },
+        "music": {
+          "id": 423724362223130
+        },
+        "publishedAsset": {
+          "id": 423728726775685
+        }
+      },
+      "prompts": {
+        "storyboard": "",
+        "video": "Create a natural 8-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos. Show one consistent synthetic fashion model wearing the exact superdown Chaya Capri in Black from the product photos, styled with the same simple black bandeau top. Preserve the smooth black ponte fabric, high fitted waist, clean front, close leg fit, below-knee capri length, narrow leg opening, and hidden side zipper. Follow this motion: walk in from the left, pause front-facing, make one slow relaxed turn to show the side and back fit, then walk out toward the right. Keep the waist and lower legs visible throughout. Stable full-body camera, clean white studio, premium soft lighting, and natural fabric physics. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, new accessories, garment changes, morphing, duplicate people, abrupt cuts, or framing that hides the capris.",
+        "music": "Instrumental fashion lookbook cue for fitted black capri pants with a sharp Y2K downtown attitude. Minimal electro at 120 BPM, tight dry kick, compact rubber bass, precise clicks, restrained glossy synth stab, confident and clean. Immediate groove from the first beat, no vocals, no spoken words, no choir, no dramatic impacts, no sound effects."
+      },
+      "source": {
+        "imageFiles": [
+          "SPDW-WP244_V1.jpg",
+          "SPDW-WP244_V2.jpg",
+          "SPDW-WP244_V3.jpg",
+          "SPDW-WP244_V4.jpg"
+        ],
+        "promptUrl": "./records/SPDW-WP244/video-prompt.txt",
+        "requestUrl": "./records/SPDW-WP244/request.json",
+        "commandUrl": "./records/SPDW-WP244/generation-command.sh",
+        "musicPromptUrl": "./records/SPDW-WP244/music-prompt.txt",
+        "storyboardPromptUrl": null
+      },
+      "cliCommand": "npx pixverse@latest --workspace-id \"$PIXVERSE_WORKSPACE_ID\" create reference \\\n  --images \\\n    ./inputs/storyboard.png \\\n    ./inputs/product-1.jpg \\\n    ./inputs/product-2.jpg \\\n    ./inputs/product-3.jpg \\\n    ./inputs/product-4.jpg \\\n  --audios ./inputs/music-master.mp3 \\\n  --prompt ./prompts/video-prompt.txt \\\n  --model minimax-h3 \\\n  --quality 1440p \\\n  --duration 8 \\\n  --aspect-ratio 9:16 \\\n  --idempotency-key \"$PRODUCT_ID-minimax-h3-v1\" \\\n  --no-wait --json"
+    },
+    {
+      "displayOrder": 5,
+      "generationOrder": 4,
+      "productId": "LIOR-WD229",
+      "productName": "LIONESS Stars Align Midi Dress in Honey Check",
+      "productType": "dress",
+      "shelf": "top-sellers",
+      "productUrl": "https://www.revolve.com/lioness-stars-align-midi-dress-in-honey-check/dp/LIOR-WD229/",
+      "status": "approved",
+      "outputUrl": "https://media.pixverse.ai/upload%2F7c6e7618-71f6-4c04-afcb-7a1de2f5bfe5.mp4",
+      "posterUrl": "./assets/posters/LIOR-WD229.jpg",
+      "settings": {
+        "storyboardModel": "gpt-image-2.5-flare",
+        "videoModel": "minimax-h3",
+        "musicModel": "music-3.0",
+        "quality": "1440p",
+        "aspectRatio": "9:16",
+        "durationSeconds": 10,
+        "sourceImageCount": 4
+      },
+      "jobs": {
+        "storyboard": null,
+        "video": {
+          "id": 423726053333787,
+          "url": "https://app.pixverse.ai/video/423726053333787"
+        },
+        "music": {
+          "id": 423724706725185
+        },
+        "publishedAsset": {
+          "id": 423728742060767
+        }
+      },
+      "prompts": {
+        "storyboard": "",
+        "video": "Create a natural 10-second vertical ecommerce fashion video. @image1 is the corrected four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos and override every other reference for garment construction. Show one consistent synthetic adult fashion model wearing the exact LIONESS Stars Align Midi Dress in Honey Check. Preserve the pale honey micro-check chiffon, self-tie halter, lace-edged deep V neckline, fitted upper body, low open back, one uninterrupted gently flared A-line skirt, translucent chiffon over full lining, ankle length, and lace only at the bottom hem. Critical: no tiers, no gathered bands, no horizontal seams, and no lace rows across the skirt. The model walks in from the left, pauses front-facing, makes one slow relaxed turn to show the side and open back, then walks out toward the right. Stable full-body camera, clean white studio, premium soft lighting, and natural chiffon movement. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, accessories, extra garments, color changes, morphing, duplicate people, abrupt cuts, or product-obscuring framing.",
+        "music": "Instrumental fashion lookbook cue for a pale honey-check chiffon halter midi dress. Warm indie-electronic at 108 BPM, soft brushed beat, rounded bass, delicate muted guitar harmonics and translucent synth air, romantic movement with modern restraint. Immediate groove from the first beat, no vocals, no spoken words, no choir, no dramatic impacts, no sound effects."
+      },
+      "source": {
+        "imageFiles": [
+          "LIOR-WD229_V1.jpg",
+          "LIOR-WD229_V2.jpg",
+          "LIOR-WD229_V3.jpg",
+          "LIOR-WD229_V4.jpg"
+        ],
+        "promptUrl": "./records/LIOR-WD229/video-prompt.txt",
+        "requestUrl": "./records/LIOR-WD229/request.json",
+        "commandUrl": "./records/LIOR-WD229/generation-command.sh",
+        "musicPromptUrl": "./records/LIOR-WD229/music-prompt.txt",
+        "storyboardPromptUrl": null
+      },
+      "cliCommand": "npx pixverse@latest --workspace-id \"$PIXVERSE_WORKSPACE_ID\" create reference \\\n  --images \\\n    ./inputs/storyboard.png \\\n    ./inputs/product-1.jpg \\\n    ./inputs/product-2.jpg \\\n    ./inputs/product-3.jpg \\\n    ./inputs/product-4.jpg \\\n  --audios ./inputs/music-master.mp3 \\\n  --prompt ./prompts/video-prompt.txt \\\n  --model minimax-h3 \\\n  --quality 1440p \\\n  --duration 10 \\\n  --aspect-ratio 9:16 \\\n  --idempotency-key \"$PRODUCT_ID-minimax-h3-v1\" \\\n  --no-wait --json"
+    },
+    {
+      "displayOrder": 6,
+      "generationOrder": 5,
+      "productId": "LEIV-WO65",
+      "productName": "LEVI'S 90s Trucker in Soft As Butter",
+      "productType": "outerwear",
+      "shelf": "top-sellers",
+      "productUrl": "https://www.revolve.com/levis-90s-trucker-in-soft-as-butter/dp/LEIV-WO65/",
+      "status": "approved",
+      "outputUrl": "https://media.pixverse.ai/upload%2Fd557ed99-396a-415f-ba73-4f487baf2624.mp4",
+      "posterUrl": "./assets/posters/LEIV-WO65.jpg",
+      "settings": {
+        "storyboardModel": "gpt-image-2.5-flare",
+        "videoModel": "minimax-h3",
+        "musicModel": "music-3.0",
+        "quality": "1440p",
+        "aspectRatio": "9:16",
+        "durationSeconds": 8,
+        "sourceImageCount": 4
+      },
+      "jobs": {
+        "storyboard": null,
+        "video": {
+          "id": 423727349872554,
+          "url": "https://app.pixverse.ai/video/423727349872554"
+        },
+        "music": {
+          "id": 423724706750036
+        },
+        "publishedAsset": {
+          "id": 423728769479304
+        }
+      },
+      "prompts": {
+        "storyboard": "",
+        "video": "Create a natural 8-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos. Show one consistent synthetic fashion model wearing the exact LEVI'S 90s Trucker jacket in Soft As Butter from the product photos, styled with the same simple white tank and black jeans. Preserve the light faded blue denim wash, relaxed oversized trucker shape, pointed collar, silver-tone button front, buttoned cuffs, chest flap pockets, side welt pockets, and buttoned hem tabs. Follow this motion: walk in from the left, pause front-facing, make one slow relaxed turn to show the side and back, then walk out toward the right. Keep hands away from the jacket details. Stable full-body camera, clean white studio, premium soft lighting, and natural denim movement. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, new accessories, garment changes, morphing, duplicate people, abrupt cuts, or framing that hides the jacket.",
+        "music": "Instrumental fashion lookbook cue for a relaxed light-wash vintage denim trucker jacket. Cool indie-dance at 110 BPM, dry live-feel drums, warm bass guitar, muted clean guitar chop, subtle analog texture, effortless Los Angeles daylight attitude. Immediate groove from the first beat, no vocals, no spoken words, no choir, no dramatic impacts, no sound effects."
+      },
+      "source": {
+        "imageFiles": [
+          "LEIV-WO65_V1.jpg",
+          "LEIV-WO65_V2.jpg",
+          "LEIV-WO65_V3.jpg",
+          "LEIV-WO65_V4.jpg"
+        ],
+        "promptUrl": "./records/LEIV-WO65/video-prompt.txt",
+        "requestUrl": "./records/LEIV-WO65/request.json",
+        "commandUrl": "./records/LEIV-WO65/generation-command.sh",
+        "musicPromptUrl": "./records/LEIV-WO65/music-prompt.txt",
+        "storyboardPromptUrl": null
+      },
+      "cliCommand": "npx pixverse@latest --workspace-id \"$PIXVERSE_WORKSPACE_ID\" create reference \\\n  --images \\\n    ./inputs/storyboard.png \\\n    ./inputs/product-1.jpg \\\n    ./inputs/product-2.jpg \\\n    ./inputs/product-3.jpg \\\n    ./inputs/product-4.jpg \\\n  --audios ./inputs/music-master.mp3 \\\n  --prompt ./prompts/video-prompt.txt \\\n  --model minimax-h3 \\\n  --quality 1440p \\\n  --duration 8 \\\n  --aspect-ratio 9:16 \\\n  --idempotency-key \"$PRODUCT_ID-minimax-h3-v1\" \\\n  --no-wait --json"
+    },
+    {
+      "displayOrder": 7,
+      "generationOrder": 7,
+      "productId": "HELO-WD5",
+      "productName": "HAELO Deep-v Brace Dress in Black",
+      "productType": "dress",
+      "shelf": "new-arrivals",
+      "productUrl": "https://www.revolve.com/haelo-deepv-brace-dress-in-black/dp/HELO-WD5/",
+      "status": "approved",
+      "outputUrl": "https://media.pixverse.ai/upload%2F44bdf002-1730-47f9-9e3b-9ad7f4fd3452.mp4",
+      "posterUrl": "./assets/posters/HELO-WD5.jpg",
+      "settings": {
+        "storyboardModel": "gpt-image-2.5-flare",
+        "videoModel": "minimax-h3",
+        "musicModel": "music-3.0",
+        "quality": "1440p",
+        "aspectRatio": "9:16",
+        "durationSeconds": 10,
+        "sourceImageCount": 4
+      },
+      "jobs": {
+        "storyboard": null,
+        "video": {
+          "id": 423727419495694,
+          "url": "https://app.pixverse.ai/video/423727419495694"
+        },
+        "music": {
+          "id": 423725154485788
+        },
+        "publishedAsset": {
+          "id": 423728797302676
+        }
+      },
+      "prompts": {
+        "storyboard": "",
+        "video": "Create a natural 10-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos. Show one consistent synthetic fashion model wearing the exact HAELO Deep-v Brace Dress in Black from the product photos. Preserve the fluid black viscose jersey, adjustable halterneck, very deep V front, slim brace details across the front opening, fitted waist, long column maxi skirt, thigh-high front slit, cross-back straps, and back zipper. Follow this motion: walk in from the left, pause front-facing, make one slow controlled turn to show the side and cross-back, then walk out toward the right. Let the skirt drape and move naturally without exposing more than the product photos. Stable full-body camera, clean white studio, premium soft lighting, and natural fabric physics. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, accessories, extra garments, color changes, morphing, duplicate people, abrupt cuts, or framing that hides the dress.",
+        "music": "Instrumental fashion lookbook cue for a fluid black deep-V maxi dress. Slow dark trip-hop at 94 BPM, deep velvet bass, restrained breakbeat, smoky electric piano fragments, elegant nocturnal atmosphere and controlled sensuality. Immediate pulse from the first beat, no vocals, no spoken words, no choir, no dramatic impacts, no sound effects."
+      },
+      "source": {
+        "imageFiles": [
+          "HELO-WD5_V1.jpg",
+          "HELO-WD5_V2.jpg",
+          "HELO-WD5_V3.jpg",
+          "HELO-WD5_V4.jpg"
+        ],
+        "promptUrl": "./records/HELO-WD5/video-prompt.txt",
+        "requestUrl": "./records/HELO-WD5/request.json",
+        "commandUrl": "./records/HELO-WD5/generation-command.sh",
+        "musicPromptUrl": "./records/HELO-WD5/music-prompt.txt",
+        "storyboardPromptUrl": null
+      },
+      "cliCommand": "npx pixverse@latest --workspace-id \"$PIXVERSE_WORKSPACE_ID\" create reference \\\n  --images \\\n    ./inputs/storyboard.png \\\n    ./inputs/product-1.jpg \\\n    ./inputs/product-2.jpg \\\n    ./inputs/product-3.jpg \\\n    ./inputs/product-4.jpg \\\n  --audios ./inputs/music-master.mp3 \\\n  --prompt ./prompts/video-prompt.txt \\\n  --model minimax-h3 \\\n  --quality 1440p \\\n  --duration 10 \\\n  --aspect-ratio 9:16 \\\n  --idempotency-key \"$PRODUCT_ID-minimax-h3-v1\" \\\n  --no-wait --json"
+    },
+    {
+      "displayOrder": 8,
+      "generationOrder": 8,
+      "productId": "HELO-WD27",
+      "productName": "HAELO Gradient Studded Dress in Fog Grey",
+      "productType": "dress",
+      "shelf": "new-arrivals",
+      "productUrl": "https://www.revolve.com/haelo-gradient-studded-dress-in-fog-grey/dp/HELO-WD27/",
+      "status": "approved",
+      "outputUrl": "https://media.pixverse.ai/upload%2F28c627fd-12ac-4cd2-9a7a-8d06dc2f609d.mp4",
+      "posterUrl": "./assets/posters/HELO-WD27.jpg",
+      "settings": {
+        "storyboardModel": "gpt-image-2.5-flare",
+        "videoModel": "minimax-h3",
+        "musicModel": "music-3.0",
+        "quality": "1440p",
+        "aspectRatio": "9:16",
+        "durationSeconds": 8,
+        "sourceImageCount": 4
+      },
+      "jobs": {
+        "storyboard": null,
+        "video": {
+          "id": 423727448459994,
+          "url": "https://app.pixverse.ai/video/423727448459994"
+        },
+        "music": {
+          "id": 423725154602525
+        },
+        "publishedAsset": {
+          "id": 423728813765318
+        }
+      },
+      "prompts": {
+        "storyboard": "",
+        "video": "Create a natural 8-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos. Show one consistent synthetic fashion model wearing the exact HAELO Gradient Studded Dress in Fog Grey from the product photos. Preserve the cool fog-grey tone, dense silver-tone stud gradient, lightweight jersey, narrow adjustable straps, deep V neckline, fitted mini silhouette, full lining, and hidden back zipper with hook-and-eye closure. Follow this motion: walk in from the left, pause front-facing, make one slow relaxed turn so the studs catch the light and the back is visible, then walk out toward the right. Stable full-body camera, clean white studio, premium soft lighting, and natural fabric physics. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, accessories, extra garments, color changes, morphing, duplicate people, abrupt cuts, or framing that hides the dress.",
+        "music": "Instrumental fashion lookbook cue for a fog-grey mini dress covered in a silver stud gradient. Metallic minimal techno at 122 BPM, crisp compact kick, cool sub bass, tiny chrome percussion and silver synth sparkles, precise high-fashion tension without harshness. Immediate groove from the first beat, no vocals, no spoken words, no choir, no dramatic impacts, no sound effects."
+      },
+      "source": {
+        "imageFiles": [
+          "HELO-WD27_V1.jpg",
+          "HELO-WD27_V2.jpg",
+          "HELO-WD27_V3.jpg",
+          "HELO-WD27_V4.jpg"
+        ],
+        "promptUrl": "./records/HELO-WD27/video-prompt.txt",
+        "requestUrl": "./records/HELO-WD27/request.json",
+        "commandUrl": "./records/HELO-WD27/generation-command.sh",
+        "musicPromptUrl": "./records/HELO-WD27/music-prompt.txt",
+        "storyboardPromptUrl": null
+      },
+      "cliCommand": "npx pixverse@latest --workspace-id \"$PIXVERSE_WORKSPACE_ID\" create reference \\\n  --images \\\n    ./inputs/storyboard.png \\\n    ./inputs/product-1.jpg \\\n    ./inputs/product-2.jpg \\\n    ./inputs/product-3.jpg \\\n    ./inputs/product-4.jpg \\\n  --audios ./inputs/music-master.mp3 \\\n  --prompt ./prompts/video-prompt.txt \\\n  --model minimax-h3 \\\n  --quality 1440p \\\n  --duration 8 \\\n  --aspect-ratio 9:16 \\\n  --idempotency-key \"$PRODUCT_ID-minimax-h3-v1\" \\\n  --no-wait --json"
+    },
+    {
+      "displayOrder": 9,
+      "generationOrder": 9,
+      "productId": "AAYR-WO4",
+      "productName": "ALL THE WAYS Claire Faux Leather Trench in Black",
+      "productType": "outerwear",
+      "shelf": "new-arrivals",
+      "productUrl": "https://www.revolve.com/all-the-ways-claire-faux-leather-trench-in-black/dp/AAYR-WO4/",
+      "status": "approved",
+      "outputUrl": "https://media.pixverse.ai/upload%2F22b7b7fa-ca86-4eb5-8bc5-a1bafc66053e.mp4",
+      "posterUrl": "./assets/posters/AAYR-WO4.jpg",
+      "settings": {
+        "storyboardModel": "gpt-image-2.5-flare",
+        "videoModel": "minimax-h3",
+        "musicModel": "music-3.0",
+        "quality": "1440p",
+        "aspectRatio": "9:16",
+        "durationSeconds": 10,
+        "sourceImageCount": 4
+      },
+      "jobs": {
+        "storyboard": null,
+        "video": {
+          "id": 423726084567065,
+          "url": "https://app.pixverse.ai/video/423726084567065"
+        },
+        "music": {
+          "id": 423725154487899
+        },
+        "publishedAsset": {
+          "id": 423729031069155
+        }
+      },
+      "prompts": {
+        "storyboard": "",
+        "video": "Create a natural 10-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos. Show one consistent synthetic fashion model wearing the exact ALL THE WAYS Claire Faux Leather Trench in Black from the product photos, styled with the same understated dark base outfit. Preserve the glossy black faux-leather finish, wide notched lapels, long sleeves, calf-length straight trench silhouette, optional self-tie belt, side pouch pockets, and back vent. Follow this motion: walk in from the left, pause front-facing, make one slow relaxed turn to show the side, belt, and back vent, then walk out toward the right. Let the coat move with realistic weight and restrained shine. Stable full-body camera, clean white studio, premium soft lighting, and natural material physics. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, new accessories, garment changes, morphing, duplicate people, abrupt cuts, or framing that hides the coat.",
+        "music": "Instrumental fashion lookbook cue for a glossy black faux-leather long trench. Cinematic dark electro at 104 BPM, weighty measured kick, low analog bass, sparse industrial texture, controlled glossy synth sweep, powerful urban night energy with luxury restraint. Immediate pulse from the first beat, no vocals, no spoken words, no choir, no dramatic impacts, no sound effects."
+      },
+      "source": {
+        "imageFiles": [
+          "AAYR-WO4_V1.jpg",
+          "AAYR-WO4_V2.jpg",
+          "AAYR-WO4_V3.jpg",
+          "AAYR-WO4_V4.jpg"
+        ],
+        "promptUrl": "./records/AAYR-WO4/video-prompt.txt",
+        "requestUrl": "./records/AAYR-WO4/request.json",
+        "commandUrl": "./records/AAYR-WO4/generation-command.sh",
+        "musicPromptUrl": "./records/AAYR-WO4/music-prompt.txt",
+        "storyboardPromptUrl": null
+      },
+      "cliCommand": "npx pixverse@latest --workspace-id \"$PIXVERSE_WORKSPACE_ID\" create reference \\\n  --images \\\n    ./inputs/storyboard.png \\\n    ./inputs/product-1.jpg \\\n    ./inputs/product-2.jpg \\\n    ./inputs/product-3.jpg \\\n    ./inputs/product-4.jpg \\\n  --audios ./inputs/music-master.mp3 \\\n  --prompt ./prompts/video-prompt.txt \\\n  --model minimax-h3 \\\n  --quality 1440p \\\n  --duration 10 \\\n  --aspect-ratio 9:16 \\\n  --idempotency-key \"$PRODUCT_ID-minimax-h3-v1\" \\\n  --no-wait --json"
+    },
+    {
+      "displayOrder": 10,
+      "generationOrder": 10,
+      "productId": "AAYR-WD195",
+      "productName": "ALL THE WAYS Madley Mini Dress in Black",
+      "productType": "dress",
+      "shelf": "new-arrivals",
+      "productUrl": "https://www.revolve.com/all-the-ways-madley-mini-dress-in-black/dp/AAYR-WD195/",
+      "status": "approved",
+      "outputUrl": "https://media.pixverse.ai/upload%2F3f92268d-13f0-4237-9e84-2a6439fcbb6b.mp4",
+      "posterUrl": "./assets/posters/AAYR-WD195.jpg",
+      "settings": {
+        "storyboardModel": "gpt-image-2.5-flare",
+        "videoModel": "minimax-h3",
+        "musicModel": "music-3.0",
+        "quality": "1440p",
+        "aspectRatio": "9:16",
+        "durationSeconds": 8,
+        "sourceImageCount": 3
+      },
+      "jobs": {
+        "storyboard": null,
+        "video": {
+          "id": 423727474091098,
+          "url": "https://app.pixverse.ai/video/423727474091098"
+        },
+        "music": {
+          "id": 423725476302117
+        },
+        "publishedAsset": {
+          "id": 423729053977780
+        }
+      },
+      "prompts": {
+        "storyboard": "",
+        "video": "Create a natural 8-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2, @image3, and @image4 are the authoritative product photos. Show one consistent synthetic fashion model wearing the exact ALL THE WAYS Madley Mini Dress in Black from the product photos. Preserve the black off-the-shoulder foldover neckline, fitted long-sleeve jersey bodice, defined waist, structured flared poplin mini skirt, pull-on construction, and exact mini length. Follow this motion: walk in from the left, pause front-facing, make one slow relaxed turn to show the side and back, then walk out toward the right. Keep arms relaxed so the neckline and waist remain clear. Stable full-body camera, clean white studio, premium soft lighting, and natural fabric physics. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, accessories, extra garments, color changes, morphing, duplicate people, abrupt cuts, or framing that hides the dress.",
+        "music": "Instrumental fashion lookbook cue for a black off-shoulder mini dress with a flared poplin skirt. Playful monochrome fashion-house groove at 117 BPM, crisp soft claps, buoyant bass, short piano-house chords and polished synth flickers, youthful but sophisticated. Immediate groove from the first beat, no vocals, no spoken words, no choir, no dramatic impacts, no sound effects."
+      },
+      "source": {
+        "imageFiles": [
+          "AAYR-WD195_V1.jpg",
+          "AAYR-WD195_V2.jpg",
+          "AAYR-WD195_V3.jpg"
+        ],
+        "promptUrl": "./records/AAYR-WD195/video-prompt.txt",
+        "requestUrl": "./records/AAYR-WD195/request.json",
+        "commandUrl": "./records/AAYR-WD195/generation-command.sh",
+        "musicPromptUrl": "./records/AAYR-WD195/music-prompt.txt",
+        "storyboardPromptUrl": null
+      },
+      "cliCommand": "npx pixverse@latest --workspace-id \"$PIXVERSE_WORKSPACE_ID\" create reference \\\n  --images \\\n    ./inputs/storyboard.png \\\n    ./inputs/product-1.jpg \\\n    ./inputs/product-2.jpg \\\n    ./inputs/product-3.jpg \\\n  --audios ./inputs/music-master.mp3 \\\n  --prompt ./prompts/video-prompt.txt \\\n  --model minimax-h3 \\\n  --quality 1440p \\\n  --duration 8 \\\n  --aspect-ratio 9:16 \\\n  --idempotency-key \"$PRODUCT_ID-minimax-h3-v1\" \\\n  --no-wait --json"
+    },
+    {
+      "displayOrder": 11,
+      "generationOrder": 11,
+      "productId": "SDYS-WD257",
+      "productName": "SNDYS x REVOLVE Avani Dress in Pear",
+      "productType": "dress",
+      "shelf": "customer-requested-detail-test",
+      "productUrl": "https://www.revolve.com/sndys-x-revolve-avani-dress-in-pear/dp/SDYS-WD257/",
+      "status": "approved",
+      "outputUrl": "https://media.pixverse.ai/upload%2F9f2dd7a8-d87a-48fd-b12e-e504fa25ac33.mp4",
+      "posterUrl": "./assets/posters/SDYS-WD257.jpg",
+      "settings": {
+        "storyboardModel": "gpt-image-2.5-flare",
+        "videoModel": "minimax-h3",
+        "musicModel": "music-3.0",
+        "quality": "1440p",
+        "aspectRatio": "9:16",
+        "durationSeconds": 8,
+        "sourceImageCount": 3
+      },
+      "jobs": {
+        "storyboard": {
+          "id": 425095529665841,
+          "kind": "image"
+        },
+        "video": {
+          "id": 425096240881149,
+          "url": "https://app.pixverse.ai/video/425096240881149"
+        },
+        "music": {
+          "id": 425095659566041
+        },
+        "publishedAsset": {
+          "id": 425097729438717
+        }
+      },
+      "prompts": {
+        "storyboard": "Create a technical ecommerce video storyboard for the SNDYS x REVOLVE Avani Dress in Pear as one precise 2x2 grid. This is a camera-planning diagram, not a finished fashion photograph. Do not show people, faces, skin, realistic bodies, or identifiable individuals. Represent the apparel as clean flat garment drawings on neutral white backgrounds. Product specification: a pear-green satin midi dress made from 52% rayon and 48% viscose, partially lined, with a straight softly scooped neckline, wide shoulder straps, a close fluid bias-cut silhouette, a hidden side zipper, a low V-shaped back, and a softly flared mid-calf hem. Panel 1: garment entering from the left with a small right-pointing motion arrow. Panel 2: centered front garment view with a small pause marker and a narrow moving-light cue across the satin. Panel 3: slow side-to-back turn with one curved arrow, clearly revealing the low V back and fluid drape. Panel 4: back three-quarter garment view moving toward the right. Preserve the exact pear color, satin sheen, neckline, straps, side seams, proportions, hem length, and back construction. Four equal vertical panels arranged top-left, top-right, bottom-left, bottom-right, touching edge-to-edge. No captions, prose, brand names, logos, decorative accessories, extra garments, color changes, altered hems, or invented product details.",
+        "video": "Create a natural 8-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2, @image3, and @image4 are the authoritative REVOLVE product photographs. Show one consistent synthetic fashion model wearing the exact SNDYS x REVOLVE Avani Dress in Pear shown in the product photographs. Product truth: 52% rayon and 48% viscose; partially lined; hidden side zipper; luminous pear-green satin; straight softly scooped neckline; wide shoulder straps; close fluid bias-cut midi silhouette; low V-shaped back; softly flared mid-calf hem. Follow this motion: walk in naturally from the left, pause front-facing long enough to read the color and cut, make one slow relaxed turn through the side to reveal the low V back, then continue toward the right. Use soft directional studio light that travels gently across the satin so the sheen, folds, and drape remain visible without changing the pear color. Keep the fabric fluid and realistically weighted, never rubbery or metallic. Stable full-body camera, clean white studio, premium restrained lighting. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, text, logos, handbag, jewelry changes, new accessories, garment changes, morphing, duplicate people, abrupt cuts, blown highlights, or framing that hides the hem or back.",
+        "music": "Instrumental only. A polished pearlescent fashion-house cue with a clean soft-disco pulse, glassy synth accents, restrained bass, and subtle silk-like shimmer. Elegant, modern, luminous, and confident rather than dramatic. Immediate rhythm from the first beat, no opening silence, no vocals, no spoken words, no choir, no risers, no impacts, and no unrelated sound effects. The first ten seconds must feel complete and support a natural runway walk, pause, and slow turn."
+      },
+      "source": {
+        "imageFiles": [
+          "SDYS-WD257_V1.jpg",
+          "SDYS-WD257_V2.jpg",
+          "SDYS-WD257_V3.jpg"
+        ],
+        "promptUrl": "./records/SDYS-WD257/video-prompt.txt",
+        "requestUrl": "./records/SDYS-WD257/request.json",
+        "commandUrl": "./records/SDYS-WD257/generation-command.sh",
+        "musicPromptUrl": "./records/SDYS-WD257/music-prompt.txt",
+        "storyboardPromptUrl": "./records/SDYS-WD257/storyboard-prompt.txt"
+      },
+      "cliCommand": "npx pixverse@latest --workspace-id \"$PIXVERSE_WORKSPACE_ID\" create reference \\\n  --images \\\n    ./inputs/storyboard.png \\\n    ./inputs/product-1.jpg \\\n    ./inputs/product-2.jpg \\\n    ./inputs/product-3.jpg \\\n  --audios ./inputs/music-master.mp3 \\\n  --prompt ./prompts/video-prompt.txt \\\n  --model minimax-h3 \\\n  --quality 1440p \\\n  --duration 8 \\\n  --aspect-ratio 9:16 \\\n  --idempotency-key \"$PRODUCT_ID-minimax-h3-v1\" \\\n  --no-wait --json"
+    },
+    {
+      "displayOrder": 12,
+      "generationOrder": 12,
+      "productId": "COEL-WK115",
+      "productName": "Camila Coelho Wynter Boiled Knit Jacket in Dark Taupe",
+      "productType": "outerwear",
+      "shelf": "customer-requested-detail-test",
+      "productUrl": "https://www.revolve.com/camila-coelho-wynter-boiled-knit-jacket-in-dark-taupe/dp/COEL-WK115/",
+      "status": "approved",
+      "outputUrl": "https://media.pixverse.ai/upload%2Fefc3c9e0-795f-49d7-b12f-b441bd0c0644.mp4",
+      "posterUrl": "./assets/posters/COEL-WK115.jpg",
+      "settings": {
+        "storyboardModel": "gpt-image-2.5-flare",
+        "videoModel": "minimax-h3",
+        "musicModel": "music-3.0",
+        "quality": "1440p",
+        "aspectRatio": "9:16",
+        "durationSeconds": 8,
+        "sourceImageCount": 4
+      },
+      "jobs": {
+        "storyboard": {
+          "id": 425095529647064,
+          "kind": "image"
+        },
+        "video": {
+          "id": 425100461879401,
+          "url": "https://app.pixverse.ai/video/425100461879401"
+        },
+        "music": {
+          "id": 425095659561685
+        },
+        "publishedAsset": {
+          "id": 425101499058245
+        }
+      },
+      "prompts": {
+        "storyboard": "Create one precise 2x2 camera-planning storyboard for an 8-second vertical ecommerce fashion video of the Camila Coelho Wynter Boiled Knit Jacket. Use the supplied official REVOLVE photographs only to preserve the garment's outline, proportions, collar height, concealed closure line, dropped shoulders, cropped hem, extremely full rounded sleeves, tapered cuffs, and clean back construction.\n\nThe storyboard must be texture-neutral monochrome line art, not a product rendering. Draw thin medium-gray contour lines on a pure white background. Leave every garment interior flat white with no color fill, no gray fill, no shading, no lighting, no shadows, no fabric texture, no knit pattern, no fibers, no flecks, no loops, no gloss, and no simulated material. It must not propose or imply the jacket's color or surface. The official product photographs, not this storyboard, will be the sole visual authority for color and texture in the final video.\n\nPanel 1: simplified jacket outline entering from the left with a small right-pointing motion arrow. Panel 2: centered front outline with a pause marker, clearly showing the tall funnel collar, concealed closure line, cropped body, dropped shoulders, and balanced sleeve volume. Panel 3: side-to-back outline with one curved turn arrow, showing sleeve depth and jacket length. Panel 4: back three-quarter outline moving toward the right with a small right-pointing arrow.\n\nFour equal vertical panels arranged top-left, top-right, bottom-left, bottom-right, touching edge-to-edge. No people, faces, bodies, skin, mannequins, captions, prose, product names, brand names, logos, decorative accessories, extra garments, color swatches, material samples, color interpretation, texture interpretation, altered proportions, invented seams, or rendered fabric.",
+        "video": "Create a natural 8-second vertical ecommerce fashion video. @image1, @image2, @image3, and @image4 are the authoritative official REVOLVE product photographs. @image5 is a texture-neutral line storyboard that controls camera order and movement only. Official product photographs override the storyboard for product color, texture, material finish, construction, styling, and branding.\n\nShow one consistent synthetic fashion model wearing the exact Camila Coelho Wynter Boiled Knit Jacket shown in @image1 through @image4, styled with simple neutral wide-leg trousers and no handbag. \"Dark Taupe\" is only the catalog color name and must not be used to infer darkness. Match the photographs' visibly light, warm mushroom-oatmeal taupe with a soft beige undertone. Preserve that same apparent brightness, warmth, and tonal range in every frame.\n\nMatch the photographed material surface exactly: a fine, dense, low-relief boiled-knit melange with subtle small-scale mixed flecks and soft short surface fibers. It is substantial and softly fuzzy at close range, but visually even and refined at normal distance. It is not coarse boucle, loop yarn, sherpa, fleece, felt, cable knit, chunky knit, curly pile, pebbled texture, or a flat synthetic sheet. Do not enlarge or exaggerate the knit pattern.\n\nProduct construction: heavyweight knit fabric; tall sculptural funnel collar; concealed front snap-button closure; cropped boxy fit; dropped shoulders; extremely full rounded puff sleeves tapering at the wrists; clean straight back. Follow @image5's motion plan: walk in naturally from the left, pause front-facing with relaxed arms so the collar, closure, cropped hem, sleeve volume, color, and fine material surface remain readable, make one slow quarter-to-back turn, then continue toward the right. The heavyweight garment moves with believable structure and restrained inertia.\n\nUse high-key, diffuse, color-neutral white studio lighting with soft frontal fill and gentle side definition. Keep the background clean white. Maintain even exposure on the jacket through front, side, and back views; retain open midtones and fine surface detail without crushed shadows, vignetting, dramatic contrast, moody grading, or raking light. Stable full-body camera. @audio1 is the existing exact 8-second instrumental soundtrack; keep it continuous and let movement meet its pulse subtly without becoming dance-like.\n\nClosed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, logos, text, handbag, new accessories, garment changes, morphing, duplicate people, abrupt cuts, collapsed sleeves, thin fabric, underexposure, dark-brown shift, charcoal shift, cool-gray cast, deep espresso tone, color drift, coarse loops, boucle texture, fleece texture, felt texture, chunky yarn, exaggerated fibers, flattened texture, or framing that hides the collar, cuffs, or cropped hem.",
+        "music": "Instrumental only. A warm tactile minimal-house cue with muted organic percussion, soft analog bass, dry brushed textures, and a refined editorial pulse. Sophisticated, cozy, architectural, and modern, with enough space to complement a heavyweight knit garment. Immediate beat from the first moment, no opening silence, no vocals, no spoken words, no choir, no cinematic impacts, and no unrelated sound effects. The first ten seconds must feel complete and support a calm walk, pause, and sculptural turn."
+      },
+      "source": {
+        "imageFiles": [
+          "COEL-WK115_V1.jpg",
+          "COEL-WK115_V2.jpg",
+          "COEL-WK115_V3.jpg",
+          "COEL-WK115_V4.jpg"
+        ],
+        "promptUrl": "./records/COEL-WK115/video-prompt.txt",
+        "requestUrl": "./records/COEL-WK115/request.json",
+        "commandUrl": "./records/COEL-WK115/generation-command.sh",
+        "musicPromptUrl": "./records/COEL-WK115/music-prompt.txt",
+        "storyboardPromptUrl": "./records/COEL-WK115/storyboard-prompt.txt"
+      },
+      "cliCommand": "npx pixverse@latest --workspace-id \"$PIXVERSE_WORKSPACE_ID\" create reference \\\n  --images \\\n    ./inputs/storyboard.png \\\n    ./inputs/product-1.jpg \\\n    ./inputs/product-2.jpg \\\n    ./inputs/product-3.jpg \\\n    ./inputs/product-4.jpg \\\n  --audios ./inputs/music-master.mp3 \\\n  --prompt ./prompts/video-prompt.txt \\\n  --model minimax-h3 \\\n  --quality 1440p \\\n  --duration 8 \\\n  --aspect-ratio 9:16 \\\n  --idempotency-key \"$PRODUCT_ID-minimax-h3-v1\" \\\n  --no-wait --json"
+    },
+    {
+      "displayOrder": 13,
+      "generationOrder": 13,
+      "productId": "PCHR-WS7",
+      "productName": "Porsche x REVOLVE 959 Unisex Jersey in Blue & Red",
+      "productType": "top",
+      "shelf": "customer-requested-detail-test",
+      "productUrl": "https://www.revolve.com/porsche-x-revolve-959-unisex-jersey-in-blue-red/dp/PCHR-WS7/",
+      "status": "approved",
+      "outputUrl": "https://media.pixverse.ai/upload%2Fd6a776de-0faa-4952-85b8-c38e558deb15.mp4",
+      "posterUrl": "./assets/posters/PCHR-WS7.jpg",
+      "settings": {
+        "storyboardModel": "gpt-image-2.5-flare",
+        "videoModel": "minimax-h3",
+        "musicModel": "music-3.0",
+        "quality": "1440p",
+        "aspectRatio": "9:16",
+        "durationSeconds": 10,
+        "sourceImageCount": 7
+      },
+      "jobs": {
+        "storyboard": {
+          "id": 425095659997530,
+          "kind": "image"
+        },
+        "video": {
+          "id": 425120861661973,
+          "url": "https://app.pixverse.ai/video/425120861661973"
+        },
+        "music": {
+          "id": 425095659574578
+        },
+        "publishedAsset": {
+          "id": 425123531127289
+        }
+      },
+      "prompts": {
+        "storyboard": "Create a technical camera-motion storyboard for an oversized short-sleeve color-block jersey as one precise 2x2 grid. This is only a movement diagram, not a product reference or finished fashion photograph. Do not show people, faces, skin, realistic bodies, or identifiable individuals. Represent the jersey as a clean flat garment silhouette on neutral white backgrounds. Use a black striped V-neck, pale blue upper body, blank white chest band, blank deep red lower front, blank white side panels, solid black shoulders and sleeves, striped sleeve cuffs, and a plain pale blue back. IMPORTANT: draw no words, letters, numbers, badges, crests, logos, patches, symbols, checkered patterns, or emblems anywhere on the jersey. Leave both sleeves as uninterrupted solid black areas. Exact branding will come only from separate authoritative product photos. Panel 1: jersey entering from the left with a small right-pointing motion arrow. Panel 2: centered front view with a pause marker. Panel 3: slow three-quarter turn with one curved arrow, holding both sleeves readable. Panel 4: centered rear three-quarter view moving toward the right. Preserve the color blocking, oversized proportions, neckline, sleeve length, cuffs, side panels, and hem. Four equal vertical panels arranged top-left, top-right, bottom-left, bottom-right, touching edge-to-edge. No captions, prose, markings, decorative accessories, extra garments, color changes, altered panels, or invented details.",
+        "video": "Create a natural 10-second vertical ecommerce fashion video. @image1 is the four-panel camera plan. @image2 through @image8 are the authoritative REVOLVE product photographs, including front, side, rear, full-body, editorial, and sleeve-detail views. Show one consistent synthetic fashion model wearing the exact Porsche x REVOLVE 959 Unisex Jersey in Blue and Red shown in the product photographs, styled simply with clean black shorts and no handbag. Product truth: lightweight 100% polyester oversized unisex short-sleeve jersey; black striped V-neck; pale blue upper body; white chest band; deep red lower front; white side panels; black shoulder and sleeve panels; striped sleeve cuffs; pale blue back; small red neck insert. Preserve all visible brand details exactly: the large black PORSCHE wordmark across the white front band, white 959 on the red neck insert, the PORSCHE TURBOCHARGED sleeve patch, and the 959 sleeve patch. The chest wordmark is fixed product geometry: in every front or three-quarter view, it must remain exactly P-O-R-S-C-H-E in the same black letterforms, order, spacing, scale, and placement photographed in @image2; never replace it with pseudo-text or altered characters. Follow this motion: walk in naturally from the left, pause front-facing for a stable readable view of PORSCHE and 959, make one slow controlled three-quarter turn that reveals both sleeve patches, continue to a brief rear view, then finish in a front three-quarter stance. Keep the camera stable and the torso large enough for lettering inspection while retaining the full jersey and most of the body. Clean white studio, even premium lighting, realistic lightweight jersey drape, minimal wrinkles crossing the wordmark. @audio1 is the exact instrumental soundtrack reference; keep it continuous and let the movement meet its pulse subtly without becoming dance-like. Closed-mouth neutral expression; no speaking, singing, lip-sync, mouth movement, presenter gestures, captions, new text, mirrored letters, misspelled or substituted lettering, altered numbers, fake logos, patch movement, color-block changes, new accessories, garment changes, morphing, duplicate people, abrupt cuts, or framing that crops the chest wordmark, neckline number, sleeve patches, or hem.",
+        "music": "Instrumental only. A precision motorsport-electro fashion cue with crisp syncopated drums, sleek low synth bass, bright mechanical arpeggios, and a controlled forward drive. Premium, sporty, graphic, and modern rather than aggressive. Immediate pulse from the first beat, no opening silence, no vocals, no spoken words, no choir, no engine sounds, no tire sounds, no sirens, no impacts, and no unrelated sound effects. The first twelve seconds must feel complete and support a measured walk, front hold, sleeve reveal, and slow turn."
+      },
+      "source": {
+        "imageFiles": [
+          "PCHR-WS7_V1.jpg",
+          "PCHR-WS7_V2.jpg",
+          "PCHR-WS7_V3.jpg",
+          "PCHR-WS7_V4.jpg",
+          "PCHR-WS7_V5.jpg",
+          "PCHR-WS7_V6.jpg",
+          "PCHR-WS7_V7.jpg"
+        ],
+        "promptUrl": "./records/PCHR-WS7/video-prompt.txt",
+        "requestUrl": "./records/PCHR-WS7/request.json",
+        "commandUrl": "./records/PCHR-WS7/generation-command.sh",
+        "musicPromptUrl": "./records/PCHR-WS7/music-prompt.txt",
+        "storyboardPromptUrl": "./records/PCHR-WS7/storyboard-prompt.txt"
+      },
+      "cliCommand": "npx pixverse@latest --workspace-id \"$PIXVERSE_WORKSPACE_ID\" create reference \\\n  --images \\\n    ./inputs/storyboard.png \\\n    ./inputs/product-1.jpg \\\n    ./inputs/product-2.jpg \\\n    ./inputs/product-3.jpg \\\n    ./inputs/product-4.jpg \\\n    ./inputs/product-5.jpg \\\n    ./inputs/product-6.jpg \\\n    ./inputs/product-7.jpg \\\n  --audios ./inputs/music-master.mp3 \\\n  --prompt ./prompts/video-prompt.txt \\\n  --model minimax-h3 \\\n  --quality 1440p \\\n  --duration 10 \\\n  --aspect-ratio 9:16 \\\n  --idempotency-key \"$PRODUCT_ID-minimax-h3-v1\" \\\n  --no-wait --json"
+    }
+  ]
+}
