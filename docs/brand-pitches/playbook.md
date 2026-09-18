@@ -238,14 +238,45 @@ Avoid prompt text, model names, job IDs, internal status labels, or generation t
 
 ### Treat desktop and mobile as separate compositions
 
-- Reserve every video frame with a stable aspect ratio before media loads.
-- Use `object-fit: contain` when the full product must remain visible; crop only when the creative intent supports it.
+Every inline video player, featured and non-featured, must preserve the source aspect ratio and maximize the media within its available frame. Apply the same fit policy in fullscreen or maximized playback. Consistency matters more than filling every pixel.
+
+- Reserve every video frame with a stable aspect ratio before media loads, normally the source or approved deliverable ratio.
+- Set the video to `width: 100%`, `height: 100%`, `object-fit: contain`, and `object-position: center`.
 - Keep portrait videos at a readable maximum size on wide screens rather than stretching them to fill the viewport.
+- Use a neutral or black frame background for unused space. Letterboxing is preferable to cropping the product.
+- Never switch smaller or non-featured cards to `object-fit: cover` merely to fill the frame. Crop only through a separate, explicitly approved creative deliverable.
+- Apply the centered `contain` rule to fullscreen playback at viewport width and height.
 - Use responsive grid changes at deliberate breakpoints.
 - Keep touch targets at least 44 pixels and prevent text or controls from overflowing.
 - Ensure sticky navigation does not hide anchored sections.
 - Verify the longest product and brand names, not only average examples.
 - Respect reduced-motion preferences for page animation.
+
+Use this baseline for product-fidelity video:
+
+```css
+.demo-media {
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  background: #000;
+}
+
+.demo-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.demo-media video:fullscreen,
+.demo-media video:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  object-fit: contain;
+  object-position: center;
+  background: #000;
+}
+```
 
 ### Make icons functional
 
@@ -426,7 +457,10 @@ Record who owns:
 
 ### Responsive and accessible behavior
 
-- [ ] Full products remain visible where fidelity requires it.
+- [ ] Featured and non-featured video players use the same centered `contain` fit rule.
+- [ ] Full products remain visible in both inline and fullscreen playback on desktop and mobile.
+- [ ] At least one featured and one non-featured video are checked in both inline and fullscreen states.
+- [ ] The release contains no unapproved `object-fit: cover` rule for product-fidelity video.
 - [ ] Text and controls fit at narrow, standard, and wide viewports.
 - [ ] No horizontal overflow, hidden anchors, or unstable card resizing occurs.
 - [ ] Keyboard, focus, contrast, alt text, labels, and reduced motion are verified.
@@ -455,7 +489,7 @@ The REVOLVE page became stronger as it moved closer to proof and further from ex
 5. **Official logos matter.** A real REVOLVE wordmark, a real PixVerse mark, and a balanced co-brand lockup made the page feel intentional.
 6. **The browser tab and shared link are part of the design.** Favicon and social-preview treatment affect the first impression before the page opens.
 7. **Prices become liabilities.** Product colors remained useful; volatile prices were removed.
-8. **Portrait media needs bounded sizing.** Full-screen-width portrait videos became too tall on desktop, while full-product framing required `contain` for featured demos.
+8. **Portrait media needs bounded, consistent sizing.** Use stable portrait frames and centered `contain` for every demo, including non-featured cards and fullscreen playback. Do not crop the product merely to fill a smaller card.
 9. **Lazy loading must be measured.** The final behavior loaded one initial poster on mobile, three on desktop, and the rest near the viewport.
 10. **A small measurable pilot is a better close than more persuasion.** The final page moved from proof directly to a focused next step.
 
