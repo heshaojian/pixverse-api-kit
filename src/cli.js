@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -68,8 +69,34 @@ function createProviderContext(context) {
 }
 
 async function runDefaultPlatformCommand(args, context) {
+  if (context.env === process.env) {
+    loadPlatformDotEnv(path.join(context.cwd, ".env"));
+  }
   const { runPlatformCommand } = await import("./platform/cli.js");
   return runPlatformCommand(args, context);
+}
+
+function loadPlatformDotEnv(filePath) {
+  let stats;
+  try {
+    stats = fs.statSync(filePath);
+  } catch (error) {
+    if (error?.code === "ENOENT") return;
+    throw error;
+  }
+  if (!stats.isFile()) return;
+
+  const allowed = new Set(["PIXVERSE_PLATFORM_API_KEY", "PIXVERSE_PLATFORM_BASE_URL"]);
+  for (const line of fs.readFileSync(filePath, "utf8").split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const separator = trimmed.indexOf("=");
+    if (separator < 1) continue;
+    const key = trimmed.slice(0, separator).trim();
+    if (!allowed.has(key) || process.env[key]) continue;
+    const rawValue = trimmed.slice(separator + 1).trim();
+    process.env[key] = rawValue.replace(/^['"]|['"]$/g, "");
+  }
 }
 
 async function runDefaultGrowthStudioCommand(args, context) {

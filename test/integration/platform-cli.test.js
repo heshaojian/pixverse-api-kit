@@ -104,6 +104,29 @@ test("--dry-run validates locally without a key, request, artifact, or secret le
   assert.doesNotMatch(JSON.stringify(result), /must-not-appear/);
 });
 
+test("upload dry-run inspects the real input but emits only safe file metadata", async () => {
+  const privateDirectory = await fs.mkdtemp(path.join(os.tmpdir(), "private-upload-source-"));
+  const filePath = path.join(privateDirectory, "reference.png");
+  await fs.writeFile(filePath, Buffer.from("fixture"));
+  let inspectedPath;
+
+  const result = await runPlatformCommand(["upload", "image", filePath, "--dry-run"], {
+    env: {},
+    inspectLocalMedia: async (value) => {
+      inspectedPath = value;
+      return { size_bytes: 7, width: 1, height: 1 };
+    },
+  });
+
+  assert.equal(inspectedPath, filePath);
+  assert.deepEqual(result.request.normalized.files.image, {
+    supplied: true,
+    basename: "reference.png",
+    inspected: true,
+  });
+  assert.doesNotMatch(JSON.stringify(result), new RegExp(privateDirectory.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+});
+
 test("Platform validation and API failures remain provider-specific", async () => {
   await assert.rejects(
     runPlatformCommand(["video", "status", ""], {
@@ -164,6 +187,11 @@ test("raw access rejects URL escape, injection, auth override, and trace reuse b
     ["raw", "GET", "/openapi/v2/account/balance", "--header", "X-API-Key: nope"],
     ["raw", "GET", "/openapi/v2/account/balance", "--header", "Ai-trace-id: reused"],
     ["raw", "GET", "/openapi/v2/account/balance", "--header", "X-Test: safe\u0000unsafe"],
+    ["raw", "GET", "/openapi/v2/account/balance", "--header", "TE: trailers"],
+    ["raw", "GET", "/openapi/v2/account/balance", "--header", "Trailer: x-checksum"],
+    ["raw", "GET", "/openapi/v2/account/balance", "--header", "Upgrade: websocket"],
+    ["raw", "GET", "/openapi/v2/account/balance", "--header", "Keep-Alive: timeout=5"],
+    ["raw", "GET", "/openapi/v2/account/balance", "--header", "Proxy_Connection: keep-alive"],
     ["raw", "GET", "/openapi/v2/account/balance", "--trace-id", "reused"],
     ["raw", "CONNECT", "/openapi/v2/account/balance"],
   ];

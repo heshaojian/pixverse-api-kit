@@ -227,6 +227,41 @@ test("Growth Studio executable still loads provider configuration from cwd doten
   }
 });
 
+test("Platform executable lazily loads only its provider configuration from cwd dotenv", async () => {
+  const server = http.createServer((request, response) => {
+    assert.equal(request.url, "/openapi/v2/account/balance");
+    assert.equal(request.headers["api-key"], "platform-fixture-credential");
+    response.setHeader("content-type", "application/json");
+    response.end('{"ErrCode":0,"ErrMsg":"success","Resp":{"credit_monthly":12}}');
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+
+  const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-platform-dotenv-"));
+  const { port } = server.address();
+  await fs.writeFile(path.join(cwd, ".env"), [
+    "PIXVERSE_PLATFORM_API_KEY=platform-fixture-credential",
+    `PIXVERSE_PLATFORM_BASE_URL=http://127.0.0.1:${port}`,
+    "PIXVERSE_GROWTH_API_KEY=must-not-be-required-or-used",
+    "",
+  ].join("\n"));
+
+  try {
+    const result = await runCli(["platform", "account", "balance"], {
+      cwd,
+      env: {
+        PIXVERSE_PLATFORM_API_KEY: "",
+        PIXVERSE_PLATFORM_BASE_URL: "",
+        PIXVERSE_GROWTH_API_KEY: "",
+      },
+    });
+    assert.equal(result.exitCode, 0);
+    assert.equal(JSON.parse(result.stdout).data.credit_monthly, 12);
+    assert.equal(result.stderr, "");
+  } finally {
+    await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+  }
+});
+
 test("legacy executable preserves JSON stdout and emits one deprecation line", async () => {
   const server = http.createServer((request, response) => {
     assert.equal(request.url, "/marketing_hub/folder/list");

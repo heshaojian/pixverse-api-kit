@@ -85,9 +85,24 @@ async function createDryRun(operation, input, context) {
       path: request.path,
       body_mode: operation.bodyMode,
       headers: redactHeaders(request.headers),
-      normalized,
+      normalized: safeDryRunNormalized(normalized),
     },
   });
+}
+
+function safeDryRunNormalized(normalized) {
+  return {
+    ...normalized,
+    payload: { ...normalized.payload },
+    query: { ...normalized.query },
+    pathParams: { ...normalized.pathParams },
+    files: Object.fromEntries(Object.entries(normalized.files).map(([name, filePath]) => [name, {
+      supplied: true,
+      basename: path.basename(filePath),
+      inspected: normalized.validationSummary?.inspected_media === true,
+    }])),
+    validationSummary: { ...normalized.validationSummary },
+  };
 }
 
 function parseSpecializedOptions(args, operation) {
@@ -221,7 +236,13 @@ function isForbiddenRawHeader(name) {
     || normalized === "host"
     || normalized === "contentlength"
     || normalized === "transferencoding"
-    || normalized === "connection";
+    || normalized === "connection"
+    || normalized === "te"
+    || normalized === "trailer"
+    || normalized === "upgrade"
+    || normalized === "keepalive"
+    || normalized === "proxyconnection"
+    || normalized === "proxyauthenticate";
 }
 
 function normalizeRawMethod(value) {
