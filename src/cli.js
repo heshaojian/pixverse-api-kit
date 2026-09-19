@@ -37,10 +37,11 @@ export async function main(argv = [], context = {}) {
 
     if (route.provider === "platform") {
       if (isHelpRequest(route.providerArgs)) {
-        stdout.write("Usage:\n  pixverse-api platform <resource> <operation> [options]\n");
+        const { getPlatformHelp } = await import("./platform/cli.js");
+        stdout.write(`${getPlatformHelp()}\n`);
         return 0;
       }
-      const runPlatform = context.runPlatformCommand ?? unavailablePlatformCommand;
+      const runPlatform = context.runPlatformCommand ?? runDefaultPlatformCommand;
       stdout.write(formatSuccess(await runPlatform(route.providerArgs, providerContext)));
       return 0;
     }
@@ -61,11 +62,14 @@ function createProviderContext(context) {
     cwd: context.cwd ?? process.cwd(),
     sleep: context.sleep,
     now: context.now,
+    inspectLocalMedia: context.inspectLocalMedia,
+    signal: context.signal,
   };
 }
 
-async function unavailablePlatformCommand() {
-  throw new Error("Platform commands are not available yet; run a Platform command after the Platform module is installed.");
+async function runDefaultPlatformCommand(args, context) {
+  const { runPlatformCommand } = await import("./platform/cli.js");
+  return runPlatformCommand(args, context);
 }
 
 async function runDefaultGrowthStudioCommand(args, context) {

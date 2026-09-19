@@ -88,6 +88,25 @@ test("main injects the full context into canonical Growth Studio commands", asyn
   assert.equal(JSON.parse(output.stdout()).folders.length, 0);
 });
 
+test("main routes Platform JSON to stdout and keeps diagnostics on stderr", async () => {
+  const output = captureOutput();
+  const exitCode = await main(["platform", "account", "balance"], {
+    env: {},
+    ...output.context,
+    runPlatformCommand: async (args) => {
+      assert.deepEqual(args, ["account", "balance"]);
+      return { operation: "account.balance", data: { credit_monthly: 10 } };
+    },
+  });
+
+  assert.equal(exitCode, 0);
+  assert.deepEqual(JSON.parse(output.stdout()), {
+    operation: "account.balance",
+    data: { credit_monthly: 10 },
+  });
+  assert.equal(output.stderr(), "");
+});
+
 test("legacy commands write one deprecation line and unchanged JSON stdout", async () => {
   const output = captureOutput();
   const rawArgument = "627410861853514292\nINJECTED https://secret.example.test/private /tmp/private.json";
@@ -123,7 +142,7 @@ test("unknown providers fail cleanly and imported functions never exit the proce
   assert.match(output.stderr(), /Unknown provider or command/);
 });
 
-test("platform placeholder does not load Growth Studio configuration", async () => {
+test("platform routing does not load Growth Studio configuration", async () => {
   const output = captureOutput();
   let growthStudioCalls = 0;
   const exitCode = await main(["platform", "account", "balance"], {
@@ -134,7 +153,7 @@ test("platform placeholder does not load Growth Studio configuration", async () 
 
   assert.equal(exitCode, 1);
   assert.equal(growthStudioCalls, 0);
-  assert.match(output.stderr(), /Platform commands are not available yet/);
+  assert.match(output.stderr(), /PIXVERSE_PLATFORM_API_KEY/);
 });
 
 test("CLI module import is process-isolated and has no output", async () => {
@@ -172,8 +191,8 @@ test("non-Growth executable routes do not read Growth Studio dotenv state", asyn
 
   const platform = await runCli(["platform", "account", "balance"], { cwd });
   assert.equal(platform.exitCode, 1);
-  assert.match(platform.stderr, /Platform commands are not available yet/);
-  assert.doesNotMatch(platform.stderr, /EISDIR|\.env/);
+  assert.match(platform.stderr, /PIXVERSE_PLATFORM_API_KEY/);
+  assert.doesNotMatch(platform.stderr, /EISDIR/);
 });
 
 test("Growth Studio executable still loads provider configuration from cwd dotenv", async () => {
