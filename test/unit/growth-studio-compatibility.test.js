@@ -372,6 +372,34 @@ test("unknown Growth Studio commands fail before configuration is loaded", async
   );
 });
 
+test("recognized Growth Studio commands validate arguments before configuration", async () => {
+  const cases = [
+    {
+      args: ["video", "create-from-url"],
+      message: /video create-from-url requires a product URL/,
+    },
+    {
+      args: ["video", "create-from-json"],
+      message: /video create-from-json requires a JSON payload path/,
+    },
+    {
+      args: ["video", "list", "--unknown"],
+      message: /Unknown video list option: --unknown/,
+    },
+    {
+      args: ["run-job"],
+      message: /run-job requires --payload <path>/,
+    },
+  ];
+
+  for (const fixture of cases) {
+    await assert.rejects(
+      runGrowthStudioCommand(fixture.args, { env: {} }),
+      fixture.message,
+    );
+  }
+});
+
 test("Growth Studio help documents the canonical command tree", () => {
   const help = getGrowthStudioHelp();
   assert.match(help, /pixverse-api growth-studio avatars list/);

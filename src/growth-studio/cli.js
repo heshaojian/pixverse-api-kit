@@ -45,10 +45,14 @@ export async function runGrowthStudioCommand(args, context = {}) {
     return (await getClient().uploadImage(filePath, { traceId: traceId("upload-image") })).body;
   }
   if (resource === "video" && operation === "create-from-url") {
-    return createFromUrl(getClient(), rest);
+    const options = parseCreateOptions(rest, "sourceUrl", "create-from-url");
+    if (!options.sourceUrl) throw new Error("video create-from-url requires a product URL.");
+    return createFromUrl(getClient(), options);
   }
   if (resource === "video" && operation === "create-from-json") {
-    return createFromJson(getClient(), rest);
+    const options = parseCreateOptions(rest, "payloadPath", "create-from-json");
+    if (!options.payloadPath) throw new Error("video create-from-json requires a JSON payload path.");
+    return createFromJson(getClient(), options);
   }
   if (resource === "video" && (operation === "get" || operation === "status")) {
     const [videoId] = rest;
@@ -59,8 +63,9 @@ export async function runGrowthStudioCommand(args, context = {}) {
     return getClient().pollVideo(videoId, { traceId: traceId("poll-video") });
   }
   if (resource === "video" && operation === "list") {
+    const options = parseListOptions(rest);
     return (await getClient().listVideos({
-      ...parseListOptions(rest),
+      ...options,
       traceId: traceId("list-videos"),
     })).body;
   }
@@ -73,7 +78,9 @@ export async function runGrowthStudioCommand(args, context = {}) {
     )).body;
   }
   if (resource === "run-job") {
-    return runJob(getClient(), [operation, ...rest].filter((value) => value !== undefined));
+    const options = parseRunJobOptions([operation, ...rest].filter((value) => value !== undefined));
+    if (!options.payloadPath) throw new Error("run-job requires --payload <path>.");
+    return runJob(getClient(), options);
   }
 
   throw new Error(`Unknown Growth Studio command: ${args.join(" ")}`);
@@ -107,9 +114,7 @@ function createClient(context) {
   return new GrowthStudioClient(options);
 }
 
-async function createFromUrl(client, args) {
-  const options = parseCreateOptions(args, "sourceUrl", "create-from-url");
-  if (!options.sourceUrl) throw new Error("video create-from-url requires a product URL.");
+async function createFromUrl(client, options) {
   const prepared = await prepareCreatePayload(
     client,
     createProductUrlPayload(options.sourceUrl),
@@ -120,9 +125,7 @@ async function createFromUrl(client, args) {
   return withFolderResult(result, prepared.folder);
 }
 
-async function createFromJson(client, args) {
-  const options = parseCreateOptions(args, "payloadPath", "create-from-json");
-  if (!options.payloadPath) throw new Error("video create-from-json requires a JSON payload path.");
+async function createFromJson(client, options) {
   const prepared = await prepareCreatePayload(
     client,
     await readJsonFile(options.payloadPath),
@@ -133,9 +136,7 @@ async function createFromJson(client, args) {
   return withFolderResult(result, prepared.folder);
 }
 
-async function runJob(client, args) {
-  const options = parseRunJobOptions(args);
-  if (!options.payloadPath) throw new Error("run-job requires --payload <path>.");
+async function runJob(client, options) {
   return runGrowthStudioJob(client, await readJsonFile(options.payloadPath), {
     folderId: options.folderId,
     folderName: options.folderName,
