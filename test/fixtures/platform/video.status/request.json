@@ -1,0 +1,8 @@
+{
+  "input": {
+    "video_id": "629000000000000005"
+  },
+  "method": "GET",
+  "path": "/openapi/v2/video/result/629000000000000005",
+  "body": null
+}

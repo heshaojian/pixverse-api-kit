@@ -1,0 +1,13 @@
+{
+  "httpStatus": 400,
+  "responseText": "{\"ErrCode\":1001,\"ErrMsg\":\"Rejected account.usage\",\"Resp\":null}",
+  "expected": {
+    "code": 1001,
+    "message": "Rejected account.usage",
+    "details": {
+      "ErrCode": 1001,
+      "ErrMsg": "Rejected account.usage",
+      "Resp": null
+    }
+  }
+}

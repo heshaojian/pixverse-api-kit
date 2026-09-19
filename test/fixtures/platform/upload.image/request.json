@@ -1,0 +1,12 @@
+{
+  "input": {
+    "image_url": "https://cdn.example.test/image.png",
+    "tag": "cover"
+  },
+  "method": "POST",
+  "path": "/openapi/v2/image/upload",
+  "body": {
+    "image_url": "https://cdn.example.test/image.png",
+    "tag": "cover"
+  }
+}

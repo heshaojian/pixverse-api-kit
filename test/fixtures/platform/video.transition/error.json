@@ -1,0 +1,13 @@
+{
+  "httpStatus": 400,
+  "responseText": "{\"ErrCode\":1001,\"ErrMsg\":\"Rejected video.transition\",\"Resp\":null}",
+  "expected": {
+    "code": 1001,
+    "message": "Rejected video.transition",
+    "details": {
+      "ErrCode": 1001,
+      "ErrMsg": "Rejected video.transition",
+      "Resp": null
+    }
+  }
+}

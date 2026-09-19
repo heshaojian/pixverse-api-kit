@@ -1,0 +1,16 @@
+{
+  "input": {
+    "img_ids": [
+      "629000000000000001"
+    ],
+    "template_id": "42"
+  },
+  "method": "POST",
+  "path": "/openapi/v2/image/template/generate",
+  "body": {
+    "img_ids": [
+      "629000000000000001"
+    ],
+    "template_id": "42"
+  }
+}

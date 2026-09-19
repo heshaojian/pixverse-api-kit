@@ -1,0 +1,34 @@
+{
+  "input": {
+    "agent_id": "414562414124109",
+    "prompt": "Recreate pacing.",
+    "quality": "720p",
+    "img_references": [
+      {
+        "img_url": "https://cdn.example.test/a.png"
+      }
+    ],
+    "video_references": [
+      {
+        "video_url": "https://cdn.example.test/a.mp4"
+      }
+    ]
+  },
+  "method": "POST",
+  "path": "/openapi/v2/video/agent/generate",
+  "body": {
+    "agent_id": "414562414124109",
+    "prompt": "Recreate pacing.",
+    "quality": "720p",
+    "img_references": [
+      {
+        "img_url": "https://cdn.example.test/a.png"
+      }
+    ],
+    "video_references": [
+      {
+        "video_url": "https://cdn.example.test/a.mp4"
+      }
+    ]
+  }
+}

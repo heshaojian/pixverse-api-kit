@@ -1,0 +1,13 @@
+{
+  "responseText": "{\"ErrCode\":0,\"ErrMsg\":\"success\",\"Resp\":{\"media_id\":629000000000000002}}",
+  "expectedEnvelope": {
+    "ErrCode": 0,
+    "ErrMsg": "success",
+    "Resp": {
+      "media_id": "629000000000000002"
+    }
+  },
+  "expectedData": {
+    "media_id": "629000000000000002"
+  }
+}

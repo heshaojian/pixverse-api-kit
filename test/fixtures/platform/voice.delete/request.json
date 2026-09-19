@@ -1,0 +1,8 @@
+{
+  "input": {
+    "speaker_id": "speaker/7"
+  },
+  "method": "DELETE",
+  "path": "/openapi/v2/video/tts_speaker/speaker%2F7",
+  "body": {}
+}

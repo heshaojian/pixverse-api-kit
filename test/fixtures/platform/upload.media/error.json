@@ -1,0 +1,13 @@
+{
+  "httpStatus": 400,
+  "responseText": "{\"ErrCode\":1001,\"ErrMsg\":\"Rejected upload.media\",\"Resp\":null}",
+  "expected": {
+    "code": 1001,
+    "message": "Rejected upload.media",
+    "details": {
+      "ErrCode": 1001,
+      "ErrMsg": "Rejected upload.media",
+      "Resp": null
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "responseText": "{\"ErrCode\":0,\"ErrMsg\":\"success\",\"Resp\":{\"image_id\":629000000000000004}}",
+  "expectedEnvelope": {
+    "ErrCode": 0,
+    "ErrMsg": "success",
+    "Resp": {
+      "image_id": "629000000000000004"
+    }
+  },
+  "expectedData": {
+    "image_id": "629000000000000004"
+  }
+}

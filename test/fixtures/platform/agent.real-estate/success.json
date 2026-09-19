@@ -1,0 +1,13 @@
+{
+  "responseText": "{\"ErrCode\":0,\"ErrMsg\":\"success\",\"Resp\":{\"video_id\":629000000000000022}}",
+  "expectedEnvelope": {
+    "ErrCode": 0,
+    "ErrMsg": "success",
+    "Resp": {
+      "video_id": "629000000000000022"
+    }
+  },
+  "expectedData": {
+    "video_id": "629000000000000022"
+  }
+}

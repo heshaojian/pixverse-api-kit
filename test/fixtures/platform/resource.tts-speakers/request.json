@@ -1,0 +1,11 @@
+{
+  "input": {
+    "page_num": 1,
+    "page_size": 20,
+    "speaker_type": "all",
+    "future_filter": "kept"
+  },
+  "method": "GET",
+  "path": "/openapi/v2/video/tts_speaker?future_filter=kept&page_num=1&page_size=20&speaker_type=all",
+  "body": null
+}

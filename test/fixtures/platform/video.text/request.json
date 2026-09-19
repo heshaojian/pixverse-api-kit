@@ -1,0 +1,18 @@
+{
+  "input": {
+    "aspect_ratio": "16:9",
+    "duration": 5,
+    "model": "v6",
+    "prompt": "A paper boat.",
+    "quality": "720p"
+  },
+  "method": "POST",
+  "path": "/openapi/v2/video/text/generate",
+  "body": {
+    "aspect_ratio": "16:9",
+    "duration": 5,
+    "model": "v6",
+    "prompt": "A paper boat.",
+    "quality": "720p"
+  }
+}

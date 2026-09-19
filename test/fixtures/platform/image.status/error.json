@@ -1,0 +1,13 @@
+{
+  "httpStatus": 400,
+  "responseText": "{\"ErrCode\":1001,\"ErrMsg\":\"Rejected image.status\",\"Resp\":null}",
+  "expected": {
+    "code": 1001,
+    "message": "Rejected image.status",
+    "details": {
+      "ErrCode": 1001,
+      "ErrMsg": "Rejected image.status",
+      "Resp": null
+    }
+  }
+}

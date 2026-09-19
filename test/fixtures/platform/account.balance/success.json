@@ -1,0 +1,17 @@
+{
+  "responseText": "{\"ErrCode\":0,\"ErrMsg\":\"success\",\"Resp\":{\"account_id\":\"123452341\",\"credit_monthly\":1069020,\"credit_package\":3630}}",
+  "expectedEnvelope": {
+    "ErrCode": 0,
+    "ErrMsg": "success",
+    "Resp": {
+      "account_id": "123452341",
+      "credit_monthly": 1069020,
+      "credit_package": 3630
+    }
+  },
+  "expectedData": {
+    "account_id": "123452341",
+    "credit_monthly": 1069020,
+    "credit_package": 3630
+  }
+}

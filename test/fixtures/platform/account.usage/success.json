@@ -1,0 +1,17 @@
+{
+  "responseText": "{\"ErrCode\":0,\"ErrMsg\":\"success\",\"Resp\":{\"items\":[],\"next_cursor\":\"\",\"has_more\":false}}",
+  "expectedEnvelope": {
+    "ErrCode": 0,
+    "ErrMsg": "success",
+    "Resp": {
+      "items": [],
+      "next_cursor": "",
+      "has_more": false
+    }
+  },
+  "expectedData": {
+    "items": [],
+    "next_cursor": "",
+    "has_more": false
+  }
+}

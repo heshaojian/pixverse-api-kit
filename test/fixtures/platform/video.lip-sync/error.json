@@ -1,0 +1,13 @@
+{
+  "httpStatus": 400,
+  "responseText": "{\"ErrCode\":1001,\"ErrMsg\":\"Rejected video.lip-sync\",\"Resp\":null}",
+  "expected": {
+    "code": 1001,
+    "message": "Rejected video.lip-sync",
+    "details": {
+      "ErrCode": 1001,
+      "ErrMsg": "Rejected video.lip-sync",
+      "Resp": null
+    }
+  }
+}

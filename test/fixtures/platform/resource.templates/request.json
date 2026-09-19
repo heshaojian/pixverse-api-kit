@@ -1,0 +1,10 @@
+{
+  "input": {
+    "type": 1,
+    "page": 2,
+    "pageSize": 20
+  },
+  "method": "GET",
+  "path": "/openapi/v2/video/effects/templates/list?type=1&page=2&pageSize=20",
+  "body": null
+}

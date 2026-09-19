@@ -1,0 +1,28 @@
+{
+  "input": {
+    "image_references": [
+      {
+        "img_id": "1"
+      }
+    ],
+    "prompt": "Combine.",
+    "model": "v6",
+    "duration": 5,
+    "quality": "720p",
+    "aspect_ratio": "16:9"
+  },
+  "method": "POST",
+  "path": "/openapi/v2/video/fusion/generate",
+  "body": {
+    "image_references": [
+      {
+        "img_id": "1"
+      }
+    ],
+    "prompt": "Combine.",
+    "model": "v6",
+    "duration": 5,
+    "quality": "720p",
+    "aspect_ratio": "16:9"
+  }
+}

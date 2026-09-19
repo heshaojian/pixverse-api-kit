@@ -1,0 +1,13 @@
+{
+  "httpStatus": 400,
+  "responseText": "{\"ErrCode\":1001,\"ErrMsg\":\"Rejected resource.tts-speakers\",\"Resp\":null}",
+  "expected": {
+    "code": 1001,
+    "message": "Rejected resource.tts-speakers",
+    "details": {
+      "ErrCode": 1001,
+      "ErrMsg": "Rejected resource.tts-speakers",
+      "Resp": null
+    }
+  }
+}

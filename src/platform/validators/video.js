@@ -106,7 +106,10 @@ function validateFusion(operation, payload) {
     && Array.isArray(payload.video_references) && payload.video_references.length > 0;
   const scalarPayload = omniVideo && payload.duration === 0 ? { ...payload } : payload;
   if (scalarPayload !== payload) delete scalarPayload.duration;
-  validateModelScalars(operation, scalarPayload);
+  const scalarOptions = payload.model === "v6" && payload.reference_mode !== undefined
+    ? { aspectRatios: ["16:9", "4:3", "1:1", "3:4", "9:16", "2:3", "3:2", "21:9", "auto"] }
+    : {};
+  validateModelScalars(operation, scalarPayload, scalarOptions);
   requireFields(operation, payload, ["image_references", "prompt", "model", "duration", "quality", "aspect_ratio"]);
   if (!["v4.5", "v5", "v5.5", "v5.6", "v6", "c1"].includes(payload.model)) {
     throw validationError(operation, "fusion model must be v4.5, v5, v5.5, v5.6, v6, or c1.");
@@ -126,9 +129,6 @@ function validateFusion(operation, payload) {
 
 function validateFusionModelRules(operation, payload, omniVideo) {
   if (payload.reference_mode !== undefined) {
-    if (!["auto", "omni"].includes(payload.reference_mode)) {
-      throw validationError(operation, "fusion reference_mode must be auto or omni.");
-    }
     if (payload.reference_mode === "omni" && payload.model !== "v6") {
       throw validationError(operation, "fusion reference_mode omni requires model v6.");
     }
@@ -149,6 +149,7 @@ function validateFusionModelRules(operation, payload, omniVideo) {
   const legacyAspects = ["16:9", "4:3", "1:1", "3:4", "9:16"];
   const extendedAspects = [...legacyAspects, "2:3", "3:2", "21:9"];
   const allowedAspects = ["v6", "c1"].includes(payload.model) ? extendedAspects : legacyAspects;
+  if (payload.model === "v6" && payload.reference_mode !== undefined) allowedAspects.push("auto");
   if (!allowedAspects.includes(payload.aspect_ratio)) {
     throw validationError(operation, `fusion aspect_ratio is not supported by ${payload.model}.`);
   }

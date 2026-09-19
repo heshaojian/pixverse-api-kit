@@ -1,0 +1,12 @@
+{
+  "input": {
+    "name": "Sample voice",
+    "audio_media_id": "629000000000000003"
+  },
+  "method": "POST",
+  "path": "/openapi/v2/video/tts_speaker",
+  "body": {
+    "name": "Sample voice",
+    "audio_media_id": "629000000000000003"
+  }
+}

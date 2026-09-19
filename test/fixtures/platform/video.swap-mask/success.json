@@ -1,0 +1,23 @@
+{
+  "responseText": "{\"ErrCode\":0,\"ErrMsg\":\"success\",\"Resp\":{\"keyframe_id\":629000000000000013,\"mask_info\":[{\"mask_id\":\"person-1\"}]}}",
+  "expectedEnvelope": {
+    "ErrCode": 0,
+    "ErrMsg": "success",
+    "Resp": {
+      "keyframe_id": "629000000000000013",
+      "mask_info": [
+        {
+          "mask_id": "person-1"
+        }
+      ]
+    }
+  },
+  "expectedData": {
+    "keyframe_id": "629000000000000013",
+    "mask_info": [
+      {
+        "mask_id": "person-1"
+      }
+    ]
+  }
+}

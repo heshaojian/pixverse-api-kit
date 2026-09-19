@@ -1,0 +1,20 @@
+{
+  "input": {
+    "source_video_id": "1",
+    "prompt": "Continue.",
+    "seed": 1,
+    "quality": "720p",
+    "duration": 5,
+    "model": "v6"
+  },
+  "method": "POST",
+  "path": "/openapi/v2/video/extend/generate",
+  "body": {
+    "source_video_id": "1",
+    "prompt": "Continue.",
+    "seed": 1,
+    "quality": "720p",
+    "duration": 5,
+    "model": "v6"
+  }
+}

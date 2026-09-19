@@ -1,0 +1,12 @@
+{
+  "input": {
+    "file_url": "https://cdn.example.test/video.mp4",
+    "kind": "video"
+  },
+  "method": "POST",
+  "path": "/openapi/v2/media/upload",
+  "body": {
+    "file_url": "https://cdn.example.test/video.mp4",
+    "kind": "video"
+  }
+}

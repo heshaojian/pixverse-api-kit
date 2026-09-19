@@ -1,0 +1,8 @@
+{
+  "input": {
+    "image_id": "629000000000000004"
+  },
+  "method": "GET",
+  "path": "/openapi/v2/image/result/629000000000000004",
+  "body": null
+}

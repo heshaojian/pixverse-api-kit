@@ -1,0 +1,7 @@
+{
+  "responseText": "{\"ErrCode\":0,\"ErrMsg\":\"success\"}",
+  "expectedEnvelope": {
+    "ErrCode": 0,
+    "ErrMsg": "success"
+  }
+}

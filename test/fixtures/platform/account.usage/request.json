@@ -1,0 +1,14 @@
+{
+  "input": {
+    "start_time": "2026-09-01 00:00:00",
+    "end_time": "2026-09-18 00:00:00",
+    "limit": 20
+  },
+  "method": "POST",
+  "path": "/openapi/v2/account/billing/usage-detail",
+  "body": {
+    "start_time": "2026-09-01 00:00:00",
+    "end_time": "2026-09-18 00:00:00",
+    "limit": 20
+  }
+}

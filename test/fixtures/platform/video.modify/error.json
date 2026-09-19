@@ -1,0 +1,13 @@
+{
+  "httpStatus": 400,
+  "responseText": "{\"ErrCode\":1001,\"ErrMsg\":\"Rejected video.modify\",\"Resp\":null}",
+  "expected": {
+    "code": 1001,
+    "message": "Rejected video.modify",
+    "details": {
+      "ErrCode": 1001,
+      "ErrMsg": "Rejected video.modify",
+      "Resp": null
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "input": {
+    "model": "v5",
+    "quality": "720p",
+    "multi_transition": [
+      {
+        "img_id": "1",
+        "duration": 3
+      },
+      {
+        "img_id": "2"
+      }
+    ]
+  },
+  "method": "POST",
+  "path": "/openapi/v2/video/multi_transition/generate",
+  "body": {
+    "model": "v5",
+    "quality": "720p",
+    "multi_transition": [
+      {
+        "img_id": "1",
+        "duration": 3
+      },
+      {
+        "img_id": "2"
+      }
+    ]
+  }
+}

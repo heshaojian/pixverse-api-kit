@@ -1,0 +1,12 @@
+{
+  "input": {
+    "source_video_id": "1",
+    "audio_media_id": "2"
+  },
+  "method": "POST",
+  "path": "/openapi/v2/video/lip_sync/generate",
+  "body": {
+    "source_video_id": "1",
+    "audio_media_id": "2"
+  }
+}

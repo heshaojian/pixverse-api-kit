@@ -1,0 +1,15 @@
+{
+  "responseText": "{\"ErrCode\":0,\"ErrMsg\":\"success\",\"Resp\":{\"id\":629000000000000005,\"status\":1}}",
+  "expectedEnvelope": {
+    "ErrCode": 0,
+    "ErrMsg": "success",
+    "Resp": {
+      "id": "629000000000000005",
+      "status": 1
+    }
+  },
+  "expectedData": {
+    "id": "629000000000000005",
+    "status": 1
+  }
+}

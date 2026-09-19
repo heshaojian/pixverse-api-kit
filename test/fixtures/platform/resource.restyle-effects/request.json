@@ -1,0 +1,9 @@
+{
+  "input": {
+    "page_num": 1,
+    "page_size": 20
+  },
+  "method": "GET",
+  "path": "/openapi/v2/video/restyle/list?page_num=1&page_size=20",
+  "body": null
+}

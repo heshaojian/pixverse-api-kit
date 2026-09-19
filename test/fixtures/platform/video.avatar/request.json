@@ -1,0 +1,14 @@
+{
+  "input": {
+    "img_id": "1",
+    "quality": "720p",
+    "audio_media_id": "2"
+  },
+  "method": "POST",
+  "path": "/openapi/v2/video/avatar/generate",
+  "body": {
+    "img_id": "1",
+    "quality": "720p",
+    "audio_media_id": "2"
+  }
+}

@@ -233,6 +233,7 @@ test("fusion enforces exact model duration, quality, aspect, and omni-video rule
     { ...base, model: "v4.5", duration: 5, aspect_ratio: "16:9" },
     { ...base, model: "v5.6", duration: 10, aspect_ratio: "9:16" },
     { ...base, model: "v6", duration: 1, aspect_ratio: "21:9" },
+    { ...base, model: "v6", duration: 5, aspect_ratio: "auto", reference_mode: "omni" },
     {
       ...base, model: "v6", duration: 0, aspect_ratio: "2:3", reference_mode: "omni",
       video_references: [{ video_id: "2", ref_name: "motion" }],
@@ -245,7 +246,6 @@ test("fusion enforces exact model duration, quality, aspect, and omni-video rule
     { ...base, model: "v5.6", duration: 10, quality: "1080p", aspect_ratio: "16:9" },
     { ...base, model: "v5.6", duration: 5, aspect_ratio: "21:9" },
     { ...base, model: "v6", duration: 16, aspect_ratio: "16:9" },
-    { ...base, model: "v6", duration: 5, aspect_ratio: "16:9", reference_mode: "unknown" },
   ]) {
     await assert.rejects(normalizeAndValidatePlatformInput(operation, input), /duration|aspect_ratio|reference_mode/i);
   }

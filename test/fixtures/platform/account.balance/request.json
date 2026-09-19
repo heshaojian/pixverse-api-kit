@@ -1,0 +1,6 @@
+{
+  "input": {},
+  "method": "GET",
+  "path": "/openapi/v2/account/balance",
+  "body": null
+}
