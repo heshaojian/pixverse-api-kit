@@ -4,6 +4,7 @@ import test from "node:test";
 
 import {
   createMemoryNonceStore,
+  createPlatformWebhookHandler,
   parsePlatformWebhook,
   verifyPlatformWebhook,
 } from "../../src/platform/webhooks.js";
@@ -101,6 +102,57 @@ test("rejects nonce replay, including concurrent verification", async () => {
   assert.equal(results.filter(({ status, reason }) => status === "rejected" && reason.code === "WEBHOOK_REPLAY").length, 2);
 });
 
+test("bounds and expires the in-memory nonce store", () => {
+  const store = createMemoryNonceStore({ maxEntries: 1 });
+  assert.equal(store.consume("old", TIMESTAMP + 1, TIMESTAMP), true);
+  assert.throws(
+    () => store.consume("blocked", TIMESTAMP + 2, TIMESTAMP),
+    (error) => error.code === "WEBHOOK_NONCE_STORE_FULL",
+  );
+  assert.equal(store.consume("new", TIMESTAMP + 3, TIMESTAMP + 2), true);
+});
+
+test("supports byte bodies, Headers, Date clocks, and Set replay stores", async () => {
+  const nonceStore = new Set();
+  const input = {
+    rawBody: Buffer.from(RAW_BODY),
+    headers: new Headers(signedHeaders()),
+    secret: SIGNING_KEY,
+    now: () => new Date(TIMESTAMP * 1_000),
+    nonceStore,
+  };
+  assert.equal((await verifyPlatformWebhook(input)).nonce, "nonce-1");
+  await assert.rejects(verifyPlatformWebhook(input), (error) => error.code === "WEBHOOK_REPLAY");
+});
+
+test("fails closed for invalid replay, clock, and header inputs", async () => {
+  const base = { rawBody: RAW_BODY, secret: SIGNING_KEY, now: () => TIMESTAMP };
+  await assert.rejects(
+    verifyPlatformWebhook({ ...base, headers: signedHeaders(), nonceStore: {} }),
+    (error) => error.code === "WEBHOOK_NONCE_STORE_INVALID",
+  );
+  await assert.rejects(
+    verifyPlatformWebhook({ ...base, headers: signedHeaders(), now: () => Number.NaN, nonceStore: new Set() }),
+    (error) => error.code === "WEBHOOK_CONFIGURATION_INVALID",
+  );
+  await assert.rejects(
+    verifyPlatformWebhook({ ...base, headers: null, nonceStore: new Set() }),
+    (error) => error.code === "WEBHOOK_HEADER_MISSING",
+  );
+  await assert.rejects(
+    verifyPlatformWebhook({ ...base, headers: ["Webhook-Timestamp"], nonceStore: new Set() }),
+    (error) => error.code === "WEBHOOK_HEADER_INVALID",
+  );
+  await assert.rejects(
+    verifyPlatformWebhook({
+      ...base,
+      headers: { ...signedHeaders(), "Ai-Trace-Id": "x".repeat(257) },
+      nonceStore: new Set(),
+    }),
+    (error) => error.code === "WEBHOOK_HEADER_INVALID",
+  );
+});
+
 test("uses a timing-safe comparison with malformed signatures rejected uniformly", async () => {
   for (const signature of ["not-base64", "YQ==", "A".repeat(44)]) {
     await assert.rejects(verifyPlatformWebhook({
@@ -119,14 +171,26 @@ test("parses valid JSON without losing large integer identifiers", () => {
 });
 
 test("returns ordinary plain objects and rejects prototype-pollution keys", () => {
-  const parsed = parsePlatformWebhook('{"delivery":{"status":"ready"}}');
+  const parsed = parsePlatformWebhook('{"delivery":{"status":"ready","items":[{"id":1}]}}');
   assert.equal(Object.getPrototypeOf(parsed), Object.prototype);
   assert.equal(Object.getPrototypeOf(parsed.delivery), Object.prototype);
+  assert.equal(Object.getPrototypeOf(parsed.delivery.items[0]), Object.prototype);
   assert.throws(
     () => parsePlatformWebhook('{"__proto__":{"polluted":true}}'),
     (error) => error.code === "WEBHOOK_PAYLOAD_INVALID",
   );
   assert.equal({}.polluted, undefined);
+});
+
+test("requires safe handler configuration", () => {
+  assert.throws(
+    () => createPlatformWebhookHandler({ secret: "", onDelivery: async () => {} }),
+    (error) => error.code === "WEBHOOK_CONFIGURATION_INVALID",
+  );
+  assert.throws(
+    () => createPlatformWebhookHandler({ secret: SIGNING_KEY }),
+    (error) => error.code === "WEBHOOK_CONFIGURATION_INVALID",
+  );
 });
 
 test("rejects malformed and non-object payloads", () => {
