@@ -107,6 +107,14 @@ test("upload inputs require exactly one endpoint-specific local file or safe rem
   await assert.rejects(normalizeAndValidatePlatformInput(image, {
     image_url: "https://user:password@example.com/a.png",
   }), /credentials|url/i);
+  for (const image_url of [
+    "http://[::ffff:127.0.0.1]/a.png",
+    "http://[::ffff:10.0.0.1]/a.png",
+    "http://[fe80::1]/a.png",
+    "http://[fd00::1]/a.png",
+  ]) {
+    await assert.rejects(normalizeAndValidatePlatformInput(image, { image_url }), /local|private/i);
+  }
 });
 
 test("image uploads enforce published extension, size, and dimension limits through injected inspection", async () => {

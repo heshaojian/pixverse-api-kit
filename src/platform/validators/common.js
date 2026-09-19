@@ -1,4 +1,5 @@
 import { PixverseCliError } from "../../core/errors.js";
+import { isIP } from "node:net";
 
 const ID_KEY = /(?:^|_)(?:id|ids)$/i;
 const URL_KEY = /(?:^|_)urls?$/i;
@@ -164,12 +165,24 @@ function visitEntries(value, visitor) {
 function isPrivateHostname(hostname) {
   if (["localhost", "localhost.localdomain", "0.0.0.0", "::", "::1"].includes(hostname)) return true;
   if (hostname.endsWith(".local") || hostname.endsWith(".localhost") || hostname.endsWith(".internal")) return true;
-  if (/^(?:fc|fd|fe8|fe9|fea|feb)[0-9a-f:]*$/i.test(hostname)) return true;
-  if (hostname.startsWith("::ffff:")) return isPrivateHostname(hostname.slice(7));
-  const match = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(hostname);
-  if (!match) return false;
-  const octets = match.slice(1).map(Number);
-  if (octets.some((octet) => octet > 255)) return true;
+  const version = isIP(hostname);
+  if (version === 4) return isPrivateIpv4(hostname.split(".").map(Number));
+  if (version !== 6) return false;
+  const mapped = mappedIpv4Octets(hostname);
+  if (mapped) return isPrivateIpv4(mapped);
+  const firstHextet = Number.parseInt(hostname.split(":", 1)[0] || "0", 16);
+  return (firstHextet & 0xfe00) === 0xfc00 || (firstHextet & 0xffc0) === 0xfe80;
+}
+
+function mappedIpv4Octets(hostname) {
+  const match = /^(?:::ffff:|0:0:0:0:0:ffff:)([0-9a-f]{1,4}):([0-9a-f]{1,4})$/i.exec(hostname);
+  if (!match) return undefined;
+  const high = Number.parseInt(match[1], 16);
+  const low = Number.parseInt(match[2], 16);
+  return [high >> 8, high & 255, low >> 8, low & 255];
+}
+
+function isPrivateIpv4(octets) {
   return octets[0] === 10
     || octets[0] === 127
     || octets[0] === 0
