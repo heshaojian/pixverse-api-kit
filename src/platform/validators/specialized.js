@@ -45,6 +45,7 @@ export async function validateSpecializedOperation(operation, payload, query = p
       return;
     case "video.sound-effect":
       requireExactlyOneField(operation, payload, VIDEO_SOURCES);
+      requireFields(operation, payload, ["prompt"]);
       return;
     case "video.extend":
       requireExactlyOneField(operation, payload, VIDEO_SOURCES);
@@ -61,7 +62,7 @@ export async function validateSpecializedOperation(operation, payload, query = p
       requireFields(operation, payload, ["prompt", "quality"]);
       validateQuality(operation, payload.quality, ["360p", "540p", "720p"]);
       validateMaximumItems(operation, payload.mask_ids, "mask_ids", 3);
-      validateMaximumItems(operation, payload.maks_urls, "maks_urls", 3);
+      validateMaximumItems(operation, payload.mask_urls, "mask_urls", 3);
       return;
     case "video.upscale":
       requireExactlyOneField(operation, payload, VIDEO_SOURCES);

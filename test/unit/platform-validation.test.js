@@ -205,6 +205,62 @@ test("transition, fusion, voice, swap, source-video, and agent inputs enforce th
   }
 });
 
+const distinguishingFieldCases = [
+  ["video.template", {
+    template_id: "template-1",
+    img_id: "1",
+    prompt: "Animate naturally",
+    model: "v6",
+    duration: 5,
+    quality: "720p",
+  }, "template_id"],
+  ["video.sound-effect", {
+    source_video_id: "1",
+    prompt: "Soft rain and distant thunder",
+  }, "prompt"],
+];
+
+for (const [id, validInput, distinguishingField] of distinguishingFieldCases) {
+  test(`${id} requires its distinguishing ${distinguishingField} field`, async () => {
+    await normalizeAndValidatePlatformInput(getPlatformOperation(id), validInput);
+    const { [distinguishingField]: omitted, ...mutatedInput } = validInput;
+    assert.notEqual(omitted, undefined);
+    await assert.rejects(
+      normalizeAndValidatePlatformInput(getPlatformOperation(id), mutatedInput),
+      new RegExp(distinguishingField, "i"),
+    );
+  });
+}
+
+test("video.modify validates the documented mask_urls field and enforces its three-item maximum", async () => {
+  const operation = getPlatformOperation("video.modify");
+  const base = {
+    source_video_id: "1",
+    prompt: "Replace the foreground subject",
+    quality: "720p",
+  };
+
+  const accepted = await normalizeAndValidatePlatformInput(operation, {
+    ...base,
+    mask_urls: [
+      "https://cdn.example.com/mask-1.png",
+      "https://cdn.example.com/mask-2.png",
+      "https://cdn.example.com/mask-3.png",
+    ],
+  });
+  assert.equal(accepted.payload.mask_urls.length, 3);
+
+  await assert.rejects(normalizeAndValidatePlatformInput(operation, {
+    ...base,
+    mask_urls: [
+      "https://cdn.example.com/mask-1.png",
+      "https://cdn.example.com/mask-2.png",
+      "https://cdn.example.com/mask-3.png",
+      "https://cdn.example.com/mask-4.png",
+    ],
+  }), /mask_urls.*no more than 3/i);
+});
+
 test("model-aware scalar validation rejects invalid prompt, quality, duration, aspect ratio, and seed", async () => {
   const operation = getPlatformOperation("video.text");
   const base = { prompt: "hello", model: "v6", quality: "720p", duration: 5, aspect_ratio: "16:9" };

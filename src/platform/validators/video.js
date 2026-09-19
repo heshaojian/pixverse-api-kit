@@ -23,7 +23,7 @@ export function validateVideoOperation(operation, payload) {
       break;
     case "video.template":
       validateModelScalars(operation, payload, { promptMaxLength: 2048 });
-      requireFields(operation, payload, ["duration", "model", "prompt", "quality"]);
+      requireFields(operation, payload, ["template_id", "duration", "model", "prompt", "quality"]);
       if (!isPresent(payload.img_id) && (!Array.isArray(payload.img_ids) || payload.img_ids.length === 0)) {
         throw validationError(operation, "img_id or img_ids image source is required.");
       }
