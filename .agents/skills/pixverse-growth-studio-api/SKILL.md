@@ -142,10 +142,10 @@ npm run cli -- growth-studio video edit 627410861853514292 2 "Make the expressio
    - Use `--auto-folder` when payload metadata has `folder_name`, `customer`, `customer_name`, `brand`, `topic`, or `campaign`, or when `product.source_url` has a merchant domain such as `revolve.com`.
    - For customer pilots, set `metadata.customer` or `metadata.folder_name` to the customer/account name so similar product jobs land in the same folder.
    - Use `npm run cli -- growth-studio folders ensure "<name>"` when you want to verify/create the folder without starting a video job.
-4. Prefer `run-job` for new jobs because it saves durable artifacts, including `folder.json` when folder resolution is used.
+4. Prefer `growth-studio run-job` for new jobs because it saves durable artifacts, including `folder.json` when folder resolution is used.
 5. Save or report the returned `job_dir`, `video_id`, `status`, `video_url`, `thumbnail_url`, and resolved `folder_id`/`folder_name`.
 6. If polling times out, keep the `job_dir` and `video_id`; another agent can resume with `npm run cli -- growth-studio video poll <video_id>` or inspect `jobs/<job>/`.
-7. Before submitting an edit, call `get` and verify `supports_edit: true` and an editable clip index. Editing is also asynchronous.
+7. Before submitting an edit, call `growth-studio video get` and verify `supports_edit: true` and an editable clip index. Editing is also asynchronous.
 
 ## Payload Template
 
@@ -193,7 +193,7 @@ For manually provided product images:
 
 ## Job Artifacts
 
-`run-job` writes a timestamped folder under `jobs/` unless another `--jobs-dir` is supplied.
+`growth-studio run-job` writes a timestamped folder under `jobs/` unless another `--jobs-dir` is supplied.
 
 - `request.json`: trace ID and submitted payload.
 - `folder.json`: resolved folder id/name and whether the folder was reused or created, when folder resolution was used.
@@ -207,7 +207,7 @@ Use these artifacts as the source of truth before retrying any creation or edit 
 ## Troubleshooting
 
 - Missing key: add `PIXVERSE_GROWTH_API_KEY=mh_live_...` to `.env`.
-- `Token is invalid` from `folders`, `ensure-folder`, `--folder-name`, or `--auto-folder`: the configured Growth Studio folder endpoint is rejecting the current server-side token. Check `PIXVERSE_GROWTH_FOLDER_API_PREFIX` against the current OpenAPI guide, set `PIXVERSE_GROWTH_FOLDER_API_KEY` only if the backend requires a separate token, or use a verified `--folder-id` until backend auth is aligned.
+- `Token is invalid` from `growth-studio folders list`, `growth-studio folders ensure`, `--folder-name`, or `--auto-folder`: the configured Growth Studio folder endpoint is rejecting the current server-side token. Check `PIXVERSE_GROWTH_FOLDER_API_PREFIX` against the current OpenAPI guide, set `PIXVERSE_GROWTH_FOLDER_API_KEY` only if the backend requires a separate token, or use a verified `--folder-id` until backend auth is aligned.
 - `WORKSPACE_ACCESS_DENIED`: the key's user may lack workspace access or may have been removed.
 - `INVALID_REQUEST` for images: upload the image through `POST /openapi/v1/image/upload` using `growth-studio upload image`; do not paste external image URLs.
 - `429`: wait according to `Retry-After`.
