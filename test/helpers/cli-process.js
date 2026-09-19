@@ -20,7 +20,7 @@ function runNode(args, options) {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, args, {
       cwd: options.cwd ?? REPOSITORY_ROOT,
-      env: { ...process.env, ...options.env },
+      env: { ...withoutPixverseApiKeys(process.env), ...options.env },
       stdio: ["ignore", "pipe", "pipe"],
     });
     let stdout = "";
@@ -33,4 +33,10 @@ function runNode(args, options) {
     child.once("error", reject);
     child.once("close", (exitCode, signal) => resolve({ exitCode, signal, stdout, stderr }));
   });
+}
+
+function withoutPixverseApiKeys(env) {
+  return Object.fromEntries(
+    Object.entries(env).filter(([name]) => !/^PIXVERSE_.*API_KEY$/.test(name)),
+  );
 }
