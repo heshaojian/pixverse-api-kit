@@ -147,6 +147,34 @@ test("image uploads enforce published extension, size, and dimension limits thro
   }
 });
 
+test("local media uploads enforce official type and video-dimension policy without invented universal limits", async () => {
+  const operation = getPlatformOperation("upload.media");
+  const calls = [];
+  const result = await normalizeAndValidatePlatformInput(operation, { file: "/safe/tiny.mp4" }, {
+    inspectLocalMedia: async (file, options) => {
+      calls.push({ file, options });
+      return {
+        size_bytes: 500 * 1024 * 1024,
+        duration_seconds: 600,
+        width: 1920,
+        height: 1080,
+        streams: [{ codec_type: "video" }],
+      };
+    },
+  });
+  assert.deepEqual(result.files, { file: "/safe/tiny.mp4" });
+  assert.deepEqual(calls[0].options, {
+    allowedExtensions: [".mp4", ".mov", ".webm", ".mp3", ".wav", ".m4a", ".aac"],
+  });
+
+  await assert.rejects(normalizeAndValidatePlatformInput(operation, { file: "/safe/payload.exe" }, {
+    inspectLocalMedia: async () => assert.fail("unsupported media must fail before inspection"),
+  }), /extension|media type/i);
+  await assert.rejects(normalizeAndValidatePlatformInput(operation, { file: "/safe/wide.mp4" }, {
+    inspectLocalMedia: async () => ({ width: 1921, height: 1080, streams: [{ codec_type: "video" }] }),
+  }), /1,?920|dimension/i);
+});
+
 test("usage timestamps reject impossible UTC calendar dates", async () => {
   await assert.rejects(normalizeAndValidatePlatformInput(getPlatformOperation("account.usage"), {
     start_time: "2026-02-30 00:00:00",
