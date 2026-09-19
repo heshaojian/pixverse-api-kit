@@ -5,50 +5,30 @@ description: Use this skill for PixVerse Platform API commands, payload validati
 
 # PixVerse Platform API
 
-Use `pixverse-api platform ...` for the Platform API at `https://app-api.pixverse.ai`.
+Use this skill for the server-side Platform API through `pixverse-api platform`. It is separate from the web `pixverse` CLI and from `pixverse-api growth-studio`; credentials, credits, commands, and job artifacts do not cross those boundaries.
 
-Configuration:
+## Route the request
 
-```bash
-PIXVERSE_PLATFORM_API_KEY=...
-PIXVERSE_PLATFORM_BASE_URL=https://app-api.pixverse.ai
-```
+- Read [capabilities](references/capabilities.md) to select an operation or build a prerequisite chain from a user goal.
+- Read [operation catalog](references/operation-catalog.md) for the exact command, method, path, billing class, async behavior, result ID, and official endpoint page.
+- Read [payload examples](references/payload-examples.json) before authoring a payload or query.
 
-Do not reuse Growth Studio keys. Platform uses `API-KEY` plus a fresh `Ai-trace-id` per new request.
+## Provider boundary
 
-Common commands:
+Use only `PIXVERSE_PLATFORM_API_KEY` and the default `https://app-api.pixverse.ai`. Never use Growth Studio keys, web-session credentials, or another provider's credit balance. Preserve all API IDs as strings.
 
-```bash
-npm run cli -- platform account balance
-npm run cli -- platform upload image ./reference.png
-npm run cli -- platform video text --payload ./text-video.json --dry-run
-npm run cli -- platform run-job --operation video.image --payload ./image-video.json --poll
-npm run cli -- platform resume ./pixverse-api-jobs/platform/<job-dir>
-```
+## Safe execution
 
-Durable job rules:
+1. Resolve prerequisites with read-only catalog/account calls.
+2. Validate a specialized command locally and run it with `--dry-run`.
+3. For a billable operation, confirm the exact live spend is authorized in the active request immediately before submission.
+4. Submit once with a fresh trace ID, preferably through `run-job`; preserve the returned job directory and result ID.
+5. Poll the known image/video ID or use `resume`. If submission was ambiguous and no ID was saved, stop at `reconciliation_required`; do not resubmit.
+6. Treat success as transport success plus `ErrCode === 0`.
 
-- Use `run-job` or canonical billable commands for billable catalog operations.
-- The CLI writes `request.json` before the billable submission and never automatically retries ambiguous billable POSTs.
-- `request.json` keeps the submitted trace ID. `video-id.json` or `image-id.json` keeps known result IDs as strings.
-- `polling.jsonl` records status snapshots. `final.json` preserves the original billable submission `trace_id`; `status_trace_id` records the last status request trace.
-- If no result ID was saved after an ambiguous response, `resume` returns `reconciliation_required` without issuing another generation.
+Use `platform raw` only for diagnosis or a newly documented endpoint absent from the specialized catalog. Do not use raw access to bypass specialized validation, authentication, trace, billing, or recovery controls.
 
-Webhook rules:
-
-- Verify before parsing JSON.
-- Signed string: `${timestamp}\n${nonce}\n${encodeURIComponent(rawBody)}`.
-- Signature: Base64 HMAC-SHA256 with the webhook secret.
-- Reject stale timestamps, duplicate nonces, malformed signatures, and malformed payloads.
-- Return plain `ok` only after verification and successful delivery handling.
-
-Raw command restrictions:
-
-- `platform raw` is for diagnosis only and is not counted as endpoint coverage.
-- It requires a relative `/openapi/v2/` path.
-- It rejects auth, cookie, host, trace, traversal, backslash, control-character, and URL-escape overrides.
-
-Operation markers covered by this skill:
+## Operation markers
 
 - operation:account.balance
 - operation:account.usage
@@ -80,5 +60,3 @@ Operation markers covered by this skill:
 - operation:agent.viral-recreation
 - operation:agent.real-estate
 - operation:video.status
-
-See `references/operation-catalog.md` for command, method, path, billing, and documentation links.
