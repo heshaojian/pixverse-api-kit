@@ -2,7 +2,17 @@
 
 Agent-safe PixVerse API tools for the Platform API and Growth Studio API. The installed binary is `pixverse-api`; the general PixVerse web CLI remains separate.
 
-## Setup
+## Local Setup
+
+This package is private and is not published to npm. Install its pinned dependencies from this checkout, then link the `pixverse-api` binary locally:
+
+```bash
+npm ci
+npm link
+pixverse-api --help
+```
+
+If you do not want a global npm link, replace `pixverse-api` in the examples with `npm run cli --`.
 
 ```bash
 cp .env.example .env
@@ -21,6 +31,15 @@ PIXVERSE_GROWTH_FOLDER_API_KEY=...
 ```
 
 Keys stay server-side. Platform and Growth Studio credentials are separate and never fall back to each other.
+
+The default origins are the official HTTPS services. HTTP/HTTPS loopback origins (`localhost`, `127.0.0.1`, or `::1`) are allowed for local tests. Any other origin must use HTTPS and is rejected unless its provider-specific opt-in is set to `true`:
+
+```bash
+PIXVERSE_PLATFORM_ALLOW_CUSTOM_BASE_URL=true
+PIXVERSE_GROWTH_ALLOW_CUSTOM_BASE_URL=true
+```
+
+Those flags deliberately allow credentials to be sent to the configured custom origin. Use them only for a server you control and keep them out of normal production configuration.
 
 ## Provider Commands
 
@@ -71,6 +90,7 @@ npm run cli -- growth-studio upload image /absolute/path/product.webp
 npm run cli -- growth-studio video create-from-url "https://shop.example.com/products/item"
 npm run cli -- growth-studio video create-from-json /absolute/path/payload.json
 npm run cli -- growth-studio run-job --payload /absolute/path/payload.json --folder-name "REVOLVE"
+npm run cli -- growth-studio resume /absolute/path/jobs/<job-dir>
 npm run cli -- growth-studio video poll 627410861853514292
 ```
 
@@ -81,8 +101,9 @@ Legacy Growth Studio aliases such as `get`, `poll`, `run-job`, and `create-from-
 - Platform uses `API-KEY` and a fresh `Ai-trace-id` for every new request.
 - Growth Studio uses `Authorization: Bearer <PIXVERSE_GROWTH_API_KEY>`.
 - Keep all IDs as strings.
-- Use durable job commands for billable work.
+- Use `run-job` for new billable work and `resume` for an existing durable job.
 - After an ambiguous billable response, inspect saved artifacts and known IDs before retrying.
+- `resume` polls a saved ID only; it never resubmits a generation. If no ID was saved, it reports that reconciliation is required.
 - Default automated tests use loopback or injected clients and do not submit paid jobs.
 
 ## Docs
@@ -96,4 +117,4 @@ Legacy Growth Studio aliases such as `get`, `poll`, `run-job`, and `create-from-
 
 ## Job Artifacts
 
-Platform `run-job` writes under `pixverse-api-jobs/platform/` by default. Growth Studio `run-job` writes under `jobs/` by default. Artifacts preserve request evidence, known IDs, polling snapshots, final state, and safe error records so another agent can recover without duplicate spend.
+Platform `run-job` writes under `pixverse-api-jobs/platform/` by default. Growth Studio `run-job` writes under `jobs/` by default. Both providers preserve redacted request evidence, known IDs, polling snapshots, final state, and safe error records. Use the provider's `resume` command with that job directory to continue polling without submitting another generation.

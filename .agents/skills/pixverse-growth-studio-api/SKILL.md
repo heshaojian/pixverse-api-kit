@@ -13,7 +13,7 @@ In this workspace, use this Growth Studio API CLI for Growth Studio/product-vide
 
 ## Location
 
-Run commands from the repository root. When working locally for John, first confirm you are in the active `PixVerse Growth Studio` checkout.
+Run commands from the unified `pixverse-api-kit` repository root. When working locally for John, first confirm that this is the active checkout and branch; do not assume a separate `PixVerse Growth Studio` checkout exists.
 
 ```bash
 npm run cli -- <command>
@@ -27,13 +27,15 @@ PIXVERSE_GROWTH_BASE_URL=https://growth-api.pixverse.ai
 # Optional, only when Growth Studio folder list/create uses a different API prefix/token:
 PIXVERSE_GROWTH_FOLDER_API_PREFIX=/marketing_hub
 PIXVERSE_GROWTH_FOLDER_API_KEY=...
+# Required only for a non-default, non-loopback API origin:
+PIXVERSE_GROWTH_ALLOW_CUSTOM_BASE_URL=true
 ```
 
 ## Safety Model
 
 The Growth Studio API can create billable video tasks, and the OpenAPI guide says create/edit endpoints do not currently support caller-provided idempotency keys. This shapes the workflow:
 
-- Keep the API key only in `.env` or the server environment.
+- Keep the API key only in `.env` or the server environment. Use the official HTTPS origin by default; a non-loopback custom origin must use HTTPS, requires `PIXVERSE_GROWTH_ALLOW_CUSTOM_BASE_URL=true`, and must be a server you control.
 - Treat folder list/create and `folder_id` assignment as Growth Studio API work. If the backend exposes a different folder path prefix, set `PIXVERSE_GROWTH_FOLDER_API_PREFIX` instead of using browser automation.
 - If folder list/create rejects the video-generation key, set `PIXVERSE_GROWTH_FOLDER_API_KEY` to the proper Growth Studio folder-management token instead of changing `PIXVERSE_GROWTH_API_KEY`.
 - Use `npm run cli -- ...` from this repository as the default execution surface for video jobs in this workspace.
@@ -108,7 +110,13 @@ Run a full job with durable artifacts:
 npm run cli -- growth-studio run-job --payload /absolute/path/payload.json --jobs-dir jobs --job-name product-name
 ```
 
-Resume by polling a known video:
+Resume a durable job without resubmitting its generation:
+
+```bash
+npm run cli -- growth-studio resume /absolute/path/jobs/<job-dir>
+```
+
+Poll a known video directly when no durable job directory is available:
 
 ```bash
 npm run cli -- growth-studio video poll 627410861853514292
@@ -144,7 +152,7 @@ npm run cli -- growth-studio video edit 627410861853514292 2 "Make the expressio
    - Use `npm run cli -- growth-studio folders ensure "<name>"` when you want to verify/create the folder without starting a video job.
 4. Prefer `growth-studio run-job` for new jobs because it saves durable artifacts, including `folder.json` when folder resolution is used.
 5. Save or report the returned `job_dir`, `video_id`, `status`, `video_url`, `thumbnail_url`, and resolved `folder_id`/`folder_name`.
-6. If polling times out, keep the `job_dir` and `video_id`; another agent can resume with `npm run cli -- growth-studio video poll <video_id>` or inspect `jobs/<job>/`.
+6. If polling times out, keep the `job_dir` and `video_id`; another agent can run `npm run cli -- growth-studio resume <job_dir>`. Resume only polls the saved ID and does not resubmit. If there is no saved ID, reconcile the ambiguous submission instead of creating a duplicate.
 7. Before submitting an edit, call `growth-studio video get` and verify `supports_edit: true` and an editable clip index. Editing is also asynchronous.
 
 ## Payload Template
@@ -201,6 +209,9 @@ For manually provided product images:
 - `video-id.json`: string `video_id`.
 - `polling.jsonl`: one details snapshot per poll.
 - `final.json`: terminal state, or create response when `--no-poll` is used.
+- `error.json`: redacted failure details when submission or polling fails.
+
+JSON artifacts are private, atomic, and recursively redacted. When resume finds a nonterminal `final.json`, it preserves that snapshot as `final-prior-N.json` before polling again.
 
 Use these artifacts as the source of truth before retrying any creation or edit action.
 
