@@ -48,7 +48,7 @@ export const RESOURCE_OPERATIONS = [
     command: ["voice", "delete"],
     method: "DELETE",
     path: "/openapi/v2/video/tts_speaker/{speaker_id}",
-    bodyMode: "none",
+    bodyMode: "json",
     validationPolicy: "voice.delete",
     billing: "non-billable",
     asynchronous: false,

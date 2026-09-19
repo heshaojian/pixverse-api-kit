@@ -12,6 +12,10 @@ const inventory = JSON.parse(fs.readFileSync(
   new URL("../fixtures/platform/official-operation-inventory.json", import.meta.url),
   "utf8",
 ));
+const successShapes = JSON.parse(fs.readFileSync(
+  new URL("../fixtures/platform/official-success-shapes.json", import.meta.url),
+  "utf8",
+));
 
 test("Platform catalog matches every independently recorded official operation", () => {
   assert.equal(PLATFORM_OPERATIONS.length, 30);
@@ -40,6 +44,12 @@ test("every operation and command is immutable", () => {
   }
 });
 
+test("every operation links to its exact official documentation page", () => {
+  const urls = PLATFORM_OPERATIONS.map(({ documentationUrl }) => documentationUrl);
+  assert.equal(new Set(urls).size, PLATFORM_OPERATIONS.length);
+  assert.equal(urls.includes("https://docs.platform.pixverse.ai/pixverse-api-llm-txt-2109771m0"), false);
+});
+
 test("catalog lookup resolves IDs and exact CLI segments", () => {
   const operation = getPlatformOperation("video.multi-transition");
   assert.equal(operation.path, "/openapi/v2/video/multi_transition/generate");
@@ -55,4 +65,41 @@ test("billable classification is explicit instead of inferred from HTTP method",
   assert.equal(getPlatformOperation("account.usage").billing, "read-only");
   assert.equal(getPlatformOperation("video.text").method, "POST");
   assert.equal(getPlatformOperation("video.text").billing, "billable");
+});
+
+test("reviewed body and asynchronous metadata matches the official contracts", () => {
+  const voiceDelete = getPlatformOperation("voice.delete");
+  assert.equal(voiceDelete.bodyMode, "json");
+
+  const swapMask = getPlatformOperation("video.swap-mask");
+  assert.equal(swapMask.asynchronous, false);
+  assert.equal(swapMask.resultIdPath, null);
+
+  assert.equal(getPlatformOperation("video.status").resultIdPath, "Resp.id");
+});
+
+test("result paths resolve against independent documented success shapes", () => {
+  assert.equal(successShapes.length, PLATFORM_OPERATIONS.length);
+  assert.deepEqual(
+    successShapes.map(({ id }) => id).sort(),
+    PLATFORM_OPERATIONS.map(({ id }) => id).sort(),
+  );
+
+  for (const operation of PLATFORM_OPERATIONS) {
+    const success = successShapes.find(({ id }) => id === operation.id);
+    if (operation.resultIdPath !== null) {
+      const resultId = operation.resultIdPath
+        .split(".")
+        .reduce((value, segment) => value?.[segment], success);
+      assert.equal(
+        typeof resultId,
+        "string",
+        `${operation.id} ${operation.resultIdPath} must resolve to a string ID`,
+      );
+    }
+  }
+
+  const swapMaskSuccess = successShapes.find(({ id }) => id === "video.swap-mask");
+  assert.equal(typeof swapMaskSuccess.Resp.keyframe_id, "string");
+  assert.equal(Array.isArray(swapMaskSuccess.Resp.mask_info), true);
 });

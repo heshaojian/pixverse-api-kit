@@ -18,8 +18,8 @@ export const VIDEO_EDITING_OPERATIONS = [
     bodyMode: "json",
     validationPolicy: id,
     billing: "billable",
-    asynchronous: true,
-    resultIdPath: "Resp.video_id",
+    asynchronous: id !== "video.swap-mask",
+    resultIdPath: id === "video.swap-mask" ? null : "Resp.video_id",
   })),
   {
     id: "video.status",
@@ -30,6 +30,6 @@ export const VIDEO_EDITING_OPERATIONS = [
     validationPolicy: "video.status",
     billing: "read-only",
     asynchronous: false,
-    resultIdPath: "Resp.video_id",
+    resultIdPath: "Resp.id",
   },
 ];
