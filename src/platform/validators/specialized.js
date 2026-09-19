@@ -161,7 +161,14 @@ function validateOptionalSeed(operation, value) {
 function validateKeyframe(operation, value, required) {
   if (!isPresent(value)) {
     if (required) throw validationError(operation, "keyframe_id is required.");
-  } else if (!Number.isInteger(value) || value < 1) throw validationError(operation, "keyframe_id must be an integer of at least 1.");
+    return;
+  }
+  const normalized = typeof value === "number" && Number.isSafeInteger(value) ? String(value) : value;
+  if (typeof normalized !== "string"
+    || !/^[1-9]\d*$/.test(normalized)
+    || BigInt(normalized) > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw validationError(operation, "keyframe_id must be a positive safe-integer string.");
+  }
 }
 function validateQuality(operation, value, allowed) {
   if (!allowed.includes(value)) throw validationError(operation, `quality must be one of ${allowed.join(", ")}.`);

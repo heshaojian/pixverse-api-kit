@@ -215,6 +215,33 @@ test("official mutually-exclusive source and lip-sync combinations are validated
   }), /either.*audio_media_id.*tts/i);
 });
 
+test("swap and swap-mask accept positive keyframe identifiers after string-safe normalization", async () => {
+  const swap = await normalizeAndValidatePlatformInput(getPlatformOperation("video.swap"), {
+    source_video_id: "1",
+    keyframe_id: 7,
+    mask_id: "2",
+    img_id: "3",
+    quality: "720p",
+  });
+  assert.equal(swap.payload.keyframe_id, "7");
+
+  const mask = await normalizeAndValidatePlatformInput(getPlatformOperation("video.swap-mask"), {
+    video_media_id: "4",
+    keyframe_id: "12",
+  });
+  assert.equal(mask.payload.keyframe_id, "12");
+});
+
+test("keyframe identifiers reject zero, negative, non-digit, and unsafe numeric values", async () => {
+  const operation = getPlatformOperation("video.swap-mask");
+  for (const keyframe_id of [0, -1, "0", "-1", "1.5", "frame-one", Number.MAX_SAFE_INTEGER + 1]) {
+    await assert.rejects(normalizeAndValidatePlatformInput(operation, {
+      source_video_id: "1",
+      keyframe_id,
+    }), /keyframe_id|string|safe integer/i);
+  }
+});
+
 test("read-only query fields are separated and validated without losing unknown payload fields", async () => {
   const result = await normalizeAndValidatePlatformInput(getPlatformOperation("resource.tts-speakers"), {
     page_num: 1,
