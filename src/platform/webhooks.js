@@ -65,11 +65,14 @@ export async function verifyPlatformWebhook(options = {}) {
     throw webhookError("Webhook authentication failed.", "WEBHOOK_TIMESTAMP_OUT_OF_RANGE", 401);
   }
 
-  const expected = createHmac("sha256", secret)
-    .update(`${timestamp}\n${nonce}\n${encodeRawBody(rawBody)}`)
-    .digest();
+  const payload = parsePlatformWebhook(rawBody);
+  const [insertionOrderQuery, sortedQuery] = canonicalWebhookQueries(payload);
+  const insertionExpected = signWebhookQuery(secret, timestamp, nonce, insertionOrderQuery);
+  const sortedExpected = signWebhookQuery(secret, timestamp, nonce, sortedQuery);
   const supplied = decodeSha256Signature(signature);
-  if (!timingSafeEqual(expected, supplied)) {
+  const matchesInsertionOrder = timingSafeEqual(insertionExpected, supplied);
+  const matchesSortedOrder = timingSafeEqual(sortedExpected, supplied);
+  if ((Number(matchesInsertionOrder) | Number(matchesSortedOrder)) === 0) {
     throw webhookError("Webhook authentication failed.", "WEBHOOK_SIGNATURE_INVALID", 401);
   }
 
@@ -247,12 +250,26 @@ function decodeSha256Signature(value) {
   return decoded;
 }
 
-function encodeRawBody(rawBody) {
-  try {
-    return encodeURIComponent(rawBody);
-  } catch (cause) {
-    throw webhookError("Webhook body is not valid text.", "WEBHOOK_BODY_INVALID", 400, cause);
-  }
+function canonicalWebhookQueries(payload) {
+  const entries = Object.entries(payload).map(([key, value]) => {
+    if (value === null || typeof value === "object") {
+      throw webhookError(
+        "Webhook payload contains a value unsupported by the documented signature format.",
+        "WEBHOOK_PAYLOAD_UNSUPPORTED",
+        400,
+      );
+    }
+    return [key, String(value)];
+  });
+  const insertionOrder = new URLSearchParams(entries).toString();
+  const sortedEntries = [...entries].sort(([left], [right]) => left.localeCompare(right));
+  return [insertionOrder, new URLSearchParams(sortedEntries).toString()];
+}
+
+function signWebhookQuery(secret, timestamp, nonce, query) {
+  return createHmac("sha256", secret)
+    .update(`${timestamp}\n${nonce}\n${query}`)
+    .digest();
 }
 
 function consumeSetLikeNonceStore(store, nonce) {
