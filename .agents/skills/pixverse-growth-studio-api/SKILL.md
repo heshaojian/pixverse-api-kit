@@ -5,7 +5,7 @@ description: Use this skill whenever a user or agent needs to create, upload ass
 
 # PixVerse API Kit: Growth Studio API
 
-Use the local CLI in this repository to interact with the Growth Studio OpenAPI from a server-side context. This keeps API keys out of browsers and gives every job durable files that another agent can inspect or resume.
+Use the local `pixverse-api growth-studio ...` CLI in this repository to interact with the Growth Studio OpenAPI from a server-side context. This keeps API keys out of browsers and gives every job durable files that another agent can inspect or resume.
 
 This repository is `pixverse-api-kit`. It contains the Growth Studio API client, tests, agent skill instructions, and public-safe brand pitch pages under `deploy/brand-pitches/<brand>/<pitch-name>/`.
 
@@ -49,87 +49,87 @@ The Growth Studio API can create billable video tasks, and the OpenAPI guide say
 List system avatars:
 
 ```bash
-npm run cli -- avatars
+npm run cli -- growth-studio avatars list
 ```
 
 List Growth Studio folders:
 
 ```bash
-npm run cli -- folders
+npm run cli -- growth-studio folders list
 ```
 
 Ensure a customer/topic folder exists:
 
 ```bash
-npm run cli -- ensure-folder "REVOLVE"
+npm run cli -- growth-studio folders ensure "REVOLVE"
 ```
 
 Upload an image and get a reusable PixVerse media URL:
 
 ```bash
-npm run cli -- upload-image /absolute/path/product.webp
+npm run cli -- growth-studio upload image /absolute/path/product.webp
 ```
 
 Create from an e-commerce product page:
 
 ```bash
-npm run cli -- create-from-url "https://shop.example.com/products/item"
+npm run cli -- growth-studio video create-from-url "https://shop.example.com/products/item"
 ```
 
 Create into a specific Growth Studio folder:
 
 ```bash
-npm run cli -- create-from-url "https://shop.example.com/products/item" --folder-id 630251570268735431
-npm run cli -- run-job --payload /absolute/path/payload.json --folder-id 630251570268735431
+npm run cli -- growth-studio video create-from-url "https://shop.example.com/products/item" --folder-id 630251570268735431
+npm run cli -- growth-studio run-job --payload /absolute/path/payload.json --folder-id 630251570268735431
 ```
 
 Create into a named customer/topic folder, creating it when missing:
 
 ```bash
-npm run cli -- create-from-url "https://shop.example.com/products/item" --folder-name "REVOLVE"
-npm run cli -- run-job --payload /absolute/path/payload.json --folder-name "REVOLVE"
+npm run cli -- growth-studio video create-from-url "https://shop.example.com/products/item" --folder-name "REVOLVE"
+npm run cli -- growth-studio run-job --payload /absolute/path/payload.json --folder-name "REVOLVE"
 ```
 
 Infer the folder from payload metadata, merchant URL, or product brand:
 
 ```bash
-npm run cli -- run-job --payload /absolute/path/payload.json --auto-folder
+npm run cli -- growth-studio run-job --payload /absolute/path/payload.json --auto-folder
 ```
 
 Create from a full JSON payload:
 
 ```bash
-npm run cli -- create-from-json /absolute/path/payload.json
+npm run cli -- growth-studio video create-from-json /absolute/path/payload.json
 ```
 
 Run a full job with durable artifacts:
 
 ```bash
-npm run cli -- run-job --payload /absolute/path/payload.json --jobs-dir jobs --job-name product-name
+npm run cli -- growth-studio run-job --payload /absolute/path/payload.json --jobs-dir jobs --job-name product-name
 ```
 
 Resume by polling a known video:
 
 ```bash
-npm run cli -- poll 627410861853514292
+npm run cli -- growth-studio video poll 627410861853514292
 ```
 
 Get details:
 
 ```bash
-npm run cli -- get 627410861853514292
+npm run cli -- growth-studio video get 627410861853514292
 ```
 
 List videos:
 
 ```bash
-npm run cli -- list --limit 20 --status succeeded
+npm run cli -- growth-studio video list --limit 20 --status succeeded
 ```
 
 Edit one clip after confirming the video supports editing:
 
 ```bash
-npm run cli -- edit 627410861853514292 2 "Make the expression more natural."
+npm run cli -- growth-studio video edit 627410861853514292 2 "Make the expression more natural."
 ```
 
 ## Standard Agent Workflow
@@ -141,10 +141,10 @@ npm run cli -- edit 627410861853514292 2 "Make the expression more natural."
    - Prefer `--folder-name <customer-or-topic>` for customer/topic pilots; the CLI reuses a case-insensitive matching folder or creates it when missing.
    - Use `--auto-folder` when payload metadata has `folder_name`, `customer`, `customer_name`, `brand`, `topic`, or `campaign`, or when `product.source_url` has a merchant domain such as `revolve.com`.
    - For customer pilots, set `metadata.customer` or `metadata.folder_name` to the customer/account name so similar product jobs land in the same folder.
-   - Use `npm run cli -- ensure-folder "<name>"` when you want to verify/create the folder without starting a video job.
+   - Use `npm run cli -- growth-studio folders ensure "<name>"` when you want to verify/create the folder without starting a video job.
 4. Prefer `run-job` for new jobs because it saves durable artifacts, including `folder.json` when folder resolution is used.
 5. Save or report the returned `job_dir`, `video_id`, `status`, `video_url`, `thumbnail_url`, and resolved `folder_id`/`folder_name`.
-6. If polling times out, keep the `job_dir` and `video_id`; another agent can resume with `npm run cli -- poll <video_id>` or inspect `jobs/<job>/`.
+6. If polling times out, keep the `job_dir` and `video_id`; another agent can resume with `npm run cli -- growth-studio video poll <video_id>` or inspect `jobs/<job>/`.
 7. Before submitting an edit, call `get` and verify `supports_edit: true` and an editable clip index. Editing is also asynchronous.
 
 ## Payload Template
@@ -164,8 +164,26 @@ For V2 folder targeting, put `folder_id` at the root of the create payload:
 For agent-created customer/topic jobs, prefer named or inferred folders instead of hardcoding old folder ids:
 
 ```bash
-npm run cli -- run-job --payload /absolute/path/revolve-payload.json --folder-name "REVOLVE"
+npm run cli -- growth-studio run-job --payload /absolute/path/revolve-payload.json --folder-name "REVOLVE"
 ```
+
+## Legacy Aliases
+
+Legacy `0.x` aliases still work and emit one deprecation warning:
+
+| Legacy | Canonical |
+|---|---|
+| `avatars` | `growth-studio avatars list` |
+| `folders` | `growth-studio folders list` |
+| `ensure-folder` | `growth-studio folders ensure` |
+| `upload-image` | `growth-studio upload image` |
+| `create-from-url` | `growth-studio video create-from-url` |
+| `create-from-json` | `growth-studio video create-from-json` |
+| `get` | `growth-studio video get` |
+| `poll` | `growth-studio video poll` |
+| `list` | `growth-studio video list` |
+| `edit` | `growth-studio video edit` |
+| `run-job` | `growth-studio run-job` |
 
 For manually provided product images:
 

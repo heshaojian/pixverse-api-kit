@@ -9,9 +9,7 @@ const SIGNING_KEY = "e2e-webhook-key";
 const TIMESTAMP = 1_800_000_000;
 
 function headersFor(rawBody, { nonce = "e2e-nonce", signatureBody = rawBody } = {}) {
-  const payload = JSON.parse(signatureBody);
-  const query = new URLSearchParams(Object.entries(payload).map(([key, value]) => [key, String(value)]));
-  const signed = `${TIMESTAMP}\n${nonce}\n${query}`;
+  const signed = `${TIMESTAMP}\n${nonce}\n${encodeURIComponent(signatureBody)}`;
   return {
     "Webhook-Timestamp": String(TIMESTAMP),
     "Webhook-Nonce": nonce,
@@ -50,18 +48,17 @@ test("returns exact plain ok only after verified delivery completes", async (t) 
   });
 });
 
-test("rejects invalid signatures and malformed payloads before delivery", async (t) => {
+test("verifies before parsing and never invokes delivery on failures", async (t) => {
   let mutations = 0;
   const url = await startHandler(t, { onDelivery: async () => { mutations += 1; } });
 
-  const invalidBody = JSON.stringify({ event: "forged" });
   const invalidSignature = await fetch(url, {
-    method: "POST", headers: headersFor(invalidBody, { signatureBody: '{"event":"different"}' }), body: invalidBody,
+    method: "POST", headers: headersFor("{", { signatureBody: "different" }), body: "{",
   });
   assert.equal(invalidSignature.status, 401);
 
   const malformedPayload = await fetch(url, {
-    method: "POST", headers: headersFor('{"event":"placeholder"}', { nonce: "malformed" }), body: "{",
+    method: "POST", headers: headersFor("{", { nonce: "malformed" }), body: "{",
   });
   assert.equal(malformedPayload.status, 400);
 
@@ -86,7 +83,7 @@ test("rejects replay and non-POST or oversized requests without delivery", async
 
   const oversized = "x".repeat(1_048_577);
   const oversizedResponse = await fetch(url, {
-    method: "POST", headers: headersFor('{"event":"large"}', { nonce: "large" }), body: oversized,
+    method: "POST", headers: headersFor(oversized, { nonce: "large" }), body: oversized,
   });
   assert.equal(oversizedResponse.status, 413);
   assert.equal(deliveries, 1);

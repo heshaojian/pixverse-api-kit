@@ -1,0 +1,27 @@
+{
+  "video.text": {
+    "prompt": "A clean product shot with subtle motion.",
+    "model": "v6",
+    "duration": 5,
+    "quality": "720p",
+    "aspect_ratio": "16:9"
+  },
+  "video.image": {
+    "img_id": "123456789012345678",
+    "prompt": "Add a slow camera push-in.",
+    "model": "v6",
+    "duration": 5,
+    "quality": "720p"
+  },
+  "agent.viral-recreation": {
+    "agent_id": "414562414124109",
+    "prompt": "Recreate the pacing with a similar product-safe composition.",
+    "quality": "720p",
+    "img_references": [
+      { "img_url": "https://cdn.example.test/reference.png" }
+    ],
+    "video_references": [
+      { "video_url": "https://cdn.example.test/reference.mp4" }
+    ]
+  }
+}

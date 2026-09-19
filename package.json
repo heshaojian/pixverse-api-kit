@@ -1,9 +1,9 @@
 {
   "name": "pixverse-api-kit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "Agent-safe PixVerse API tools for Growth Studio generation and brand pitch assets.",
+  "description": "Agent-safe PixVerse API CLI for Platform API and Growth Studio API workflows.",
   "bin": {
     "pixverse-api": "./src/cli.js"
   },
