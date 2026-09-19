@@ -187,7 +187,7 @@ Legacy `0.x` aliases still work and emit one deprecation warning:
 
 For manually provided product images:
 
-1. Run `upload-image` for each local file.
+1. Run `growth-studio upload image` for each local file.
 2. Put returned URLs under `product.images[].url`.
 3. Do not use arbitrary merchant image URLs in `product.images`.
 
@@ -209,6 +209,6 @@ Use these artifacts as the source of truth before retrying any creation or edit 
 - Missing key: add `PIXVERSE_GROWTH_API_KEY=mh_live_...` to `.env`.
 - `Token is invalid` from `folders`, `ensure-folder`, `--folder-name`, or `--auto-folder`: the configured Growth Studio folder endpoint is rejecting the current server-side token. Check `PIXVERSE_GROWTH_FOLDER_API_PREFIX` against the current OpenAPI guide, set `PIXVERSE_GROWTH_FOLDER_API_KEY` only if the backend requires a separate token, or use a verified `--folder-id` until backend auth is aligned.
 - `WORKSPACE_ACCESS_DENIED`: the key's user may lack workspace access or may have been removed.
-- `INVALID_REQUEST` for images: upload the image through `POST /openapi/v1/image/upload` using `upload-image`; do not paste external image URLs.
+- `INVALID_REQUEST` for images: upload the image through `POST /openapi/v1/image/upload` using `growth-studio upload image`; do not paste external image URLs.
 - `429`: wait according to `Retry-After`.
 - `failed` or `canceled` video status is a resource state, not necessarily a failed details request. Report the resource `error` object and `request_id`.
