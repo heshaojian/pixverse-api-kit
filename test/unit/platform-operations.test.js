@@ -68,6 +68,8 @@ test("billable classification is explicit instead of inferred from HTTP method",
 });
 
 test("reviewed body and asynchronous metadata matches the official contracts", () => {
+  assert.equal(getPlatformOperation("voice.create").resultIdPath, null);
+
   const voiceDelete = getPlatformOperation("voice.delete");
   assert.equal(voiceDelete.bodyMode, "json");
 
@@ -76,6 +78,34 @@ test("reviewed body and asynchronous metadata matches the official contracts", (
   assert.equal(swapMask.resultIdPath, null);
 
   assert.equal(getPlatformOperation("video.status").resultIdPath, "Resp.id");
+});
+
+test("success fixtures retain exact documented collection and empty response shapes", () => {
+  const usage = successShapes.find(({ id }) => id === "account.usage");
+  assert.deepEqual(usage.Resp, {
+    items: [],
+    next_cursor: "",
+    has_more: false,
+  });
+
+  const voiceCreate = successShapes.find(({ id }) => id === "voice.create");
+  assert.equal(Object.hasOwn(voiceCreate, "Resp"), false);
+
+  const voiceDelete = successShapes.find(({ id }) => id === "voice.delete");
+  assert.equal(Object.hasOwn(voiceDelete, "Resp"), false);
+
+  assert.deepEqual(
+    successShapes.find(({ id }) => id === "resource.templates").Resp,
+    { effect_items: [] },
+  );
+  assert.deepEqual(
+    successShapes.find(({ id }) => id === "resource.tts-speakers").Resp,
+    { total: 15, data: [{ speaker_id: "7", name: "Harper" }] },
+  );
+  assert.equal(
+    Object.hasOwn(successShapes.find(({ id }) => id === "resource.restyle-effects"), "Resp"),
+    false,
+  );
 });
 
 test("result paths resolve against independent documented success shapes", () => {

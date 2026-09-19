@@ -41,7 +41,7 @@ export const RESOURCE_OPERATIONS = [
     validationPolicy: "voice.create",
     billing: "non-billable",
     asynchronous: false,
-    resultIdPath: "Resp.speaker_id",
+    resultIdPath: null,
   },
   {
     id: "voice.delete",
