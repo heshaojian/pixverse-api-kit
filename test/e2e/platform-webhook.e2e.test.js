@@ -91,3 +91,41 @@ test("rejects replay and non-POST or oversized requests without delivery", async
   assert.equal(oversizedResponse.status, 413);
   assert.equal(deliveries, 1);
 });
+
+test("blocks a concurrent duplicate while the first delivery is in progress", async (t) => {
+  let releaseDelivery;
+  let deliveries = 0;
+  const gate = new Promise((resolve) => { releaseDelivery = resolve; });
+  const rawBody = JSON.stringify({ event: "processing", id: "concurrent" });
+  const url = await startHandler(t, {
+    onDelivery: async () => {
+      deliveries += 1;
+      await gate;
+    },
+  });
+  const options = { method: "POST", headers: headersFor(rawBody, { nonce: "concurrent" }), body: rawBody };
+  const firstResponse = fetch(url, options);
+  while (deliveries === 0) await new Promise((resolve) => setImmediate(resolve));
+  const duplicate = await fetch(url, options);
+  assert.equal(duplicate.status, 409);
+  releaseDelivery();
+  assert.equal((await firstResponse).status, 200);
+  assert.equal(deliveries, 1);
+});
+
+test("releases a nonce after transient delivery failure so the retry can succeed", async (t) => {
+  let attempts = 0;
+  const rawBody = JSON.stringify({ event: "retry", id: "retryable" });
+  const url = await startHandler(t, {
+    onDelivery: async () => {
+      attempts += 1;
+      if (attempts === 1) throw new Error("transient storage outage");
+    },
+  });
+  const options = { method: "POST", headers: headersFor(rawBody, { nonce: "retry-nonce" }), body: rawBody };
+  assert.equal((await fetch(url, options)).status, 500);
+  const retry = await fetch(url, options);
+  assert.equal(retry.status, 200);
+  assert.equal(await retry.text(), "ok");
+  assert.equal(attempts, 2);
+});

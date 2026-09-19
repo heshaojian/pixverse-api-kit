@@ -24,19 +24,38 @@ const REQUIRED_HEADERS = new Map([
 export function createMemoryNonceStore(options = {}) {
   const maxEntries = positiveInteger(options.maxEntries, MAX_NONCES);
   const entries = new Map();
+  function reserve(nonce, expiresAt, nowSeconds) {
+    for (const [storedNonce, entry] of entries) {
+      if (entry.expiresAt < nowSeconds) entries.delete(storedNonce);
+    }
+    if (entries.has(nonce)) return undefined;
+    if (entries.size >= maxEntries) throw webhookError(
+      "Webhook replay protection is temporarily unavailable.",
+      "WEBHOOK_NONCE_STORE_FULL",
+      503,
+    );
+    const token = Symbol("webhook-nonce-reservation");
+    entries.set(nonce, { expiresAt, state: "reserved", token });
+    return Object.freeze({
+      commit() {
+        const entry = entries.get(nonce);
+        if (entry?.state !== "reserved" || entry.token !== token) return false;
+        entries.set(nonce, { expiresAt: entry.expiresAt, state: "committed" });
+        return true;
+      },
+      release() {
+        const entry = entries.get(nonce);
+        if (entry?.state !== "reserved" || entry.token !== token) return false;
+        entries.delete(nonce);
+        return true;
+      },
+    });
+  }
   return Object.freeze({
+    reserve,
     consume(nonce, expiresAt, nowSeconds) {
-      for (const [storedNonce, storedExpiry] of entries) {
-        if (storedExpiry < nowSeconds) entries.delete(storedNonce);
-      }
-      if (entries.has(nonce)) return false;
-      if (entries.size >= maxEntries) throw webhookError(
-        "Webhook replay protection is temporarily unavailable.",
-        "WEBHOOK_NONCE_STORE_FULL",
-        503,
-      );
-      entries.set(nonce, expiresAt);
-      return true;
+      const reservation = reserve(nonce, expiresAt, nowSeconds);
+      return reservation ? reservation.commit() : false;
     },
   });
 }
@@ -77,20 +96,37 @@ export async function verifyPlatformWebhook(options = {}) {
   }
 
   const nonceStore = options.nonceStore;
-  if (!nonceStore || (typeof nonceStore.consume !== "function"
-    && !(typeof nonceStore.has === "function" && typeof nonceStore.add === "function"))) {
+  if (!nonceStore || (typeof nonceStore.reserve !== "function"
+    && !(typeof nonceStore.has === "function"
+      && typeof nonceStore.add === "function"
+      && typeof nonceStore.delete === "function"))) {
     throw webhookError(
       "Webhook replay protection is not configured.",
       "WEBHOOK_NONCE_STORE_INVALID",
       500,
     );
   }
-  const consumed = typeof nonceStore.consume === "function"
-    ? await nonceStore.consume(nonce, timestampSeconds + MAX_TIMESTAMP_SKEW_SECONDS, nowSeconds)
-    : consumeSetLikeNonceStore(nonceStore, nonce);
-  if (!consumed) throw webhookError("Webhook delivery was already received.", "WEBHOOK_REPLAY", 409);
+  const reservation = typeof nonceStore.reserve === "function"
+    ? await nonceStore.reserve(nonce, timestampSeconds + MAX_TIMESTAMP_SKEW_SECONDS, nowSeconds)
+    : reserveSetLikeNonceStore(nonceStore, nonce);
+  if (!reservation) throw webhookError("Webhook delivery was already received.", "WEBHOOK_REPLAY", 409);
+  if (typeof reservation.commit !== "function" || typeof reservation.release !== "function") {
+    throw webhookError(
+      "Webhook replay protection returned an invalid reservation.",
+      "WEBHOOK_NONCE_STORE_INVALID",
+      500,
+    );
+  }
 
-  return { timestamp, nonce, signature, traceId };
+  return {
+    timestamp,
+    nonce,
+    signature,
+    traceId,
+    payload,
+    commit: () => reservation.commit(),
+    release: () => reservation.release(),
+  };
 }
 
 export function parsePlatformWebhook(rawBody) {
@@ -117,24 +153,39 @@ export function createPlatformWebhookHandler(options = {}) {
   const nonceStore = options.nonceStore ?? createMemoryNonceStore();
 
   return async function platformWebhookHandler(request, response) {
+    let verification;
     try {
       if (request.method !== "POST") {
         response.setHeader("allow", "POST");
         throw webhookError("Method not allowed.", "WEBHOOK_METHOD_NOT_ALLOWED", 405);
       }
       const rawBody = await readRawBody(request);
-      const verification = await verifyPlatformWebhook({
+      verification = await verifyPlatformWebhook({
         rawBody,
         headers: request.rawHeaders ?? request.headers,
         secret: options.secret,
         now: options.now,
         nonceStore,
       });
-      const payload = parsePlatformWebhook(rawBody);
-      await options.onDelivery(payload, verification);
+      const context = {
+        timestamp: verification.timestamp,
+        nonce: verification.nonce,
+        signature: verification.signature,
+        traceId: verification.traceId,
+      };
+      await options.onDelivery(verification.payload, context);
       response.writeHead(200, { "content-type": "text/plain; charset=utf-8" });
       response.end("ok");
+      await verification.commit();
+      verification = undefined;
     } catch (error) {
+      if (verification) {
+        try {
+          await verification.release();
+        } catch {
+          // The response remains a failure; never disclose nonce-store internals.
+        }
+      }
       if (response.headersSent) {
         response.end();
         return;
@@ -272,10 +323,22 @@ function signWebhookQuery(secret, timestamp, nonce, query) {
     .digest();
 }
 
-function consumeSetLikeNonceStore(store, nonce) {
-  if (store.has(nonce)) return false;
+function reserveSetLikeNonceStore(store, nonce) {
+  if (store.has(nonce)) return undefined;
   store.add(nonce);
-  return true;
+  let state = "reserved";
+  return Object.freeze({
+    commit() {
+      if (state !== "reserved") return false;
+      state = "committed";
+      return true;
+    },
+    release() {
+      if (state !== "reserved") return false;
+      state = "released";
+      return store.delete(nonce);
+    },
+  });
 }
 
 function resolveNow(now) {

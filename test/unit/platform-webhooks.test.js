@@ -39,12 +39,21 @@ test("verifies the documented Base64 HMAC-SHA256 formula and normalizes header c
     now: () => TIMESTAMP,
     nonceStore: createMemoryNonceStore(),
   });
-  assert.deepEqual(result, {
+  assert.deepEqual({
+    timestamp: result.timestamp,
+    nonce: result.nonce,
+    signature: result.signature,
+    traceId: result.traceId,
+  }, {
     timestamp: String(TIMESTAMP),
     nonce: "nonce-1",
     signature: headers["Webhook-Signature"],
     traceId: "trace-1",
   });
+  assert.deepEqual({ ...result.payload }, JSON.parse(RAW_BODY));
+  assert.equal(typeof result.commit, "function");
+  assert.equal(typeof result.release, "function");
+  assert.equal(await result.release(), true);
 });
 
 for (const [name, configure] of [
@@ -107,6 +116,8 @@ test("rejects nonce replay, including concurrent verification", async () => {
   const results = await Promise.allSettled([attempt(), attempt(), attempt()]);
   assert.equal(results.filter(({ status }) => status === "fulfilled").length, 1);
   assert.equal(results.filter(({ status, reason }) => status === "rejected" && reason.code === "WEBHOOK_REPLAY").length, 2);
+  const [{ value }] = results.filter(({ status }) => status === "fulfilled");
+  assert.equal(await value.release(), true);
 });
 
 test("bounds and expires the in-memory nonce store", () => {
@@ -128,7 +139,30 @@ test("supports byte bodies, Headers, Date clocks, and Set replay stores", async 
     now: () => new Date(TIMESTAMP * 1_000),
     nonceStore,
   };
-  assert.equal((await verifyPlatformWebhook(input)).nonce, "nonce-1");
+  const reserved = await verifyPlatformWebhook(input);
+  assert.equal(reserved.nonce, "nonce-1");
+  await assert.rejects(verifyPlatformWebhook(input), (error) => error.code === "WEBHOOK_REPLAY");
+  assert.equal(await reserved.release(), true);
+  const committed = await verifyPlatformWebhook(input);
+  assert.equal(await committed.commit(), true);
+  await assert.rejects(verifyPlatformWebhook(input), (error) => error.code === "WEBHOOK_REPLAY");
+});
+
+test("standalone verification requires an explicit commit or release", async () => {
+  const nonceStore = createMemoryNonceStore();
+  const input = {
+    rawBody: RAW_BODY,
+    headers: signedHeaders(),
+    secret: SIGNING_KEY,
+    now: () => TIMESTAMP,
+    nonceStore,
+  };
+  const first = await verifyPlatformWebhook(input);
+  await assert.rejects(verifyPlatformWebhook(input), (error) => error.code === "WEBHOOK_REPLAY");
+  assert.equal(await first.release(), true);
+  const retry = await verifyPlatformWebhook(input);
+  assert.equal(await retry.commit(), true);
+  assert.equal(await retry.release(), false);
   await assert.rejects(verifyPlatformWebhook(input), (error) => error.code === "WEBHOOK_REPLAY");
 });
 
@@ -150,6 +184,7 @@ test("matches independent official-style insertion-order and sorted signature ve
       nonceStore: createMemoryNonceStore(),
     });
     assert.equal(verified.nonce, common["Webhook-Nonce"]);
+    assert.equal(await verified.release(), true);
   }
 });
 
