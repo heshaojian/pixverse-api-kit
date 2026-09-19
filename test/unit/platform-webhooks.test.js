@@ -10,6 +10,7 @@ import {
 } from "../../src/platform/webhooks.js";
 
 const SIGNING_KEY = "unit-test-webhook-key";
+const VECTOR_KEY = "official-vector-key";
 const TIMESTAMP = 1_800_000_000;
 const RAW_BODY = JSON.stringify({ event: "video.completed", video_id: "9007199254740993123" });
 
@@ -17,7 +18,10 @@ function signedHeaders(rawBody = RAW_BODY, overrides = {}) {
   const timestamp = String(overrides.timestamp ?? TIMESTAMP);
   const nonce = overrides.nonce ?? "nonce-1";
   const signingKey = overrides.signingKey ?? SIGNING_KEY;
-  const signed = `${timestamp}\n${nonce}\n${encodeURIComponent(rawBody)}`;
+  const payload = JSON.parse(rawBody);
+  const entries = Object.entries(payload).map(([key, value]) => [key, String(value)]);
+  if (overrides.sortKeys) entries.sort(([left], [right]) => left.localeCompare(right));
+  const signed = `${timestamp}\n${nonce}\n${new URLSearchParams(entries)}`;
   return {
     "Webhook-Timestamp": timestamp,
     "Webhook-Nonce": nonce,
@@ -44,7 +48,10 @@ test("verifies the documented Base64 HMAC-SHA256 formula and normalizes header c
 });
 
 for (const [name, configure] of [
-  ["altered body", () => ({ rawBody: `${RAW_BODY} `, headers: signedHeaders() })],
+  ["altered payload field", () => ({
+    rawBody: JSON.stringify({ event: "video.failed", video_id: "9007199254740993123" }),
+    headers: signedHeaders(),
+  })],
   ["wrong signing key", () => ({ rawBody: RAW_BODY, headers: signedHeaders(RAW_BODY, { signingKey: "other" }) })],
   ["missing required header", () => {
     const headers = signedHeaders();
@@ -65,7 +72,7 @@ for (const [name, configure] of [
   ["non-string raw body", () => ({ rawBody: {}, headers: signedHeaders() })],
   ["oversized raw body", () => {
     const rawBody = "x".repeat(1_048_577);
-    return { rawBody, headers: signedHeaders(rawBody) };
+    return { rawBody, headers: signedHeaders() };
   }],
   ["oversized nonce", () => ({ rawBody: RAW_BODY, headers: signedHeaders(RAW_BODY, { nonce: "n".repeat(257) }) })],
 ]) {
@@ -123,6 +130,43 @@ test("supports byte bodies, Headers, Date clocks, and Set replay stores", async 
   };
   assert.equal((await verifyPlatformWebhook(input)).nonce, "nonce-1");
   await assert.rejects(verifyPlatformWebhook(input), (error) => error.code === "WEBHOOK_REPLAY");
+});
+
+test("matches independent official-style insertion-order and sorted signature vectors", async () => {
+  const rawBody = '{"z":"a b&=+~!*\u0027()","a":true,"none":"null","num":10.5}';
+  const common = {
+    "Webhook-Timestamp": String(TIMESTAMP),
+    "Webhook-Nonce": "0123456789abcdef0123456789abcdef",
+  };
+  for (const signature of [
+    "Z7ncfqZaszY/Y6k5NKWvSmdu333nClL51kgYgYFrhoQ=",
+    "Yk/kgd9aBU9xdWaM97rylL+P4/Dw5iN3T80C0Em1Lo8=",
+  ]) {
+    const verified = await verifyPlatformWebhook({
+      rawBody,
+      headers: { ...common, "Webhook-Signature": signature },
+      secret: VECTOR_KEY,
+      now: () => TIMESTAMP,
+      nonceStore: createMemoryNonceStore(),
+    });
+    assert.equal(verified.nonce, common["Webhook-Nonce"]);
+  }
+});
+
+test("rejects composite and null values absent from the official canonicalization", async () => {
+  for (const [nonce, rawBody] of [
+    ["null-value", '{"id":"1","value":null}'],
+    ["array-value", '{"id":"1","value":[1,2]}'],
+    ["object-value", '{"id":"1","value":{"nested":true}}'],
+  ]) {
+    await assert.rejects(verifyPlatformWebhook({
+      rawBody,
+      headers: signedHeaders(RAW_BODY, { nonce }),
+      secret: SIGNING_KEY,
+      now: () => TIMESTAMP,
+      nonceStore: createMemoryNonceStore(),
+    }), (error) => error.code === "WEBHOOK_PAYLOAD_UNSUPPORTED");
+  }
 });
 
 test("fails closed for invalid replay, clock, and header inputs", async () => {
