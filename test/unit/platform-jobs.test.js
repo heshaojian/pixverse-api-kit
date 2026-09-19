@@ -59,6 +59,8 @@ test("submit follows validate, durable request, one submit, ID, snapshots, final
   assert.deepEqual(artifacts["video-id.json"], { video_id: "627410861853514292" });
   assert.deepEqual(artifacts["polling.jsonl"].map(({ status }) => status), ["processing", "succeeded"]);
   assert.equal(artifacts["final.json"].status, "succeeded");
+  assert.equal(artifacts["final.json"].trace_id, TRACE);
+  assert.equal(artifacts["final.json"].status_trace_id, `${TRACE}-status`);
   assert.equal(JSON.stringify(artifacts).includes("never persist"), false);
   assert.equal(Object.hasOwn(INPUT, "payload"), false);
 });
@@ -86,10 +88,12 @@ test("resume reads artifacts first, polls known IDs, and never submits a generat
   const calls = [];
   const resumed = await resumePlatformJob({ execute: async (id, input) => {
     calls.push([id, input]);
-    return { operation: id, traceId: TRACE, envelope: { ErrCode: 0, Resp: { id: "42", status: 1 } }, data: { id: "42", status: 1 } };
+    return { operation: id, traceId: "22222222-2222-4222-8222-222222222222", envelope: { ErrCode: 0, Resp: { id: "42", status: 1 } }, data: { id: "42", status: 1 } };
   } }, submitted.job_dir, { sleep: async () => {}, now: () => 0 });
   assert.deepEqual(calls, [["video.status", { video_id: "42" }]]);
   assert.equal(resumed.status, "succeeded");
+  assert.equal(resumed.trace_id, TRACE);
+  assert.equal(resumed.status_trace_id, "22222222-2222-4222-8222-222222222222");
 });
 
 test("resume without a saved ID performs no network request and returns reconciliation evidence", async (t) => {

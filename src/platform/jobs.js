@@ -158,27 +158,15 @@ async function pollKnownJob(client, { jobDir, operation, id, traceId, options })
       operation: operation.id,
       traceId,
     });
-    const final = {
-      provider: "platform",
-      operation: operation.id,
-      trace_id: traceId,
-      job_dir: jobDir,
-      id: String(id),
-      ...finalSnapshot,
-    };
+    const final = finalJobSnapshot({ operation, traceId, jobDir, id, snapshot: finalSnapshot });
     await writeArtifact(jobDir, "final.json", final);
     if (final.status !== "succeeded") throw terminalStatusError(final);
     return final;
   } catch (error) {
     if (error?.category === "timeout" && lastSnapshot) {
-      await writeArtifactIfMissing(jobDir, "final.json", {
-        provider: "platform",
-        operation: operation.id,
-        trace_id: traceId,
-        job_dir: jobDir,
-        id: String(id),
-        ...lastSnapshot,
-      });
+      await writeArtifactIfMissing(jobDir, "final.json", finalJobSnapshot({
+        operation, traceId, jobDir, id, snapshot: lastSnapshot,
+      }));
     }
     await persistFailure(jobDir, error, { operation: operation.id, traceId });
     throw error;
@@ -199,6 +187,18 @@ function submittedResult({ operation, created, id, jobDir, status }) {
     status,
     envelope: redact(created.envelope),
     data: redact(created.data),
+  };
+}
+
+function finalJobSnapshot({ operation, traceId, jobDir, id, snapshot }) {
+  return {
+    provider: "platform",
+    operation: operation.id,
+    job_dir: jobDir,
+    id: String(id),
+    ...snapshot,
+    status_trace_id: snapshot.trace_id,
+    trace_id: traceId,
   };
 }
 

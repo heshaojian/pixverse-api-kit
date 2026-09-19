@@ -48,6 +48,8 @@ test("unknown status is preserved until timeout with final and error artifacts",
   assert.equal(artifacts["polling.jsonl"].at(-1).status, "unknown");
   assert.equal(artifacts["polling.jsonl"].at(-1).raw_status, 777);
   assert.equal(artifacts["final.json"].status, "unknown");
+  assert.equal(artifacts["final.json"].trace_id, artifacts["request.json"].trace_id);
+  assert.equal(artifacts["final.json"].status_trace_id, "status");
   assert.equal(artifacts["error.json"].category, "timeout");
 
   const calls = [];
