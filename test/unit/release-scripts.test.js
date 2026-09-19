@@ -87,10 +87,21 @@ test("secret scanner covers every tracked text surface, ignores untracked and bi
 
 test("default tests are hermetic and pitch asset tests are opt-in", async () => {
   const packageJson = JSON.parse(await fs.readFile(new URL("../../package.json", import.meta.url), "utf8"));
+  const rootApiTests = [
+    "test/client.test.js",
+    "test/folders.test.js",
+    "test/jobs.test.js",
+    "test/platform-skill.test.js",
+  ];
 
   assert.equal(packageJson.scripts.test, "npm run test:api");
   assert.match(packageJson.scripts["test:api"], /--import \.\/scripts\/no-paid-network\.js/);
   assert.doesNotMatch(packageJson.scripts["test:api"], /brand-pitch|plaud-|revolve-/);
+  for (const file of rootApiTests) {
+    assert.match(packageJson.scripts["test:api"], new RegExp(file.replaceAll(".", "\\.")));
+    assert.match(packageJson.scripts["test:coverage"], new RegExp(file.replaceAll(".", "\\.")));
+    assert.doesNotMatch(packageJson.scripts["test:pitches"], new RegExp(file.replaceAll(".", "\\.")));
+  }
   assert.match(packageJson.scripts["test:pitches"], /brand-pitch/);
   assert.match(packageJson.scripts["test:pitches"], /plaud-/);
   assert.match(packageJson.scripts["test:pitches"], /revolve-/);

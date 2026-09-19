@@ -84,7 +84,7 @@ export async function resumeGrowthStudioJob(client, jobDirectory, options = {}) 
     const final = await pollKnownVideo(client, jobDir, videoId, request.trace_id, options);
     return resultFromFinal(jobDir, videoId, final);
   } catch (error) {
-    await persistFailure(jobDir, error, request.trace_id);
+    await persistFailure(jobDir, error, request.trace_id, { preserveExisting: true });
     throw error;
   }
 }
@@ -142,7 +142,8 @@ async function writeArtifactIfMissing(jobDir, name, value) {
   await writeArtifact(jobDir, name, value);
 }
 
-async function persistFailure(jobDir, error, traceId) {
+async function persistFailure(jobDir, error, traceId, options = {}) {
+  if (options.preserveExisting) await archivePriorArtifact(jobDir, "error.json", "error-prior");
   const publicError = serializeError(error);
   await writeArtifactIfMissing(jobDir, "error.json", redact({
     name: publicError.name,
@@ -158,18 +159,23 @@ async function persistFailure(jobDir, error, traceId) {
 }
 
 async function archivePriorFinal(jobDir) {
-  const source = path.join(jobDir, "final.json");
+  await archivePriorArtifact(jobDir, "final.json", "final-prior");
+}
+
+async function archivePriorArtifact(jobDir, sourceName, targetPrefix) {
+  const source = path.join(jobDir, sourceName);
   for (let index = 1; index < Number.MAX_SAFE_INTEGER; index += 1) {
-    const target = path.join(jobDir, `final-prior-${index}.json`);
+    const target = path.join(jobDir, `${targetPrefix}-${index}.json`);
     try {
       await fs.link(source, target);
       await fs.unlink(source);
-      return;
+      return true;
     } catch (error) {
+      if (error?.code === "ENOENT") return false;
       if (error?.code !== "EEXIST") throw error;
     }
   }
-  throw new Error("Could not preserve the prior Growth Studio final artifact.");
+  throw new Error(`Could not preserve the prior Growth Studio ${sourceName} artifact.`);
 }
 
 function isTerminal(status) {

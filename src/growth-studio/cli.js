@@ -86,7 +86,8 @@ export async function runGrowthStudioCommand(args, context = {}) {
   if (resource === "resume") {
     const options = parseResumeOptions([operation, ...rest].filter((value) => value !== undefined));
     const jobDirectory = path.resolve(context.cwd ?? process.cwd(), options.jobDirectory);
-    return (context.resumeGrowthStudioJob ?? resumeGrowthStudioJob)(getClient(), jobDirectory, options);
+    const resumeClient = context.client ?? createDeferredResumeClient(getClient);
+    return (context.resumeGrowthStudioJob ?? resumeGrowthStudioJob)(resumeClient, jobDirectory, options);
   }
 
   throw new Error(`Unknown Growth Studio command: ${args.join(" ")}`);
@@ -119,6 +120,14 @@ function createClient(context) {
   if (context.fetchImpl) options.fetchImpl = context.fetchImpl;
   if (context.sleep) options.sleep = context.sleep;
   return new GrowthStudioClient(options);
+}
+
+function createDeferredResumeClient(getClient) {
+  return Object.freeze({
+    pollVideo(...args) {
+      return getClient().pollVideo(...args);
+    },
+  });
 }
 
 async function createFromUrl(client, options) {

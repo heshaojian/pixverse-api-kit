@@ -477,6 +477,20 @@ test("Growth Studio resume delegates to poll-only recovery", async () => {
   assert.equal(calls[0][1], "/tmp/growth-job");
 });
 
+test("Growth Studio resume can require reconciliation without loading configuration", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-growth-cli-resume-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const jobDir = path.join(root, "unknown-job");
+  await fs.mkdir(jobDir);
+  await fs.writeFile(path.join(jobDir, "request.json"), JSON.stringify({ trace_id: "fixture-trace" }));
+
+  const result = await runGrowthStudioCommand(["resume", jobDir], { env: {} });
+
+  assert.equal(result.status, "reconciliation_required");
+  assert.equal(result.retryable, false);
+  assert.equal(result.trace_id, "fixture-trace");
+});
+
 test("Growth Studio help documents the canonical command tree", () => {
   const help = getGrowthStudioHelp();
   assert.match(help, /pixverse-api growth-studio avatars list/);

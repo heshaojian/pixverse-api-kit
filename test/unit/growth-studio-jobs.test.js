@@ -74,3 +74,32 @@ test("Growth Studio resume without an ID requires reconciliation without network
   assert.equal(result.retryable, false);
   assert.equal(result.trace_id, "fixture-trace");
 });
+
+test("Growth Studio resume preserves an earlier error when polling fails again", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-growth-resume-error-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const jobDir = path.join(root, "failed-job");
+  await fs.mkdir(jobDir);
+  await fs.writeFile(path.join(jobDir, "request.json"), JSON.stringify({ trace_id: "fixture-trace" }));
+  await fs.writeFile(path.join(jobDir, "video-id.json"), JSON.stringify({ video_id: "627410861853514292" }));
+  await fs.writeFile(path.join(jobDir, "error.json"), JSON.stringify({
+    message: "Earlier safe failure",
+    trace_id: "fixture-trace",
+  }));
+
+  await assert.rejects(
+    resumeGrowthStudioJob({
+      async pollVideo() {
+        throw new TypeError("fixture transport detail that must not persist");
+      },
+    }, jobDir, { initialDelaySeconds: 0 }),
+    /fixture transport detail/,
+  );
+
+  const prior = JSON.parse(await fs.readFile(path.join(jobDir, "error-prior-1.json"), "utf8"));
+  const current = JSON.parse(await fs.readFile(path.join(jobDir, "error.json"), "utf8"));
+  assert.equal(prior.message, "Earlier safe failure");
+  assert.equal(current.message, "Growth Studio job failed. Inspect saved artifacts before recovery.");
+  assert.equal(current.category, "transport");
+  assert.doesNotMatch(JSON.stringify(current), /fixture transport detail/);
+});
