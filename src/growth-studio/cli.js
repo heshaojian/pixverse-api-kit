@@ -18,19 +18,23 @@ export const GROWTH_STUDIO_LEGACY_COMMAND_MAPPINGS = Object.freeze({
 });
 
 export async function runGrowthStudioCommand(args, context = {}) {
-  const client = context.client || createClient(context);
   const [resource, operation, ...rest] = args;
+  let client;
+  const getClient = () => {
+    client ??= context.client || createClient(context);
+    return client;
+  };
 
   if (resource === "avatars" && operation === "list") {
-    return (await client.listAvatars({ traceId: traceId("list-avatars") })).body;
+    return (await getClient().listAvatars({ traceId: traceId("list-avatars") })).body;
   }
   if (resource === "folders" && operation === "list") {
-    return (await client.listFolders({ traceId: traceId("list-folders") })).body;
+    return (await getClient().listFolders({ traceId: traceId("list-folders") })).body;
   }
   if (resource === "folders" && operation === "ensure") {
     const options = parseEnsureFolderOptions(rest);
     if (!options.folderName) throw new Error("folders ensure requires a folder name.");
-    return resolveFolderForPayload(client, {}, {
+    return resolveFolderForPayload(getClient(), {}, {
       folderName: options.folderName,
       traceId: traceId("ensure-folder"),
     });
@@ -38,38 +42,38 @@ export async function runGrowthStudioCommand(args, context = {}) {
   if (resource === "upload" && operation === "image") {
     const [filePath] = rest;
     if (!filePath) throw new Error("upload image requires a file path.");
-    return (await client.uploadImage(filePath, { traceId: traceId("upload-image") })).body;
+    return (await getClient().uploadImage(filePath, { traceId: traceId("upload-image") })).body;
   }
   if (resource === "video" && operation === "create-from-url") {
-    return createFromUrl(client, rest);
+    return createFromUrl(getClient(), rest);
   }
   if (resource === "video" && operation === "create-from-json") {
-    return createFromJson(client, rest);
+    return createFromJson(getClient(), rest);
   }
   if (resource === "video" && (operation === "get" || operation === "status")) {
     const [videoId] = rest;
-    return (await client.getVideo(videoId, { traceId: traceId("get-video") })).body;
+    return (await getClient().getVideo(videoId, { traceId: traceId("get-video") })).body;
   }
   if (resource === "video" && operation === "poll") {
     const [videoId] = rest;
-    return client.pollVideo(videoId, { traceId: traceId("poll-video") });
+    return getClient().pollVideo(videoId, { traceId: traceId("poll-video") });
   }
   if (resource === "video" && operation === "list") {
-    return (await client.listVideos({
+    return (await getClient().listVideos({
       ...parseListOptions(rest),
       traceId: traceId("list-videos"),
     })).body;
   }
   if (resource === "video" && operation === "edit") {
     const [videoId, clipIndex, ...instructionParts] = rest;
-    return (await client.editVideo(
+    return (await getClient().editVideo(
       videoId,
       { clip_index: Number(clipIndex), instruction: instructionParts.join(" ") },
       { traceId: traceId("edit-video") },
     )).body;
   }
   if (resource === "run-job") {
-    return runJob(client, [operation, ...rest].filter((value) => value !== undefined));
+    return runJob(getClient(), [operation, ...rest].filter((value) => value !== undefined));
   }
 
   throw new Error(`Unknown Growth Studio command: ${args.join(" ")}`);

@@ -365,6 +365,13 @@ test("Growth Studio command adapter rejects incomplete commands without configur
   );
 });
 
+test("unknown Growth Studio commands fail before configuration is loaded", async () => {
+  await assert.rejects(
+    runGrowthStudioCommand(["nope"], { env: {} }),
+    /Unknown Growth Studio command: nope/,
+  );
+});
+
 test("Growth Studio help documents the canonical command tree", () => {
   const help = getGrowthStudioHelp();
   assert.match(help, /pixverse-api growth-studio avatars list/);
