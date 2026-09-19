@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import https from "node:https";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { promisify } from "node:util";
 
 import { collectJavaScriptFiles } from "../../scripts/check-syntax.js";
 import { assertSafeTestNetworkTarget } from "../../scripts/no-paid-network.js";
@@ -12,6 +14,8 @@ import {
   scanFiles,
   scanTextForSecrets,
 } from "../../scripts/scan-secrets.js";
+
+const execFileAsync = promisify(execFile);
 
 test("syntax walker covers nested source and test JavaScript", async () => {
   const files = await collectJavaScriptFiles(process.cwd());
@@ -44,28 +48,63 @@ test("secret scanner rejects representative credentials and allows placeholders"
   }
 });
 
-test("secret scanner excludes ignored dotenv secrets and returns deterministic redacted findings", async (t) => {
+test("secret scanner covers every tracked text surface, ignores untracked and binary files, and redacts findings", async (t) => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-secret-scan-"));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
-  await fs.mkdir(path.join(root, "src"));
+  await fs.mkdir(path.join(root, "deploy"), { recursive: true });
+  await fs.mkdir(path.join(root, "payloads"), { recursive: true });
+  await fs.mkdir(path.join(root, "pixverse-cli-jobs", "sample"), { recursive: true });
+  await fs.mkdir(path.join(root, "node_modules", "tracked-package"), { recursive: true });
   await fs.writeFile(path.join(root, ".env"), "PIXVERSE_GROWTH_API_KEY=" + "mh_" + "live_never_print_this\n");
-  await fs.writeFile(path.join(root, ".env.example"), "PIXVERSE_GROWTH_API_KEY=mh_live_REPLACE_WITH_PRODUCTION_API_KEY\n");
-  await fs.writeFile(path.join(root, "src", "b.js"), "const token = '" + "mh_" + "live_bbbbbbbbbbbb';\n");
-  await fs.writeFile(path.join(root, "src", "a.js"), "const token = '" + "mh_" + "live_aaaaaaaaaaaa';\n");
+  await fs.writeFile(path.join(root, "deploy", "index.html"), "<p>safe</p>\nAuthorization: Bearer " + "deploysecret123456\n");
+  await fs.writeFile(path.join(root, "payloads", "request.json"), "{\n  \"PIXVERSE_PLATFORM_API_KEY\": \"" + "payload_secret_123456" + "\"\n}\n");
+  await fs.writeFile(path.join(root, "pixverse-cli-jobs", "sample", "response.json"), "safe\n" + "mh_" + "live_jobsecret123456\n");
+  await fs.writeFile(path.join(root, "binary.png"), Buffer.from([0x89, 0x50, 0x4e, 0x47, 0, 0x6d, 0x68, 0x5f, 0x6c, 0x69, 0x76, 0x65, 0x5f, 0x78]));
+  await fs.writeFile(path.join(root, "node_modules", "tracked-package", "index.js"), "const key = '" + "mh_" + "live_dependencysecret';\n");
+
+  await execFileAsync("git", ["init", "--quiet"], { cwd: root });
+  await execFileAsync("git", ["add", "deploy/index.html", "payloads/request.json", "pixverse-cli-jobs/sample/response.json", "binary.png", "node_modules/tracked-package/index.js"], { cwd: root });
 
   const scannable = await collectScannableFiles(root);
   assert.equal(scannable.includes(path.join(root, ".env")), false);
-  assert.equal(scannable.includes(path.join(root, ".env.example")), true);
+  assert.equal(scannable.includes(path.join(root, "deploy", "index.html")), true);
+  assert.equal(scannable.includes(path.join(root, "payloads", "request.json")), true);
+  assert.equal(scannable.includes(path.join(root, "pixverse-cli-jobs", "sample", "response.json")), true);
+  assert.equal(scannable.includes(path.join(root, "binary.png")), false);
+  assert.equal(scannable.includes(path.join(root, "node_modules", "tracked-package", "index.js")), false);
 
   const first = await scanFiles(root);
   const second = await scanFiles(root);
   assert.deepEqual(first, second);
-  assert.deepEqual(first.map(({ file, name }) => [path.relative(root, file), name]), [
-    ["src/a.js", "Growth Studio live key"],
-    ["src/b.js", "Growth Studio live key"],
+  assert.deepEqual(first.map(({ file, line, name }) => [path.relative(root, file), line, name]), [
+    ["deploy/index.html", 2, "Bearer token"],
+    ["payloads/request.json", 2, "Platform API key"],
+    ["pixverse-cli-jobs/sample/response.json", 2, "Growth Studio live key"],
   ]);
   assert.equal(JSON.stringify(first).includes("never_print_this"), false);
   assert.equal(first.every((finding) => !("value" in finding)), true);
+});
+
+test("default tests are hermetic and pitch asset tests are opt-in", async () => {
+  const packageJson = JSON.parse(await fs.readFile(new URL("../../package.json", import.meta.url), "utf8"));
+
+  assert.equal(packageJson.scripts.test, "npm run test:api");
+  assert.match(packageJson.scripts["test:api"], /--import \.\/scripts\/no-paid-network\.js/);
+  assert.doesNotMatch(packageJson.scripts["test:api"], /brand-pitch|plaud-|revolve-/);
+  assert.match(packageJson.scripts["test:pitches"], /brand-pitch/);
+  assert.match(packageJson.scripts["test:pitches"], /plaud-/);
+  assert.match(packageJson.scripts["test:pitches"], /revolve-/);
+});
+
+test("CI runs credential-free release gates", async () => {
+  const workflow = await fs.readFile(new URL("../../.github/workflows/ci.yml", import.meta.url), "utf8");
+
+  assert.match(workflow, /npm ci/);
+  assert.match(workflow, /npm run check/);
+  assert.match(workflow, /npm run test:coverage/);
+  assert.match(workflow, /npm run security:scan/);
+  assert.match(workflow, /npm audit --audit-level=high/);
+  assert.doesNotMatch(workflow, /PIXVERSE_(?:PLATFORM|GROWTH)_API_KEY/);
 });
 
 test("release targets enforce the no-paid-network guard without banning config assertions", async () => {
@@ -95,6 +134,7 @@ test("release targets enforce the no-paid-network guard without banning config a
     }
   }
   assert.deepEqual(productionHostFiles, [
+    "test/unit/growth-studio-compatibility.test.js",
     "test/unit/platform-config.test.js",
     "test/unit/release-scripts.test.js",
   ]);

@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Check syntax
+        run: npm run check
+
+      - name: Run API tests with coverage
+        run: npm run test:coverage
+
+      - name: Scan tracked text for secrets
+        run: npm run security:scan
+
+      - name: Audit high-severity vulnerabilities
+        run: npm audit --audit-level=high
