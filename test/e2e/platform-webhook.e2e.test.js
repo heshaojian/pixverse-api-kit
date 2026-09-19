@@ -129,3 +129,48 @@ test("releases a nonce after transient delivery failure so the retry can succeed
   assert.equal(await retry.text(), "ok");
   assert.equal(attempts, 2);
 });
+
+test("returns non-200 without ok or release when durable nonce commit throws", async (t) => {
+  let deliveries = 0;
+  let releases = 0;
+  const rawBody = JSON.stringify({ event: "commit", id: "commit-throws" });
+  const url = await startHandler(t, {
+    nonceStore: {
+      reserve: () => ({
+        commit: async () => { throw new Error(`private ${SIGNING_KEY}`); },
+        release: async () => { releases += 1; return true; },
+      }),
+    },
+    onDelivery: async () => { deliveries += 1; },
+  });
+  const response = await fetch(url, {
+    method: "POST", headers: headersFor(rawBody, { nonce: "commit-throws" }), body: rawBody,
+  });
+  const responseBody = await response.text();
+  assert.equal(response.status, 500);
+  assert.notEqual(responseBody, "ok");
+  assert.equal(responseBody.includes(SIGNING_KEY), false);
+  assert.equal(deliveries, 1);
+  assert.equal(releases, 0);
+});
+
+test("returns non-200 without release when durable nonce commit times out", async (t) => {
+  let releases = 0;
+  const rawBody = JSON.stringify({ event: "commit", id: "commit-timeout" });
+  const url = await startHandler(t, {
+    commitTimeoutMs: 5,
+    nonceStore: {
+      reserve: () => ({
+        commit: async () => new Promise(() => {}),
+        release: async () => { releases += 1; return true; },
+      }),
+    },
+    onDelivery: async () => {},
+  });
+  const response = await fetch(url, {
+    method: "POST", headers: headersFor(rawBody, { nonce: "commit-timeout" }), body: rawBody,
+  });
+  assert.equal(response.status, 500);
+  assert.equal(await response.text(), "webhook delivery failed");
+  assert.equal(releases, 0);
+});

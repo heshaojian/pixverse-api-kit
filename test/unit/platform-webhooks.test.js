@@ -166,6 +166,25 @@ test("standalone verification requires an explicit commit or release", async () 
   await assert.rejects(verifyPlatformWebhook(input), (error) => error.code === "WEBHOOK_REPLAY");
 });
 
+test("standalone commit errors remain explicit and do not implicitly release", async () => {
+  let releases = 0;
+  const commitError = new Error("durable nonce store unavailable");
+  const verified = await verifyPlatformWebhook({
+    rawBody: RAW_BODY,
+    headers: signedHeaders(RAW_BODY, { nonce: "commit-error" }),
+    secret: SIGNING_KEY,
+    now: () => TIMESTAMP,
+    nonceStore: {
+      reserve: () => ({
+        commit: async () => { throw commitError; },
+        release: async () => { releases += 1; return true; },
+      }),
+    },
+  });
+  await assert.rejects(verified.commit(), (error) => error === commitError);
+  assert.equal(releases, 0);
+});
+
 test("matches independent official-style insertion-order and sorted signature vectors", async () => {
   const rawBody = '{"z":"a b&=+~!*\u0027()","a":true,"none":"null","num":10.5}';
   const common = {

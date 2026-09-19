@@ -15,6 +15,8 @@ const MAX_NONCE_BYTES = 256;
 const MAX_TRACE_ID_BYTES = 256;
 const MAX_TIMESTAMP_SKEW_SECONDS = 300;
 const MAX_NONCES = 10_000;
+const DEFAULT_COMMIT_TIMEOUT_MS = 5_000;
+const MAX_COMMIT_TIMEOUT_MS = 60_000;
 const REQUIRED_HEADERS = new Map([
   ["webhook-timestamp", "timestamp"],
   ["webhook-nonce", "nonce"],
@@ -151,9 +153,11 @@ export function createPlatformWebhookHandler(options = {}) {
     throw webhookError("A webhook delivery callback is required.", "WEBHOOK_CONFIGURATION_INVALID", 500);
   }
   const nonceStore = options.nonceStore ?? createMemoryNonceStore();
+  const commitTimeoutMs = normalizeCommitTimeout(options.commitTimeoutMs);
 
   return async function platformWebhookHandler(request, response) {
     let verification;
+    let commitStarted = false;
     try {
       if (request.method !== "POST") {
         response.setHeader("allow", "POST");
@@ -174,18 +178,21 @@ export function createPlatformWebhookHandler(options = {}) {
         traceId: verification.traceId,
       };
       await options.onDelivery(verification.payload, context);
+      commitStarted = true;
+      await commitNonceReservation(verification, commitTimeoutMs);
+      verification = undefined;
       response.writeHead(200, { "content-type": "text/plain; charset=utf-8" });
       response.end("ok");
-      await verification.commit();
-      verification = undefined;
     } catch (error) {
-      if (verification) {
+      if (verification && !commitStarted) {
         try {
           await verification.release();
         } catch {
           // The response remains a failure; never disclose nonce-store internals.
         }
       }
+      // A started durable commit has an ambiguous outcome. Releasing here could
+      // admit a duplicate delivery, so only pre-commit failures are released.
       if (response.headersSent) {
         response.end();
         return;
@@ -341,6 +348,31 @@ function reserveSetLikeNonceStore(store, nonce) {
   });
 }
 
+async function commitNonceReservation(verification, timeoutMs) {
+  let timeout;
+  try {
+    const committed = await Promise.race([
+      Promise.resolve().then(() => verification.commit()),
+      new Promise((_, reject) => {
+        timeout = setTimeout(() => reject(webhookError(
+          "Webhook replay protection commit timed out.",
+          "WEBHOOK_NONCE_COMMIT_TIMEOUT",
+          500,
+        )), timeoutMs);
+      }),
+    ]);
+    if (committed !== true) {
+      throw webhookError(
+        "Webhook replay protection commit failed.",
+        "WEBHOOK_NONCE_COMMIT_FAILED",
+        500,
+      );
+    }
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 function resolveNow(now) {
   const value = typeof now === "function" ? now() : Date.now();
   if (value instanceof Date) return value.getTime();
@@ -356,6 +388,14 @@ function unixSeconds(value) {
 
 function positiveInteger(value, fallback) {
   return Number.isSafeInteger(value) && value > 0 ? value : fallback;
+}
+
+function normalizeCommitTimeout(value) {
+  if (value === undefined) return DEFAULT_COMMIT_TIMEOUT_MS;
+  if (!Number.isSafeInteger(value) || value < 1 || value > MAX_COMMIT_TIMEOUT_MS) {
+    throw webhookError("Invalid webhook commit timeout.", "WEBHOOK_CONFIGURATION_INVALID", 500);
+  }
+  return value;
 }
 
 function safeStatusCode(value) {
