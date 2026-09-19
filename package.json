@@ -11,9 +11,15 @@
     "cli": "node ./src/cli.js",
     "compare:revolve": "node ./qa/revolve-v3-v4-comparison/server.js",
     "test": "node --test",
-    "check": "node --check src/*.js qa/revolve-v3-v4-comparison/*.js test/*.test.js"
+    "check": "node --check src/*.js src/core/*.js qa/revolve-v3-v4-comparison/*.js test/*.test.js test/unit/*.test.js"
   },
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "json-bigint": "1.0.0"
+  },
+  "devDependencies": {
+    "c8": "10.1.3"
   }
 }
