@@ -122,3 +122,23 @@ test("payload recipes contain no credentials, private hosts, or production media
     assert.equal(new URL(match[0]).hostname.endsWith("example.test"), true);
   }
 });
+
+test("model, pricing, and limit guidance is dated and linked to primary sources", async () => {
+  const skill = await readSkill("SKILL.md");
+  const reference = await readSkill("references/models-pricing-and-limits.md");
+  const officialPages = [
+    "https://docs.platform.pixverse.ai/model-overview-2140345m0",
+    "https://docs.platform.pixverse.ai/c1-2067883m0",
+    "https://docs.platform.pixverse.ai/v6-2056814m0",
+    "https://docs.platform.pixverse.ai/capability-matrix-2144288m0",
+    "https://docs.platform.pixverse.ai/pricing-796039m0",
+    "https://docs.platform.pixverse.ai/rate-limit-796040m0",
+    "https://docs.platform.pixverse.ai/upload-image-13016631e0",
+    "https://docs.platform.pixverse.ai/upload-videoaudio-19094401e0",
+  ];
+  assert.match(skill, /references\/models-pricing-and-limits\.md/);
+  assert.match(reference, /Verified against official docs: 2026-09-19/);
+  assert.match(reference, /refresh|re-check|verify live/i);
+  for (const page of officialPages) assert.ok(reference.includes(page), page);
+  assert.doesNotMatch(reference, /654[- ]template/i);
+});

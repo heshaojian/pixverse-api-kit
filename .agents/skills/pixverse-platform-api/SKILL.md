@@ -12,6 +12,7 @@ Use this skill for the server-side Platform API through `pixverse-api platform`.
 - Read [capabilities](references/capabilities.md) to select an operation or build a prerequisite chain from a user goal.
 - Read [operation catalog](references/operation-catalog.md) for the exact command, method, path, billing class, async behavior, result ID, and official endpoint page.
 - Read [payload examples](references/payload-examples.json) before authoring a payload or query.
+- Read [models, pricing, and limits](references/models-pricing-and-limits.md) when model compatibility, upload constraints, credits, throughput, templates, speakers, or presets affect the task; refresh volatile facts live.
 
 ## Provider boundary
 
