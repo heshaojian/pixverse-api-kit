@@ -2,35 +2,35 @@
 
 Every documented Platform API endpoint currently covered by `pixverse-api platform`.
 
-| Marker | Command | Method | Path | Billing | Async |
-|---|---|---:|---|---|---:|
-| operation:account.balance | `platform account balance` | GET | `/openapi/v2/account/balance` | read-only | no |
-| operation:account.usage | `platform account usage` | POST | `/openapi/v2/account/billing/usage-detail` | read-only | no |
-| operation:upload.image | `platform upload image` | POST | `/openapi/v2/image/upload` | non-billable | no |
-| operation:upload.media | `platform upload media` | POST | `/openapi/v2/media/upload` | non-billable | no |
-| operation:resource.templates | `platform resource templates` | GET | `/openapi/v2/video/effects/templates/list` | read-only | no |
-| operation:resource.tts-speakers | `platform resource tts-speakers` | GET | `/openapi/v2/video/tts_speaker` | read-only | no |
-| operation:resource.restyle-effects | `platform resource restyle-effects` | GET | `/openapi/v2/video/restyle/list` | read-only | no |
-| operation:voice.create | `platform voice create` | POST | `/openapi/v2/video/tts_speaker` | non-billable | no |
-| operation:voice.delete | `platform voice delete` | DELETE | `/openapi/v2/video/tts_speaker/{speaker_id}` | non-billable | no |
-| operation:image.template | `platform image template` | POST | `/openapi/v2/image/template/generate` | billable | yes |
-| operation:image.status | `platform image status` | GET | `/openapi/v2/image/result/{image_id}` | read-only | no |
-| operation:video.text | `platform video text` | POST | `/openapi/v2/video/text/generate` | billable | yes |
-| operation:video.image | `platform video image` | POST | `/openapi/v2/video/img/generate` | billable | yes |
-| operation:video.template | `platform video template` | POST | `/openapi/v2/video/img/generate` | billable | yes |
-| operation:video.transition | `platform video transition` | POST | `/openapi/v2/video/transition/generate` | billable | yes |
-| operation:video.multi-transition | `platform video multi-transition` | POST | `/openapi/v2/video/multi_transition/generate` | billable | yes |
-| operation:video.lip-sync | `platform video lip-sync` | POST | `/openapi/v2/video/lip_sync/generate` | billable | yes |
-| operation:video.fusion | `platform video fusion` | POST | `/openapi/v2/video/fusion/generate` | billable | yes |
-| operation:video.restyle | `platform video restyle` | POST | `/openapi/v2/video/restyle/generate` | billable | yes |
-| operation:video.swap-mask | `platform video swap-mask` | POST | `/openapi/v2/video/mask/selection` | billable | no |
-| operation:video.swap | `platform video swap` | POST | `/openapi/v2/video/swap/generate` | billable | yes |
-| operation:video.sound-effect | `platform video sound-effect` | POST | `/openapi/v2/video/sound_effect/generate` | billable | yes |
-| operation:video.extend | `platform video extend` | POST | `/openapi/v2/video/extend/generate` | billable | yes |
-| operation:video.motion-control | `platform video motion-control` | POST | `/openapi/v2/video/mimic/generate` | billable | yes |
-| operation:video.modify | `platform video modify` | POST | `/openapi/v2/video/modify/generate` | billable | yes |
-| operation:video.upscale | `platform video upscale` | POST | `/openapi/v2/video/upscale/generate` | billable | yes |
-| operation:video.avatar | `platform video avatar` | POST | `/openapi/v2/video/avatar/generate` | billable | yes |
-| operation:agent.viral-recreation | `platform agent viral-recreation` | POST | `/openapi/v2/video/agent/generate` | billable | yes |
-| operation:agent.real-estate | `platform agent real-estate` | POST | `/openapi/v2/video/agent/generate` | billable | yes |
-| operation:video.status | `platform video status` | GET | `/openapi/v2/video/result/{video_id}` | read-only | no |
+| Marker | Command | Method | Path | Billing | Async | Result ID path | Key prerequisite/input boundary | Official docs |
+|---|---|---:|---|---|---:|---|---|---|
+| operation:account.balance | `platform account balance` | GET | `/openapi/v2/account/balance` | read-only | no | none | Platform credential; no payload | https://docs.platform.pixverse.ai/get-user-credit-balance-13778989e0 |
+| operation:account.usage | `platform account usage` | POST | `/openapi/v2/account/billing/usage-detail` | read-only | no | none | UTC `start_time` and `end_time`; optional cursor/limit | https://docs.platform.pixverse.ai/usage-deduction-query-41209884e0 |
+| operation:upload.image | `platform upload image` | POST | `/openapi/v2/image/upload` | non-billable | no | `Resp.img_id` | One supported local image or public `image_url` | https://docs.platform.pixverse.ai/upload-image-13016631e0 |
+| operation:upload.media | `platform upload media` | POST | `/openapi/v2/media/upload` | non-billable | no | `Resp.media_id` | One supported local or public video/audio source plus kind | https://docs.platform.pixverse.ai/upload-videoaudio-19094401e0 |
+| operation:resource.templates | `platform resource templates` | GET | `/openapi/v2/video/effects/templates/list` | read-only | no | none | Live type/page filters; do not rely on stored snapshots | https://docs.platform.pixverse.ai/get-template-list-38573064e0 |
+| operation:resource.tts-speakers | `platform resource tts-speakers` | GET | `/openapi/v2/video/tts_speaker` | read-only | no | none | Live page and speaker-type filters | https://docs.platform.pixverse.ai/get-speechlipsync-tts-list-19094355e0 |
+| operation:resource.restyle-effects | `platform resource restyle-effects` | GET | `/openapi/v2/video/restyle/list` | read-only | no | none | Live page filters before choosing `restyle_id` | https://docs.platform.pixverse.ai/restyle-effect-list-21992862e0 |
+| operation:voice.create | `platform voice create` | POST | `/openapi/v2/video/tts_speaker` | non-billable | no | none | Voice name plus uploaded audio `media_id` string | https://docs.platform.pixverse.ai/create-custom-voice-40528181e0 |
+| operation:voice.delete | `platform voice delete` | DELETE | `/openapi/v2/video/tts_speaker/{speaker_id}` | non-billable | no | none | Known custom `speaker_id` string | https://docs.platform.pixverse.ai/delete-custom-voice-40528243e0 |
+| operation:image.template | `platform image template` | POST | `/openapi/v2/image/template/generate` | billable | yes | `Resp.image_id` | Uploaded `img_ids` strings plus live `template_id` | https://docs.platform.pixverse.ai/image-template-generation-27564921e0 |
+| operation:image.status | `platform image status` | GET | `/openapi/v2/image/result/{image_id}` | read-only | no | `Resp.image_id` | Known `image_id` string; never resubmit generation to poll | https://docs.platform.pixverse.ai/get-image-generation-27565028e0 |
+| operation:video.text | `platform video text` | POST | `/openapi/v2/video/text/generate` | billable | yes | `Resp.video_id` | Prompt plus compatible model/duration/quality/aspect ratio | https://docs.platform.pixverse.ai/text-to-video-generation-13016634e0 |
+| operation:video.image | `platform video image` | POST | `/openapi/v2/video/img/generate` | billable | yes | `Resp.video_id` | Uploaded `img_id` string plus prompt/model/duration/quality | https://docs.platform.pixverse.ai/image-to-video-generation-13016633e0 |
+| operation:video.template | `platform video template` | POST | `/openapi/v2/video/img/generate` | billable | yes | `Resp.video_id` | Uploaded `img_id` plus live `template_id` and compatible generation fields | https://docs.platform.pixverse.ai/template-video-generation-33889423e0 |
+| operation:video.transition | `platform video transition` | POST | `/openapi/v2/video/transition/generate` | billable | yes | `Resp.video_id` | Exactly first/last uploaded frame IDs plus generation fields | https://docs.platform.pixverse.ai/transitionfirst-last-frame-generation-15123014e0 |
+| operation:video.multi-transition | `platform video multi-transition` | POST | `/openapi/v2/video/multi_transition/generate` | billable | yes | `Resp.video_id` | Ordered 2-7 uploaded frame IDs with per-segment durations | https://docs.platform.pixverse.ai/multi-transition-video-generation-24001841e0 |
+| operation:video.lip-sync | `platform video lip-sync` | POST | `/openapi/v2/video/lip_sync/generate` | billable | yes | `Resp.video_id` | Source video plus exactly one uploaded-audio or TTS source | https://docs.platform.pixverse.ai/speechlipsync-generation-19094278e0 |
+| operation:video.fusion | `platform video fusion` | POST | `/openapi/v2/video/fusion/generate` | billable | yes | `Resp.video_id` | Named image/video references plus prompt and compatible generation fields | https://docs.platform.pixverse.ai/fusionreference-to-video-generation-19884194e0 |
+| operation:video.restyle | `platform video restyle` | POST | `/openapi/v2/video/restyle/generate` | billable | yes | `Resp.video_id` | Source video plus live `restyle_id` | https://docs.platform.pixverse.ai/restyle-video-generation-21992681e0 |
+| operation:video.swap-mask | `platform video swap-mask` | POST | `/openapi/v2/video/mask/selection` | billable | no | none | Source video plus safe-integer-string `keyframe_id` | https://docs.platform.pixverse.ai/swap-mask-generation-24001877e0 |
+| operation:video.swap | `platform video swap` | POST | `/openapi/v2/video/swap/generate` | billable | yes | `Resp.video_id` | Source video, keyframe/mask from mask selection, replacement `img_id`, and quality | https://docs.platform.pixverse.ai/swap-video-generation-24001839e0 |
+| operation:video.sound-effect | `platform video sound-effect` | POST | `/openapi/v2/video/sound_effect/generate` | billable | yes | `Resp.video_id` | Source video plus sound description | https://docs.platform.pixverse.ai/sound-effect-generation-19884196e0 |
+| operation:video.extend | `platform video extend` | POST | `/openapi/v2/video/extend/generate` | billable | yes | `Resp.video_id` | Source video plus continuation prompt and compatible V6 fields | https://docs.platform.pixverse.ai/extend-generation-19094393e0 |
+| operation:video.motion-control | `platform video motion-control` | POST | `/openapi/v2/video/mimic/generate` | billable | yes | `Resp.video_id` | Motion source video plus subject `img_id` and quality | https://docs.platform.pixverse.ai/motion-control-mimic-generation-28748523e0 |
+| operation:video.modify | `platform video modify` | POST | `/openapi/v2/video/modify/generate` | billable | yes | `Resp.video_id` | Source video plus edit prompt; optional masks/references | https://docs.platform.pixverse.ai/modify-generation-33365578e0 |
+| operation:video.upscale | `platform video upscale` | POST | `/openapi/v2/video/upscale/generate` | billable | yes | `Resp.video_id` | Existing source video ID | https://docs.platform.pixverse.ai/upscale-video-37938008e0 |
+| operation:video.avatar | `platform video avatar` | POST | `/openapi/v2/video/avatar/generate` | billable | yes | `Resp.video_id` | Portrait `img_id` plus quality and exactly one uploaded-audio or TTS source | https://docs.platform.pixverse.ai/avatar-generation-40528034e0 |
+| operation:agent.viral-recreation | `platform agent viral-recreation` | POST | `/openapi/v2/video/agent/generate` | billable | yes | `Resp.video_id` | Fixed agent ID, prompt, image references, and exactly one video reference | https://docs.platform.pixverse.ai/viral-recreation-agent-41205382e0 |
+| operation:agent.real-estate | `platform agent real-estate` | POST | `/openapi/v2/video/agent/generate` | billable | yes | `Resp.video_id` | Fixed agent ID/model plus listing URL or supported image set | https://docs.platform.pixverse.ai/one-click-real-estate-video-42843647e0 |
+| operation:video.status | `platform video status` | GET | `/openapi/v2/video/result/{video_id}` | read-only | no | `Resp.id` | Known `video_id` string; never resubmit generation to poll | https://docs.platform.pixverse.ai/get-video-generation-status-13016632e0 |

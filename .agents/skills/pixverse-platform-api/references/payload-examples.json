@@ -1,27 +1,311 @@
 {
+  "account.balance": {
+    "description": "Read the current Platform credit balance.",
+    "input": {}
+  },
+  "account.usage": {
+    "description": "Query usage deductions and refunds over a UTC interval.",
+    "input": {
+      "start_time": "2026-09-01 00:00:00",
+      "end_time": "2026-09-18 00:00:00",
+      "limit": 20
+    }
+  },
+  "upload.image": {
+    "description": "Upload a public image URL for use by later operations.",
+    "input": {
+      "image_url": "https://cdn.example.test/reference.png",
+      "tag": "reference"
+    }
+  },
+  "upload.media": {
+    "description": "Upload a public video URL for use by later operations.",
+    "input": {
+      "file_url": "https://cdn.example.test/reference.mp4",
+      "kind": "video"
+    }
+  },
+  "resource.templates": {
+    "description": "List current video templates with pagination.",
+    "input": {
+      "type": 1,
+      "page": 1,
+      "pageSize": 20
+    }
+  },
+  "resource.tts-speakers": {
+    "description": "List current system and custom TTS speakers.",
+    "input": {
+      "page_num": 1,
+      "page_size": 20,
+      "speaker_type": "all"
+    }
+  },
+  "resource.restyle-effects": {
+    "description": "List current restyle effects with pagination.",
+    "input": {
+      "page_num": 1,
+      "page_size": 20
+    }
+  },
+  "voice.create": {
+    "description": "Create a custom voice from previously uploaded audio.",
+    "input": {
+      "name": "Sample voice",
+      "audio_media_id": "629000000000000003"
+    }
+  },
+  "voice.delete": {
+    "description": "Delete a known custom TTS speaker.",
+    "input": {
+      "speaker_id": "speaker-7"
+    }
+  },
+  "image.template": {
+    "description": "Generate an image from uploaded images and a current template.",
+    "input": {
+      "img_ids": [
+        "629000000000000001"
+      ],
+      "template_id": "42"
+    }
+  },
+  "image.status": {
+    "description": "Retrieve status for a known image generation ID.",
+    "input": {
+      "image_id": "629000000000000004"
+    }
+  },
   "video.text": {
-    "prompt": "A clean product shot with subtle motion.",
-    "model": "v6",
-    "duration": 5,
-    "quality": "720p",
-    "aspect_ratio": "16:9"
+    "description": "Generate a video from a text prompt.",
+    "input": {
+      "aspect_ratio": "16:9",
+      "duration": 5,
+      "model": "v6",
+      "prompt": "A paper boat drifts across a quiet pond.",
+      "quality": "720p"
+    }
   },
   "video.image": {
-    "img_id": "123456789012345678",
-    "prompt": "Add a slow camera push-in.",
-    "model": "v6",
-    "duration": 5,
-    "quality": "720p"
+    "description": "Animate one previously uploaded image.",
+    "input": {
+      "duration": 5,
+      "img_id": "629000000000000001",
+      "model": "v6",
+      "prompt": "Add a slow camera push-in.",
+      "quality": "720p"
+    }
+  },
+  "video.template": {
+    "description": "Apply a current managed video template to an uploaded image.",
+    "input": {
+      "duration": 5,
+      "img_id": "629000000000000001",
+      "model": "v6",
+      "prompt": "Animate the subject naturally.",
+      "quality": "720p",
+      "template_id": "42"
+    }
+  },
+  "video.transition": {
+    "description": "Interpolate between first and last uploaded frames.",
+    "input": {
+      "first_frame_img": "629000000000000001",
+      "last_frame_img": "629000000000000002",
+      "prompt": "Transition smoothly between the two scenes.",
+      "model": "v6",
+      "duration": 5,
+      "quality": "720p"
+    }
+  },
+  "video.multi-transition": {
+    "description": "Move through an ordered set of uploaded keyframes.",
+    "input": {
+      "model": "v5",
+      "quality": "720p",
+      "multi_transition": [
+        {
+          "img_id": "629000000000000001",
+          "duration": 3
+        },
+        {
+          "img_id": "629000000000000002"
+        }
+      ]
+    }
+  },
+  "video.lip-sync": {
+    "description": "Lip-sync an existing Platform video using one audio source.",
+    "input": {
+      "source_video_id": "629000000000000005",
+      "audio_media_id": "629000000000000003"
+    },
+    "alternatives": [
+      {
+        "label": "Use a TTS speaker and content instead of uploaded audio",
+        "input": {
+          "source_video_id": "629000000000000005",
+          "lip_sync_tts_speaker_id": "speaker-7",
+          "lip_sync_tts_content": "Welcome to the product tour."
+        }
+      }
+    ]
+  },
+  "video.fusion": {
+    "description": "Guide video generation with uploaded image references.",
+    "input": {
+      "image_references": [
+        {
+          "img_id": "629000000000000001"
+        }
+      ],
+      "prompt": "Combine the reference with a calm studio scene.",
+      "model": "v6",
+      "duration": 5,
+      "quality": "720p",
+      "aspect_ratio": "16:9"
+    }
+  },
+  "video.restyle": {
+    "description": "Apply a current restyle effect to an existing video.",
+    "input": {
+      "source_video_id": "629000000000000005",
+      "restyle_id": "629000000000000006"
+    }
+  },
+  "video.swap-mask": {
+    "description": "Select replaceable regions at a source-video keyframe.",
+    "input": {
+      "source_video_id": "629000000000000005",
+      "keyframe_id": "1"
+    }
+  },
+  "video.swap": {
+    "description": "Replace a selected region with an uploaded image.",
+    "input": {
+      "source_video_id": "629000000000000005",
+      "keyframe_id": "1",
+      "mask_id": "person-1",
+      "img_id": "629000000000000002",
+      "quality": "720p"
+    }
+  },
+  "video.sound-effect": {
+    "description": "Generate synchronized sound for an existing video.",
+    "input": {
+      "source_video_id": "629000000000000005",
+      "prompt": "Gentle rain and distant thunder."
+    }
+  },
+  "video.extend": {
+    "description": "Continue an existing video with a prompt.",
+    "input": {
+      "source_video_id": "629000000000000005",
+      "prompt": "Continue the camera movement into the next scene.",
+      "seed": 1,
+      "quality": "720p",
+      "duration": 5,
+      "model": "v6"
+    }
+  },
+  "video.motion-control": {
+    "description": "Transfer motion from a reference video to an uploaded subject image.",
+    "input": {
+      "source_video_id": "629000000000000005",
+      "img_id": "629000000000000002",
+      "quality": "720p"
+    }
+  },
+  "video.modify": {
+    "description": "Prompt-edit content in an existing video.",
+    "input": {
+      "source_video_id": "629000000000000005",
+      "prompt": "Change the sky to a soft sunset.",
+      "quality": "720p"
+    }
+  },
+  "video.upscale": {
+    "description": "Upscale an existing video.",
+    "input": {
+      "source_video_id": "629000000000000005"
+    }
+  },
+  "video.avatar": {
+    "description": "Create a talking avatar from a portrait and one audio source.",
+    "input": {
+      "img_id": "629000000000000001",
+      "quality": "720p",
+      "audio_media_id": "629000000000000003"
+    },
+    "alternatives": [
+      {
+        "label": "Use TTS instead of uploaded audio",
+        "input": {
+          "img_id": "629000000000000001",
+          "quality": "720p",
+          "lip_sync_tts_speaker_id": "speaker-7",
+          "lip_sync_tts_content": "Here is the latest update."
+        }
+      }
+    ]
   },
   "agent.viral-recreation": {
-    "agent_id": "414562414124109",
-    "prompt": "Recreate the pacing with a similar product-safe composition.",
-    "quality": "720p",
-    "img_references": [
-      { "img_url": "https://cdn.example.test/reference.png" }
-    ],
-    "video_references": [
-      { "video_url": "https://cdn.example.test/reference.mp4" }
+    "description": "Recreate pacing using image references and one video reference.",
+    "input": {
+      "agent_id": "414562414124109",
+      "prompt": "Recreate the pacing with a product-safe composition.",
+      "quality": "720p",
+      "img_references": [
+        {
+          "img_url": "https://cdn.example.test/reference.png"
+        }
+      ],
+      "video_references": [
+        {
+          "video_url": "https://cdn.example.test/reference.mp4"
+        }
+      ]
+    }
+  },
+  "agent.real-estate": {
+    "description": "Create a real-estate video from a public listing URL.",
+    "input": {
+      "agent_id": "419629433597950",
+      "model": "pro",
+      "product_url": "https://listing.example.test/home"
+    },
+    "alternatives": [
+      {
+        "label": "Use an image set instead of a listing URL",
+        "input": {
+          "agent_id": "419629433597950",
+          "model": "fast",
+          "prompt": "Create a concise property tour.",
+          "img_references": [
+            {
+              "img_url": "https://cdn.example.test/room-1.png"
+            },
+            {
+              "img_url": "https://cdn.example.test/room-2.png"
+            },
+            {
+              "img_url": "https://cdn.example.test/room-3.png"
+            },
+            {
+              "img_url": "https://cdn.example.test/room-4.png"
+            },
+            {
+              "img_url": "https://cdn.example.test/room-5.png"
+            }
+          ]
+        }
+      }
     ]
+  },
+  "video.status": {
+    "description": "Retrieve status for a known video generation ID.",
+    "input": {
+      "video_id": "629000000000000005"
+    }
   }
 }
