@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
+import fs from "node:fs/promises";
 import http from "node:http";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
 
 import { main } from "../../src/cli.js";
@@ -87,19 +90,23 @@ test("main injects the full context into canonical Growth Studio commands", asyn
 
 test("legacy commands write one deprecation line and unchanged JSON stdout", async () => {
   const output = captureOutput();
-  const exitCode = await main(["get", "627410861853514292"], {
+  const rawArgument = "627410861853514292\nINJECTED https://secret.example.test/private /tmp/private.json";
+  const exitCode = await main(["get", rawArgument], {
     env: {},
     ...output.context,
     runGrowthStudioCommand: async (args) => {
-      assert.deepEqual(args, ["video", "get", "627410861853514292"]);
+      assert.deepEqual(args, ["video", "get", rawArgument]);
       return { video_id: "627410861853514292" };
     },
   });
 
   assert.equal(exitCode, 0);
   assert.equal(JSON.parse(output.stdout()).video_id, "627410861853514292");
-  assert.equal(output.stderr().trim().split("\n").length, 1);
-  assert.match(output.stderr(), /deprecated.*growth-studio/i);
+  assert.equal(
+    output.stderr(),
+    'Warning: legacy command syntax is deprecated; use the "pixverse-api growth-studio" namespace.\n',
+  );
+  assert.doesNotMatch(output.stderr(), /INJECTED|secret\.example|private\.json/);
 });
 
 test("unknown providers fail cleanly and imported functions never exit the process", async () => {
@@ -149,6 +156,58 @@ test("executable CLI help and unknown commands return stable exit codes", async 
   assert.match(unknown.stderr, /Unknown provider or command/);
 });
 
+test("non-Growth executable routes do not read Growth Studio dotenv state", async () => {
+  const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-api-routing-"));
+  await fs.mkdir(path.join(cwd, ".env"));
+
+  const help = await runCli(["--help"], { cwd });
+  assert.equal(help.exitCode, 0);
+  assert.match(help.stdout, /pixverse-api growth-studio/);
+  assert.equal(help.stderr, "");
+
+  const unknown = await runCli(["unknown"], { cwd });
+  assert.equal(unknown.exitCode, 1);
+  assert.match(unknown.stderr, /Unknown provider or command/);
+  assert.doesNotMatch(unknown.stderr, /EISDIR|\.env/);
+
+  const platform = await runCli(["platform", "account", "balance"], { cwd });
+  assert.equal(platform.exitCode, 1);
+  assert.match(platform.stderr, /Platform commands are not available yet/);
+  assert.doesNotMatch(platform.stderr, /EISDIR|\.env/);
+});
+
+test("Growth Studio executable still loads provider configuration from cwd dotenv", async () => {
+  const server = http.createServer((request, response) => {
+    assert.equal(request.url, "/marketing_hub/folder/list");
+    response.setHeader("content-type", "application/json");
+    response.end(JSON.stringify({ folders: [] }));
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+
+  const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-growth-dotenv-"));
+  const { port } = server.address();
+  await fs.writeFile(path.join(cwd, ".env"), [
+    `PIXVERSE_GROWTH_API_KEY=${"mh_" + "live_fixture"}`,
+    `PIXVERSE_GROWTH_BASE_URL=http://127.0.0.1:${port}`,
+    "",
+  ].join("\n"));
+
+  try {
+    const result = await runCli(["growth-studio", "folders", "list"], {
+      cwd,
+      env: {
+        PIXVERSE_GROWTH_API_KEY: "",
+        PIXVERSE_GROWTH_BASE_URL: "",
+      },
+    });
+    assert.equal(result.exitCode, 0);
+    assert.deepEqual(JSON.parse(result.stdout), { folders: [] });
+    assert.equal(result.stderr, "");
+  } finally {
+    await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+  }
+});
+
 test("legacy executable preserves JSON stdout and emits one deprecation line", async () => {
   const server = http.createServer((request, response) => {
     assert.equal(request.url, "/marketing_hub/folder/list");
@@ -170,8 +229,10 @@ test("legacy executable preserves JSON stdout and emits one deprecation line", a
     assert.deepEqual(JSON.parse(result.stdout), {
       folders: [{ folder_id: "630251570268735431" }],
     });
-    assert.equal(result.stderr.trim().split("\n").length, 1);
-    assert.match(result.stderr, /deprecated.*growth-studio/i);
+    assert.equal(
+      result.stderr,
+      'Warning: legacy command syntax is deprecated; use the "pixverse-api growth-studio" namespace.\n',
+    );
   } finally {
     await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
   }

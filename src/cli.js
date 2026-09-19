@@ -5,8 +5,8 @@ import { fileURLToPath } from "node:url";
 import { getTopLevelHelp, isHelpRequest } from "./cli/options.js";
 import { formatError, formatSuccess } from "./cli/output.js";
 import { routeCommand } from "./cli/router.js";
-import { getGrowthStudioHelp, runGrowthStudioCommand } from "./growth-studio/cli.js";
-import { loadDotEnv } from "./growth-studio/config.js";
+
+const LEGACY_WARNING = 'Warning: legacy command syntax is deprecated; use the "pixverse-api growth-studio" namespace.\n';
 
 export async function main(argv = [], context = {}) {
   const stdout = context.stdout ?? process.stdout;
@@ -23,15 +23,14 @@ export async function main(argv = [], context = {}) {
   try {
     if (route.provider === "growth-studio") {
       if (isHelpRequest(route.providerArgs)) {
+        const { getGrowthStudioHelp } = await import("./growth-studio/cli.js");
         stdout.write(`${getGrowthStudioHelp()}\n`);
         return 0;
       }
       if (route.legacy) {
-        stderr.write(
-          `Command "${route.legacyCommand}" is deprecated; use "pixverse-api growth-studio ${route.providerArgs.join(" ")}".\n`,
-        );
+        stderr.write(LEGACY_WARNING);
       }
-      const runGrowthStudio = context.runGrowthStudioCommand ?? runGrowthStudioCommand;
+      const runGrowthStudio = context.runGrowthStudioCommand ?? runDefaultGrowthStudioCommand;
       stdout.write(formatSuccess(await runGrowthStudio(route.providerArgs, providerContext)));
       return 0;
     }
@@ -69,12 +68,20 @@ async function unavailablePlatformCommand() {
   throw new Error("Platform commands are not available yet; run a Platform command after the Platform module is installed.");
 }
 
+async function runDefaultGrowthStudioCommand(args, context) {
+  if (context.env === process.env) {
+    const { loadDotEnv } = await import("./growth-studio/config.js");
+    loadDotEnv(path.join(context.cwd, ".env"));
+  }
+  const { runGrowthStudioCommand } = await import("./growth-studio/cli.js");
+  return runGrowthStudioCommand(args, context);
+}
+
 function isExecutedDirectly() {
   return process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 }
 
 if (isExecutedDirectly()) {
-  loadDotEnv();
   main(process.argv.slice(2)).then((exitCode) => {
     process.exitCode = exitCode;
   });
