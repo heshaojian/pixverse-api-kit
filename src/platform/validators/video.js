@@ -75,8 +75,10 @@ function validateMultiTransition(operation, payload) {
     if (index < items.length - 1 && !isPresent(item.duration)) {
       throw validationError(operation, "duration is required for every multi-transition item except the last item.");
     }
-    if (isPresent(item.duration) && (!Number.isInteger(item.duration) || item.duration <= 0)) {
-      throw validationError(operation, "multi-transition item duration must be a positive integer.");
+    const minimumDuration = index === items.length - 1 ? 0 : 1;
+    if (isPresent(item.duration) && (!Number.isInteger(item.duration) || item.duration < minimumDuration)) {
+      const range = minimumDuration === 0 ? "a non-negative integer" : "a positive integer";
+      throw validationError(operation, `multi-transition item duration must be ${range}.`);
     }
   });
 }

@@ -210,6 +210,16 @@ test("official multi-transition order and bounds are validated", async () => {
     multi_transition: [{ img_id: "1", duration: 3 }, { img_id: "2" }],
   });
   assert.equal(result.payload.multi_transition[0].img_id, "1");
+
+  const sentinel = await normalizeAndValidatePlatformInput(operation, {
+    ...base,
+    multi_transition: [{ img_id: "1", duration: 3 }, { img_id: "2", duration: 0 }],
+  });
+  assert.equal(sentinel.payload.multi_transition[1].duration, 0);
+  await assert.rejects(normalizeAndValidatePlatformInput(operation, {
+    ...base,
+    multi_transition: [{ img_id: "1", duration: 0 }, { img_id: "2" }],
+  }), /duration.*positive/i);
 });
 
 test("official mutually-exclusive source and lip-sync combinations are validated", async () => {
