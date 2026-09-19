@@ -4,6 +4,7 @@ import path from "node:path";
 import test from "node:test";
 
 import { PLATFORM_OPERATIONS } from "../src/platform/operations.js";
+import { normalizePlatformStatus } from "../src/platform/status.js";
 import { normalizeAndValidatePlatformInput } from "../src/platform/validation.js";
 
 const ROOT = process.cwd();
@@ -39,6 +40,15 @@ function visitIdentifiers(value, key = "") {
     return Object.entries(value).flatMap(([childKey, child]) => visitIdentifiers(child, childKey));
   }
   return /(^|_)(id|ids)$/.test(key) ? [{ key, value }] : [];
+}
+
+function parseStatusTable(markdown) {
+  return new Map(markdown.split("\n")
+    .filter((line) => /^\| [15678] \|/.test(line))
+    .map((line) => {
+      const [code, name, terminal] = line.split("|").slice(1, 4).map((cell) => cell.trim().replaceAll("`", ""));
+      return [Number(code), { name, terminal: terminal === "yes" }];
+    }));
 }
 
 test("Platform skill exposes the complete progressively disclosed resource graph", async () => {
@@ -141,4 +151,34 @@ test("model, pricing, and limit guidance is dated and linked to primary sources"
   assert.match(reference, /refresh|re-check|verify live/i);
   for (const page of officialPages) assert.ok(reference.includes(page), page);
   assert.doesNotMatch(reference, /654[- ]template/i);
+});
+
+test("workflow status meanings match the executable normalizer", async () => {
+  const workflow = await readSkill("references/workflows-and-recovery.md");
+  const rows = parseStatusTable(workflow);
+  assert.equal(rows.size, 5);
+  for (const code of [1, 5, 6, 7, 8]) {
+    const actual = normalizePlatformStatus(code);
+    assert.deepEqual(rows.get(code), { name: actual.status, terminal: actual.terminal });
+  }
+});
+
+test("workflow and troubleshooting guidance preserves paid-call and webhook invariants", async () => {
+  const skill = await readSkill("SKILL.md");
+  const workflow = await readSkill("references/workflows-and-recovery.md");
+  const troubleshooting = await readSkill("references/troubleshooting.md");
+  assert.match(skill, /references\/workflows-and-recovery\.md/);
+  assert.match(skill, /references\/troubleshooting\.md/);
+  assert.match(workflow, /--dry-run/);
+  assert.match(workflow, /run-job/);
+  assert.match(workflow, /resume/);
+  assert.match(workflow, /reconciliation_required/);
+  assert.match(workflow, /verify.*before.*pars/i);
+  assert.match(workflow, /return.*`ok`.*after/i);
+  assert.match(workflow, /https:\/\/docs\.platform\.pixverse\.ai\/how-to-use-webhook-1905378m0/);
+  assert.match(troubleshooting, /ErrCode.*zero|ErrCode.*0/i);
+  assert.match(troubleshooting, /ambiguous/i);
+  assert.match(troubleshooting, /do not.*resubmit|never.*resubmit|must not.*retry/i);
+  assert.match(troubleshooting, /moderation/i);
+  assert.match(troubleshooting, /rate|concurren/i);
 });
