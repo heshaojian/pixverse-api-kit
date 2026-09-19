@@ -125,3 +125,57 @@ test("requestHttp retries a read-only transient failure with a non-JSON body", a
   assert.equal(attempts, 2);
   assert.equal(result.body.status, "ready");
 });
+
+test("requestHttp does not retry an already-aborted request", async () => {
+  const abortCause = new DOMException("The operation was aborted.", "AbortError");
+  const controller = new AbortController();
+  controller.abort(abortCause);
+  const delays = [];
+  let attempts = 0;
+
+  await assert.rejects(requestHttp({
+    url: "https://example.test/status",
+    signal: controller.signal,
+    retry: { maxAttempts: 3, delayMs: 10 },
+    sleep: async (milliseconds) => delays.push(milliseconds),
+    fetchImpl: async (_url, { signal }) => {
+      attempts += 1;
+      assert.equal(signal.aborted, true);
+      throw signal.reason;
+    },
+  }), (error) => {
+    assert.equal(error.category, "transport");
+    assert.equal(error.retryable, false);
+    assert.equal(error.cause, abortCause);
+    assert.equal(error.cause.name, "AbortError");
+    return true;
+  });
+
+  assert.equal(attempts, 1);
+  assert.deepEqual(delays, []);
+});
+
+test("requestHttp does not retry an AbortError raised during fetch", async () => {
+  const abortCause = new DOMException("Fetch was aborted.", "AbortError");
+  const delays = [];
+  let attempts = 0;
+
+  await assert.rejects(requestHttp({
+    url: "https://example.test/status",
+    retry: { maxAttempts: 3, delayMs: 10 },
+    sleep: async (milliseconds) => delays.push(milliseconds),
+    fetchImpl: async () => {
+      attempts += 1;
+      throw abortCause;
+    },
+  }), (error) => {
+    assert.equal(error.category, "transport");
+    assert.equal(error.retryable, false);
+    assert.equal(error.cause, abortCause);
+    assert.equal(error.cause.name, "AbortError");
+    return true;
+  });
+
+  assert.equal(attempts, 1);
+  assert.deepEqual(delays, []);
+});

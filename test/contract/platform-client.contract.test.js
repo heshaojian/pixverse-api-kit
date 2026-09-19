@@ -84,6 +84,32 @@ test("explicit recovery reuses only the saved trace and preserves the abort sign
   assert.equal(recorder.calls[0].signal, controller.signal);
 });
 
+test("an aborted read request is surfaced once without retry or backoff", async () => {
+  const abortCause = new DOMException("Stop Platform request.", "AbortError");
+  const controller = new AbortController();
+  controller.abort(abortCause);
+  const delays = [];
+  let attempts = 0;
+  const client = new PlatformClient({
+    apiKey: TEST_CREDENTIAL,
+    baseUrl: BASE_URL,
+    sleep: async (milliseconds) => delays.push(milliseconds),
+    fetchImpl: async (_url, { signal }) => {
+      attempts += 1;
+      throw signal.reason;
+    },
+  });
+
+  await assert.rejects(
+    client.execute("account.balance", {}, { signal: controller.signal }),
+    (error) => error.category === "transport"
+      && error.retryable === false
+      && error.cause === abortCause,
+  );
+  assert.equal(attempts, 1);
+  assert.deepEqual(delays, []);
+});
+
 test("GET and HEAD read requests retry transient failures, while every non-read-only request submits once", async () => {
   const readRecorder = createRecordingFetch([
     jsonResponse('{"error":"busy"}', { status: 503 }),

@@ -33,16 +33,17 @@ export async function requestHttp(options) {
     try {
       response = await fetchImpl(url, { method: normalizedMethod, headers, body, signal });
     } catch (cause) {
+      const aborted = signal?.aborted === true || cause?.name === "AbortError";
       const error = new PixverseCliError("PixVerse API transport request failed.", {
         category: "transport",
         provider,
         operation,
-        retryable: canRetry,
+        retryable: canRetry && !aborted,
         traceId,
         cause,
         details: { cause: cause instanceof Error ? cause.message : String(cause) },
       });
-      if (!canRetry || attempt === maxAttempts) throw error;
+      if (aborted || !canRetry || attempt === maxAttempts) throw error;
       await sleep(retryDelayMilliseconds(retry, attempt));
       continue;
     }
