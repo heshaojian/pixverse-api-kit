@@ -20,11 +20,13 @@ export function importCli(options = {}) {
 }
 
 function runNode(args, options) {
+  const cwd = options.cwd ?? SAFE_CHILD_CWD;
   const childEnv = { ...withoutPixverseSecrets(process.env), ...options.env };
   assertLoopbackProviderUrls(options.env ?? {});
+  assertDotEnvProviderUrlIsLoopback(args, cwd, options.env ?? {});
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, args, {
-      cwd: options.cwd ?? SAFE_CHILD_CWD,
+      cwd,
       env: childEnv,
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -73,4 +75,55 @@ function isLoopbackUrl(value) {
   } catch {
     return false;
   }
+}
+
+function assertDotEnvProviderUrlIsLoopback(args, cwd, overrides) {
+  const provider = providerForChildArgs(args);
+  if (!provider) return;
+  const dotEnv = readDotEnv(path.join(cwd, ".env"));
+  const credentialNames = provider === "platform"
+    ? ["PIXVERSE_PLATFORM_API_KEY"]
+    : ["PIXVERSE_GROWTH_API_KEY", "PIXVERSE_GROWTH_FOLDER_API_KEY"];
+  const baseUrlName = provider === "platform"
+    ? "PIXVERSE_PLATFORM_BASE_URL"
+    : "PIXVERSE_GROWTH_BASE_URL";
+  const hasDotEnvCredential = credentialNames.some((name) => dotEnv[name] && !overrides[name]);
+  if (!hasDotEnvCredential) return;
+
+  const baseUrl = overrides[baseUrlName] || dotEnv[baseUrlName];
+  if (!isLoopbackUrl(baseUrl)) {
+    throw new Error(`${provider} credentials in cwd/.env require a loopback ${baseUrlName} in child CLI tests.`);
+  }
+}
+
+function providerForChildArgs(args) {
+  if (args[0] !== path.join(REPOSITORY_ROOT, "src/cli.js")) return null;
+  const command = args[1];
+  if (command === "platform") return "platform";
+  if (command === "growth-studio") return "growth-studio";
+  return new Set([
+    "avatars", "folders", "ensure-folder", "upload-image", "create-from-url",
+    "create-from-json", "get", "poll", "list", "edit", "run-job",
+  ]).has(command) ? "growth-studio" : null;
+}
+
+function readDotEnv(filePath) {
+  try {
+    if (!fs.statSync(filePath).isFile()) return {};
+  } catch (error) {
+    if (error?.code === "ENOENT") return {};
+    throw error;
+  }
+
+  const values = {};
+  for (const line of fs.readFileSync(filePath, "utf8").split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const separator = trimmed.indexOf("=");
+    if (separator < 1) continue;
+    const name = trimmed.slice(0, separator).trim();
+    if (!/^PIXVERSE_/.test(name)) continue;
+    values[name] = trimmed.slice(separator + 1).trim().replace(/^['"]|['"]$/g, "");
+  }
+  return values;
 }

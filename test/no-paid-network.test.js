@@ -78,6 +78,21 @@ test("child CLI helpers reject credentials without an explicit loopback provider
   );
 });
 
+test("child CLI helpers reject provider credentials loaded from an unsafe cwd dotenv", async (t) => {
+  const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-unsafe-dotenv-"));
+  t.after(() => fs.rm(cwd, { recursive: true, force: true }));
+  await fs.writeFile(path.join(cwd, ".env"), [
+    "PIXVERSE_PLATFORM_API_KEY=platform-fixture-key",
+    "PIXVERSE_PLATFORM_BASE_URL=https://app-api.pixverse.ai",
+    "",
+  ].join("\n"));
+
+  assert.throws(
+    () => runCli(["platform", "account", "balance"], { cwd }),
+    /credentials in cwd\/\.env require a loopback PIXVERSE_PLATFORM_BASE_URL/,
+  );
+});
+
 test("default help paths do not require credentials or contact PixVerse hosts", async () => {
   const result = await runCli(["--help"]);
   assert.equal(result.exitCode, 0);
