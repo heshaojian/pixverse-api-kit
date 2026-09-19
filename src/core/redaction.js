@@ -33,6 +33,8 @@ function isSensitiveKey(key) {
   const normalized = String(key).replace(/[^a-z0-9]/gi, "").toLowerCase();
   return normalized.endsWith("authorization")
     || normalized.endsWith("apikey")
+    || normalized.endsWith("password")
+    || normalized.endsWith("cookie")
     || normalized.endsWith("token")
     || normalized.endsWith("secret");
 }

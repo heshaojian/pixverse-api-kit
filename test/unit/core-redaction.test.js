@@ -41,11 +41,19 @@ test("redact covers common prefixed and camel-case credential names", () => {
     client_secret: "secret",
     "x-api-key": "secret",
     bearerToken: "secret",
+    password: "secret",
+    databasePassword: "secret",
+    cookie: "secret",
+    "set-cookie": "secret",
   }), {
     access_token: "[REDACTED]",
     refreshToken: "[REDACTED]",
     client_secret: "[REDACTED]",
     "x-api-key": "[REDACTED]",
     bearerToken: "[REDACTED]",
+    password: "[REDACTED]",
+    databasePassword: "[REDACTED]",
+    cookie: "[REDACTED]",
+    "set-cookie": "[REDACTED]",
   });
 });
