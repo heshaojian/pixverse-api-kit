@@ -11,7 +11,10 @@
     "cli": "node ./src/cli.js",
     "compare:revolve": "node ./qa/revolve-v3-v4-comparison/server.js",
     "test": "node --test",
-    "check": "node ./scripts/check-syntax.js"
+    "test:api": "node --import ./scripts/no-paid-network.js --test test/unit/*.test.js test/contract/*.test.js test/integration/*.test.js test/e2e/*.test.js test/catalog-completeness.test.js test/no-paid-network.test.js",
+    "test:coverage": "c8 --check-coverage --lines 80 --branches 80 --functions 80 --statements 80 --include 'src/**/*.js' node --import ./scripts/no-paid-network.js --test test/unit/*.test.js test/contract/*.test.js test/integration/*.test.js test/e2e/*.test.js test/catalog-completeness.test.js test/no-paid-network.test.js",
+    "check": "node scripts/check-syntax.js",
+    "security:scan": "node scripts/scan-secrets.js"
   },
   "engines": {
     "node": ">=20"
