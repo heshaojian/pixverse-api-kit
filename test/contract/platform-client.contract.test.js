@@ -3,7 +3,10 @@ import fs from "node:fs/promises";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { PlatformClient } from "../../src/platform/client.js";
+import {
+  PlatformClient,
+  normalizePlatformResponseIdentifiers,
+} from "../../src/platform/client.js";
 import { PLATFORM_OPERATIONS } from "../../src/platform/operations.js";
 import { buildPlatformRequest } from "../../src/platform/request.js";
 import { createRecordingFetch, describeRecordedBody, jsonResponse } from "../helpers/recording-fetch.js";
@@ -65,6 +68,51 @@ test("new requests always receive fresh trace IDs and ignore a caller trace outs
   assert.match(second.traceId, UUID_PATTERN);
   assert.notEqual(first.traceId, "caller-trace");
   assert.notEqual(first.traceId, second.traceId);
+});
+
+test("response normalization stringifies resource IDs recursively without mutating source or numeric metrics", () => {
+  const source = deepFreeze({
+    id: 1,
+    account_id: 2,
+    video_id: 3,
+    image_id: 4,
+    speaker_id: 5,
+    keyframe_id: 6,
+    status: 7,
+    count: 8,
+    credits: 9,
+    created_at: 1_726_733_600,
+    nested: Object.freeze([Object.freeze({
+      mask_id: 10,
+      video_ids: Object.freeze([11, "9007199254740993"]),
+      image_id: "9007199254740995",
+    })]),
+  });
+
+  const normalized = normalizePlatformResponseIdentifiers(source);
+
+  assert.deepEqual(toPlainJson(normalized), {
+    id: "1",
+    account_id: "2",
+    video_id: "3",
+    image_id: "4",
+    speaker_id: "5",
+    keyframe_id: 6,
+    status: 7,
+    count: 8,
+    credits: 9,
+    created_at: 1_726_733_600,
+    nested: [{
+      mask_id: "10",
+      video_ids: ["11", "9007199254740993"],
+      image_id: "9007199254740995",
+    }],
+  });
+  assert.equal(source.account_id, 2);
+  assert.equal(source.nested[0].mask_id, 10);
+  assert.notEqual(normalized, source);
+  assert.notEqual(normalized.nested, source.nested);
+  assert.notEqual(normalized.nested[0], source.nested[0]);
 });
 
 test("explicit recovery reuses only the saved trace and preserves the abort signal", async () => {
@@ -204,7 +252,9 @@ function deepFreeze(value) {
 function assertStringIds(value, key = "") {
   if (Array.isArray(value)) return value.forEach((item) => assertStringIds(item, key.replace(/s$/i, "")));
   if (!value || typeof value !== "object") {
-    if (/(?:^|_)(?:id|ids)$/i.test(key)) assert.equal(typeof value, "string", `${key} must be lossless`);
+    if (key.toLowerCase() !== "keyframe_id" && /(?:^|_)(?:id|ids)$/i.test(key)) {
+      assert.equal(typeof value, "string", `${key} must be lossless`);
+    }
     return;
   }
   for (const [childKey, childValue] of Object.entries(value)) assertStringIds(childValue, childKey);

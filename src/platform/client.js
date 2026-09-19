@@ -67,7 +67,7 @@ export class PlatformClient {
       });
     } catch (error) {
       if (hasPlatformEnvelope(error?.details)) {
-        parsePlatformEnvelope(error.details, {
+        parsePlatformEnvelope(normalizePlatformResponseIdentifiers(error.details), {
           operation: operation.id,
           httpStatus: error.status,
           traceId,
@@ -75,7 +75,7 @@ export class PlatformClient {
       }
       throw error;
     }
-    const parsed = parsePlatformEnvelope(response.body, {
+    const parsed = parsePlatformEnvelope(normalizePlatformResponseIdentifiers(response.body), {
       operation: operation.id,
       httpStatus: response.status,
       traceId,
@@ -89,6 +89,25 @@ export class PlatformClient {
       retryAfter: response.retryAfter,
     };
   }
+}
+
+export function normalizePlatformResponseIdentifiers(value, fieldName = "") {
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizePlatformResponseIdentifiers(item, fieldName));
+  }
+  if (value !== null && typeof value === "object") {
+    const normalized = Object.getPrototypeOf(value) === null ? Object.create(null) : {};
+    for (const [name, item] of Object.entries(value)) {
+      normalized[name] = normalizePlatformResponseIdentifiers(item, name);
+    }
+    return normalized;
+  }
+  if (isResourceIdentifierField(fieldName)
+    && typeof value === "number"
+    && Number.isSafeInteger(value)) {
+    return String(value);
+  }
+  return value;
 }
 
 function resolveTraceId(operation, options, traceIdFactory) {
@@ -108,6 +127,11 @@ function resolveTraceId(operation, options, traceIdFactory) {
 function hasPlatformEnvelope(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value)
     && Object.hasOwn(value, "ErrCode");
+}
+
+function isResourceIdentifierField(fieldName) {
+  return fieldName.toLowerCase() !== "keyframe_id"
+    && /(?:^|_)(?:id|ids)$/i.test(fieldName);
 }
 
 function unknownOperationError(operationId) {
