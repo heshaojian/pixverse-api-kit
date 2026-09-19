@@ -194,6 +194,35 @@ test("model-aware scalar validation rejects invalid prompt, quality, duration, a
   }
 });
 
+test("fusion enforces exact model duration, quality, aspect, and omni-video rules", async () => {
+  const operation = getPlatformOperation("video.fusion");
+  const base = {
+    image_references: [{ img_id: "1", ref_name: "subject" }],
+    prompt: "Animate @subject",
+    quality: "720p",
+  };
+  for (const input of [
+    { ...base, model: "v4.5", duration: 5, aspect_ratio: "16:9" },
+    { ...base, model: "v5.6", duration: 10, aspect_ratio: "9:16" },
+    { ...base, model: "v6", duration: 1, aspect_ratio: "21:9" },
+    {
+      ...base, model: "v6", duration: 0, aspect_ratio: "2:3", reference_mode: "omni",
+      video_references: [{ video_id: "2", ref_name: "motion" }],
+    },
+  ]) {
+    await normalizeAndValidatePlatformInput(operation, input);
+  }
+  for (const input of [
+    { ...base, model: "v4.5", duration: 10, aspect_ratio: "16:9" },
+    { ...base, model: "v5.6", duration: 10, quality: "1080p", aspect_ratio: "16:9" },
+    { ...base, model: "v5.6", duration: 5, aspect_ratio: "21:9" },
+    { ...base, model: "v6", duration: 16, aspect_ratio: "16:9" },
+    { ...base, model: "v6", duration: 5, aspect_ratio: "16:9", reference_mode: "unknown" },
+  ]) {
+    await assert.rejects(normalizeAndValidatePlatformInput(operation, input), /duration|aspect_ratio|reference_mode/i);
+  }
+});
+
 test("official multi-transition order and bounds are validated", async () => {
   const operation = getPlatformOperation("video.multi-transition");
   const base = { model: "v5", quality: "720p" };

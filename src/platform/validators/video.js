@@ -111,6 +111,7 @@ function validateFusion(operation, payload) {
   if (!["v4.5", "v5", "v5.5", "v5.6", "v6", "c1"].includes(payload.model)) {
     throw validationError(operation, "fusion model must be v4.5, v5, v5.5, v5.6, v6, or c1.");
   }
+  validateFusionModelRules(operation, payload, omniVideo);
   const references = payload.image_references;
   if (!Array.isArray(references) || references.length === 0) {
     throw validationError(operation, "fusion requires one or more image references.");
@@ -120,5 +121,35 @@ function validateFusion(operation, payload) {
   if (references.length > maximum) throw validationError(operation, `fusion accepts at most ${maximum} image references for this model.`);
   if (omniVideo && payload.duration !== 0) {
     throw validationError(operation, "fusion duration must be 0 for v6 omni mode with video references.");
+  }
+}
+
+function validateFusionModelRules(operation, payload, omniVideo) {
+  if (payload.reference_mode !== undefined) {
+    if (!["auto", "omni"].includes(payload.reference_mode)) {
+      throw validationError(operation, "fusion reference_mode must be auto or omni.");
+    }
+    if (payload.reference_mode === "omni" && payload.model !== "v6") {
+      throw validationError(operation, "fusion reference_mode omni requires model v6.");
+    }
+  }
+
+  if (!omniVideo) {
+    const durations = ["v4.5", "v5"].includes(payload.model) ? [5, 8]
+      : ["v5.5", "v5.6"].includes(payload.model) ? [5, 8, 10]
+        : undefined;
+    if (durations && !durations.includes(payload.duration)) {
+      throw validationError(operation, `fusion duration for ${payload.model} must be ${durations.join(" or ")}.`);
+    }
+    if (["v5.5", "v5.6"].includes(payload.model) && payload.quality === "1080p" && payload.duration === 10) {
+      throw validationError(operation, "fusion duration 10 is not available at 1080p for v5.5 or v5.6.");
+    }
+  }
+
+  const legacyAspects = ["16:9", "4:3", "1:1", "3:4", "9:16"];
+  const extendedAspects = [...legacyAspects, "2:3", "3:2", "21:9"];
+  const allowedAspects = ["v6", "c1"].includes(payload.model) ? extendedAspects : legacyAspects;
+  if (!allowedAspects.includes(payload.aspect_ratio)) {
+    throw validationError(operation, `fusion aspect_ratio is not supported by ${payload.model}.`);
   }
 }
