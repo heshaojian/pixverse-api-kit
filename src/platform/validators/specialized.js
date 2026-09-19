@@ -164,10 +164,13 @@ function validateKeyframe(operation, value, required) {
     return;
   }
   const normalized = typeof value === "number" && Number.isSafeInteger(value) ? String(value) : value;
+  const minimum = operation.id === "video.swap-mask" ? 0n : 1n;
   if (typeof normalized !== "string"
-    || !/^[1-9]\d*$/.test(normalized)
+    || !/^\d+$/.test(normalized)
+    || BigInt(normalized) < minimum
     || BigInt(normalized) > BigInt(Number.MAX_SAFE_INTEGER)) {
-    throw validationError(operation, "keyframe_id must be a positive safe-integer string.");
+    const range = minimum === 0n ? "non-negative" : "positive";
+    throw validationError(operation, `keyframe_id must be a ${range} safe-integer string.`);
   }
 }
 function validateQuality(operation, value, allowed) {

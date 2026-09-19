@@ -238,15 +238,30 @@ test("swap and swap-mask accept positive keyframe identifiers after string-safe 
     keyframe_id: "12",
   });
   assert.equal(mask.payload.keyframe_id, "12");
+
+  const firstFrameMask = await normalizeAndValidatePlatformInput(getPlatformOperation("video.swap-mask"), {
+    source_video_id: "5",
+    keyframe_id: 0,
+  });
+  assert.equal(firstFrameMask.payload.keyframe_id, "0");
 });
 
-test("keyframe identifiers reject zero, negative, non-digit, and unsafe numeric values", async () => {
-  const operation = getPlatformOperation("video.swap-mask");
-  for (const keyframe_id of [0, -1, "0", "-1", "1.5", "frame-one", Number.MAX_SAFE_INTEGER + 1]) {
-    await assert.rejects(normalizeAndValidatePlatformInput(operation, {
+test("keyframe identifiers apply endpoint-specific zero rules and reject invalid values", async () => {
+  const maskOperation = getPlatformOperation("video.swap-mask");
+  for (const keyframe_id of [-1, "-1", "1.5", "frame-one", Number.MAX_SAFE_INTEGER + 1]) {
+    await assert.rejects(normalizeAndValidatePlatformInput(maskOperation, {
       source_video_id: "1",
       keyframe_id,
     }), /keyframe_id|string|safe integer/i);
+  }
+  for (const keyframe_id of [0, "0"]) {
+    await assert.rejects(normalizeAndValidatePlatformInput(getPlatformOperation("video.swap"), {
+      source_video_id: "1",
+      keyframe_id,
+      mask_id: "2",
+      img_id: "3",
+      quality: "720p",
+    }), /keyframe_id/i);
   }
 });
 
