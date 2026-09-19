@@ -8,7 +8,8 @@ import { redact, redactHeaders } from "../core/redaction.js";
 import { createTraceId } from "../core/trace.js";
 import { PlatformClient } from "./client.js";
 import { getPlatformConfig } from "./config.js";
-import { PLATFORM_OPERATIONS, matchPlatformCommand } from "./operations.js";
+import { resumePlatformJob, submitPlatformJob } from "./jobs.js";
+import { getPlatformOperation, PLATFORM_OPERATIONS, matchPlatformCommand } from "./operations.js";
 import { buildPlatformRequest } from "./request.js";
 import { normalizeAndValidatePlatformInput } from "./validation.js";
 
@@ -27,6 +28,8 @@ const INPUT_OPTIONAL_OPERATIONS = new Set([
 
 export async function runPlatformCommand(args, context = {}) {
   if (args[0] === "raw") return runRawCommand(args.slice(1), context);
+  if (args[0] === "run-job") return runJobCommand(args.slice(1), context);
+  if (args[0] === "resume") return runResumeCommand(args.slice(1), context);
 
   const operation = matchPlatformCommand(args);
   if (!operation) throw cliError("Unknown Platform command.", "UNKNOWN_PLATFORM_COMMAND");
@@ -36,6 +39,12 @@ export async function runPlatformCommand(args, context = {}) {
   if (options.dryRun) return createDryRun(operation, input, context);
 
   const client = context.client ?? createClient(context);
+  if (operation.billing === "billable") {
+    return (context.submitPlatformJob ?? submitPlatformJob)(client, operation.id, input, {
+      ...jobOptions(context),
+      poll: false,
+    });
+  }
   return client.execute(operation.id, input, {
     inspectLocalMedia: context.inspectLocalMedia,
     signal: context.signal,
@@ -47,7 +56,84 @@ export function getPlatformHelp() {
     `  pixverse-api platform ${command.join(" ")} [--payload <path>] [--dry-run]`
   ));
   commands.push("  pixverse-api platform raw <method> </openapi/v2/path> [--payload <path>] [--header <name:value>]");
+  commands.push("\nDurable jobs:");
+  commands.push("  run-job --operation <operation-id> --payload <path> [--poll]");
+  commands.push("  resume <job-directory>");
   return `Usage:\n${commands.join("\n")}`;
+}
+
+async function runJobCommand(args, context) {
+  const options = parseJobOptions(args);
+  const operation = getPlatformOperation(options.operationId);
+  if (!operation || operation.billing !== "billable") {
+    throw cliError("run-job requires a billable Platform operation ID.", "INVALID_PLATFORM_JOB_OPERATION", options.operationId);
+  }
+  if (!options.payloadPath) throw cliError("run-job requires --payload <path>.", "PLATFORM_PAYLOAD_REQUIRED", operation.id);
+  const input = await readPayload(options.payloadPath, context.cwd);
+  const client = context.client ?? createClient(context);
+  return (context.submitPlatformJob ?? submitPlatformJob)(client, operation.id, input, {
+    ...jobOptions(context),
+    poll: options.poll,
+    intervalMs: options.intervalMs ?? context.intervalMs,
+    timeoutMs: options.timeoutMs ?? context.timeoutMs,
+  });
+}
+
+async function runResumeCommand(args, context) {
+  const options = parseResumeOptions(args);
+  const client = context.client ?? createClient(context);
+  return (context.resumePlatformJob ?? resumePlatformJob)(client, path.resolve(context.cwd ?? process.cwd(), options.jobDirectory), {
+    ...jobOptions(context),
+    intervalMs: options.intervalMs ?? context.intervalMs,
+    timeoutMs: options.timeoutMs ?? context.timeoutMs,
+  });
+}
+
+function parseJobOptions(args) {
+  const options = { poll: false };
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === "--operation") options.operationId = readOptionValue(args, ++index, arg);
+    else if (arg === "--payload") options.payloadPath = readOptionValue(args, ++index, arg);
+    else if (arg === "--poll") options.poll = true;
+    else if (arg === "--interval-ms") options.intervalMs = readPositiveNumberOption(args, ++index, arg);
+    else if (arg === "--timeout-ms") options.timeoutMs = readNonNegativeNumberOption(args, ++index, arg);
+    else if (arg === "--json") continue;
+    else if (arg === "--trace-id") throw cliError("New jobs cannot reuse a caller trace ID.", "TRACE_REUSE_FORBIDDEN", options.operationId);
+    else throw cliError("Unknown Platform job option.", "UNKNOWN_PLATFORM_OPTION", options.operationId);
+  }
+  if (!options.operationId) throw cliError("run-job requires --operation <operation-id>.", "MISSING_PLATFORM_JOB_OPERATION");
+  return options;
+}
+
+function parseResumeOptions(args) {
+  const options = {};
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === "--interval-ms") options.intervalMs = readPositiveNumberOption(args, ++index, arg);
+    else if (arg === "--timeout-ms") options.timeoutMs = readNonNegativeNumberOption(args, ++index, arg);
+    else if (arg === "--json") continue;
+    else if (arg.startsWith("--")) throw cliError("Unknown Platform resume option.", "UNKNOWN_PLATFORM_OPTION", "resume");
+    else if (options.jobDirectory) throw cliError("resume accepts exactly one job directory.", "INVALID_PLATFORM_ARGUMENTS", "resume");
+    else options.jobDirectory = arg;
+  }
+  if (!options.jobDirectory) throw cliError("resume requires a job directory.", "MISSING_PLATFORM_JOB_DIRECTORY", "resume");
+  return options;
+}
+
+function jobOptions(context) {
+  return {
+    cwd: context.cwd,
+    jobRoot: context.jobRoot,
+    inspectLocalMedia: context.inspectLocalMedia,
+    traceIdFactory: context.traceIdFactory,
+    sleep: context.sleep,
+    now: context.now,
+    jobNow: context.jobNow,
+    intervalMs: context.intervalMs,
+    timeoutMs: context.timeoutMs,
+    signal: context.signal,
+  };
 }
 
 function createClient(context) {
@@ -310,6 +396,22 @@ async function readPayload(filePath, cwd = process.cwd()) {
 function readOptionValue(args, index, optionName) {
   const value = args[index];
   if (!value || value.startsWith("--")) throw cliError(`${optionName} requires a value.`, "MISSING_PLATFORM_OPTION_VALUE");
+  return value;
+}
+
+function readPositiveNumberOption(args, index, optionName) {
+  const value = Number(readOptionValue(args, index, optionName));
+  if (!Number.isFinite(value) || value <= 0) {
+    throw cliError(`${optionName} requires a positive number.`, "INVALID_PLATFORM_OPTION_VALUE");
+  }
+  return value;
+}
+
+function readNonNegativeNumberOption(args, index, optionName) {
+  const value = Number(readOptionValue(args, index, optionName));
+  if (!Number.isFinite(value) || value < 0) {
+    throw cliError(`${optionName} requires a non-negative number.`, "INVALID_PLATFORM_OPTION_VALUE");
+  }
   return value;
 }
 
