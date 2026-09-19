@@ -4,43 +4,83 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { runGrowthStudioCommand } from "../../src/growth-studio/cli.js";
+import { runCli } from "../helpers/cli-process.js";
+import { createMockApiServer, sendJson } from "../helpers/mock-api-server.js";
 
-test("namespaced Growth Studio create, poll, and folder job flow stay offline", async () => {
+test("executable Growth Studio namespace resolves folders and completes create to poll offline", async (t) => {
   const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-growth-e2e-"));
   const payloadPath = path.join(tempRoot, "payload.json");
+  const jobsDir = path.join(tempRoot, "jobs");
   await fs.writeFile(payloadPath, JSON.stringify({
-    product: { source_url: "https://shop.example.test/item" },
+    product: { source_url: "https://product.example.invalid/item" },
     video: { avatar: { mode: "auto" } },
   }));
-  const calls = [];
-  const client = {
-    async createVideo(payload, options) {
-      calls.push(["create", payload, options.traceId]);
-      return { body: { video_id: "627410861853514292", status: "processing" } };
-    },
-    async pollVideo(videoId, options) {
-      calls.push(["poll", videoId, options.traceId]);
-      await options.onSnapshot?.({ video_id: videoId, status: "succeeded" });
-      return { video_id: videoId, status: "succeeded", output: { video_url: "https://media.pixverse.ai/final.mp4" } };
-    },
-  };
 
-  const result = await runGrowthStudioCommand([
+  const server = await createMockApiServer((request, response) => {
+    assert.equal(request.headers.authorization, "Bearer mh_live_fixture");
+    assert.equal(request.headers["api-key"], undefined);
+
+    if (request.method === "GET" && request.url === "/marketing_hub/folder/list") {
+      return sendJson(response, { ErrCode: 0, Resp: { folders: [] } });
+    }
+    if (request.method === "POST" && request.url === "/marketing_hub/folder/create") {
+      assert.deepEqual(JSON.parse(request.body.toString()), { name: "ACME" });
+      return sendJson(response, { ErrCode: 0, Resp: { folder_id: "630251570268735431" } });
+    }
+    if (request.method === "POST" && request.url === "/openapi/v1/videos") {
+      const payload = JSON.parse(request.body.toString());
+      assert.equal(payload.folder_id, "630251570268735431");
+      return sendJson(response, { video_id: "627410861853514292", status: "processing" });
+    }
+    if (request.method === "GET" && request.url === "/openapi/v1/videos/627410861853514292") {
+      return sendJson(response, {
+        video_id: "627410861853514292",
+        status: "succeeded",
+        output: { video_url: "https://media.example.invalid/final.mp4" },
+      });
+    }
+    return sendJson(response, { error: { message: "unexpected request" } }, 404);
+  });
+  t.after(async () => {
+    await server.close();
+    await fs.rm(tempRoot, { recursive: true, force: true });
+  });
+
+  const result = await runCli([
+    "growth-studio",
     "run-job",
     "--payload",
     payloadPath,
-    "--folder-id",
-    "630251570268735431",
+    "--folder-name",
+    "ACME",
     "--jobs-dir",
-    path.join(tempRoot, "jobs"),
-  ], { client });
+    jobsDir,
+    "--initial-delay-seconds",
+    "0",
+    "--fallback-delay-seconds",
+    "0",
+  ], {
+    cwd: tempRoot,
+    env: {
+      PIXVERSE_GROWTH_API_KEY: "mh_live_fixture",
+      PIXVERSE_GROWTH_BASE_URL: server.baseUrl,
+    },
+  });
 
-  assert.equal(result.video_id, "627410861853514292");
-  assert.equal(result.status, "succeeded");
-  assert.deepEqual(calls.map(([name]) => name), ["create", "poll"]);
-  assert.equal(calls[0][1].folder_id, "630251570268735431");
-  assert.deepEqual(JSON.parse(await fs.readFile(path.join(result.job_dir, "video-id.json"), "utf8")), {
+  assert.equal(result.exitCode, 0, result.stderr);
+  assert.equal(result.stderr, "");
+  const output = JSON.parse(result.stdout);
+  assert.equal(output.video_id, "627410861853514292");
+  assert.equal(output.status, "succeeded");
+  assert.equal(output.folder_id, "630251570268735431");
+  assert.deepEqual(server.requests.map(({ method, url }) => `${method} ${url}`), [
+    "GET /marketing_hub/folder/list",
+    "POST /marketing_hub/folder/create",
+    "POST /openapi/v1/videos",
+    "GET /openapi/v1/videos/627410861853514292",
+  ]);
+  assert.deepEqual(JSON.parse(await fs.readFile(path.join(output.job_dir, "video-id.json"), "utf8")), {
     video_id: "627410861853514292",
   });
+  assert.equal((await fs.readFile(path.join(output.job_dir, "polling.jsonl"), "utf8")).trim().length > 0, true);
 });
