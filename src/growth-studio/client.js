@@ -21,6 +21,7 @@ export class GrowthStudioApiError extends Error {
   constructor(message, options = {}) {
     super(message);
     this.name = "GrowthStudioApiError";
+    this.category = options.category;
     this.status = options.status;
     this.code = options.code;
     this.retryable = options.retryable ?? false;
@@ -58,7 +59,22 @@ export async function parseResponse(response) {
   const requestId = response.headers.get("x-request-id");
   const retryAfter = getRetryAfterSeconds(response.headers);
   const text = await response.text();
-  const body = text ? safeJson(text) : {};
+  let body = {};
+  if (text) {
+    try {
+      body = JSON.parse(text);
+    } catch {
+      if (response.ok) {
+        throw new GrowthStudioApiError("PixVerse API returned invalid JSON in a successful response.", {
+          category: "protocol",
+          status: response.status,
+          code: "INVALID_JSON_RESPONSE",
+          retryable: false,
+          requestId,
+        });
+      }
+    }
+  }
 
   if (!response.ok) {
     const error = body.error || {};
@@ -269,14 +285,6 @@ function isEditRunning(status) {
 
 function defaultSleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function safeJson(text) {
-  try {
-    return JSON.parse(text);
-  } catch {
-    return {};
-  }
 }
 
 function withTrailingSlash(value) {

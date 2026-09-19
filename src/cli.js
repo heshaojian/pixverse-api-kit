@@ -86,7 +86,11 @@ function loadPlatformDotEnv(filePath) {
   }
   if (!stats.isFile()) return;
 
-  const allowed = new Set(["PIXVERSE_PLATFORM_API_KEY", "PIXVERSE_PLATFORM_BASE_URL"]);
+  const allowed = new Set([
+    "PIXVERSE_PLATFORM_API_KEY",
+    "PIXVERSE_PLATFORM_BASE_URL",
+    "PIXVERSE_PLATFORM_ALLOW_CUSTOM_BASE_URL",
+  ]);
   for (const line of fs.readFileSync(filePath, "utf8").split(/\r?\n/)) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("#")) continue;

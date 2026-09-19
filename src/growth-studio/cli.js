@@ -1,7 +1,8 @@
+import path from "node:path";
 import { GrowthStudioClient, createProductUrlPayload } from "./client.js";
 import { getGrowthStudioConfig } from "./config.js";
 import { resolveFolderForPayload } from "./folders.js";
-import { readJsonFile, runGrowthStudioJob } from "./jobs.js";
+import { readJsonFile, resumeGrowthStudioJob, runGrowthStudioJob } from "./jobs.js";
 
 export const GROWTH_STUDIO_LEGACY_COMMAND_MAPPINGS = Object.freeze({
   avatars: ["avatars", "list"],
@@ -82,6 +83,11 @@ export async function runGrowthStudioCommand(args, context = {}) {
     if (!options.payloadPath) throw new Error("run-job requires --payload <path>.");
     return runJob(getClient(), options);
   }
+  if (resource === "resume") {
+    const options = parseResumeOptions([operation, ...rest].filter((value) => value !== undefined));
+    const jobDirectory = path.resolve(context.cwd ?? process.cwd(), options.jobDirectory);
+    return (context.resumeGrowthStudioJob ?? resumeGrowthStudioJob)(getClient(), jobDirectory, options);
+  }
 
   throw new Error(`Unknown Growth Studio command: ${args.join(" ")}`);
 }
@@ -104,7 +110,8 @@ export function getGrowthStudioHelp() {
   pixverse-api growth-studio video poll <video_id>
   pixverse-api growth-studio video list [--limit 20] [--status succeeded] [--cursor <cursor>]
   pixverse-api growth-studio video edit <video_id> <clip_index> <instruction>
-  pixverse-api growth-studio run-job --payload <payload.json> [job options]`;
+  pixverse-api growth-studio run-job --payload <payload.json> [job options]
+  pixverse-api growth-studio resume <job-directory> [polling options]`;
 }
 
 function createClient(context) {
@@ -144,9 +151,9 @@ async function runJob(client, options) {
     jobsDir: options.jobsDir,
     jobName: options.jobName,
     poll: options.poll,
-    timeoutMs: options.timeoutMinutes ? Number(options.timeoutMinutes) * 60 * 1000 : undefined,
-    initialDelaySeconds: options.initialDelaySeconds ? Number(options.initialDelaySeconds) : undefined,
-    fallbackDelaySeconds: options.fallbackDelaySeconds ? Number(options.fallbackDelaySeconds) : undefined,
+    timeoutMs: options.timeoutMinutes === undefined ? undefined : options.timeoutMinutes * 60 * 1000,
+    initialDelaySeconds: options.initialDelaySeconds,
+    fallbackDelaySeconds: options.fallbackDelaySeconds,
     traceId: traceId("job"),
   });
 }
@@ -221,18 +228,46 @@ function parseRunJobOptions(args) {
     else if (arg === "--auto-folder") options.autoFolder = true;
     else if (arg === "--jobs-dir") options.jobsDir = readOptionValue(args, ++index, arg);
     else if (arg === "--job-name") options.jobName = readOptionValue(args, ++index, arg);
-    else if (arg === "--timeout-minutes") options.timeoutMinutes = readOptionValue(args, ++index, arg);
-    else if (arg === "--initial-delay-seconds") options.initialDelaySeconds = readOptionValue(args, ++index, arg);
-    else if (arg === "--fallback-delay-seconds") options.fallbackDelaySeconds = readOptionValue(args, ++index, arg);
+    else if (arg === "--timeout-minutes") options.timeoutMinutes = readFiniteOption(args, ++index, arg, { minimum: 0, exclusive: true });
+    else if (arg === "--initial-delay-seconds") options.initialDelaySeconds = readFiniteOption(args, ++index, arg, { minimum: 0 });
+    else if (arg === "--fallback-delay-seconds") options.fallbackDelaySeconds = readFiniteOption(args, ++index, arg, { minimum: 0 });
     else if (arg === "--no-poll") options.poll = false;
     else throw new Error(`Unknown run-job option: ${arg}`);
   }
   return options;
 }
 
+function parseResumeOptions(args) {
+  const options = {};
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === "--timeout-minutes") options.timeoutMs = readFiniteOption(args, ++index, arg, { minimum: 0, exclusive: true }) * 60 * 1000;
+    else if (arg === "--initial-delay-seconds") options.initialDelaySeconds = readFiniteOption(args, ++index, arg, { minimum: 0 });
+    else if (arg === "--fallback-delay-seconds") options.fallbackDelaySeconds = readFiniteOption(args, ++index, arg, { minimum: 0 });
+    else if (arg.startsWith("--")) throw new Error(`Unknown resume option: ${arg}`);
+    else if (!options.jobDirectory) options.jobDirectory = arg;
+    else throw new Error("resume accepts exactly one job directory.");
+  }
+  if (!options.jobDirectory) throw new Error("resume requires a job directory.");
+  return options;
+}
+
 function readOptionValue(args, index, optionName) {
   const value = args[index];
   if (!value || value.startsWith("--")) throw new Error(`${optionName} requires a value.`);
+  return value;
+}
+
+function readFiniteOption(args, index, optionName, constraints = {}) {
+  const rawValue = readOptionValue(args, index, optionName);
+  const value = Number(rawValue);
+  const belowMinimum = constraints.exclusive
+    ? value <= constraints.minimum
+    : value < constraints.minimum;
+  if (!Number.isFinite(value) || belowMinimum) {
+    const comparison = constraints.exclusive ? "greater than" : "at least";
+    throw new Error(`${optionName} must be a finite number ${comparison} ${constraints.minimum}.`);
+  }
   return value;
 }
 

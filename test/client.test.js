@@ -110,6 +110,24 @@ test("parseResponse throws structured API errors", async () => {
   });
 });
 
+test("parseResponse rejects malformed JSON from a successful response as a protocol error", async () => {
+  const response = new Response("not-json", {
+    status: 200,
+    headers: { "x-request-id": "request_malformed" },
+  });
+
+  await assert.rejects(parseResponse(response), (error) => {
+    assert.ok(error instanceof GrowthStudioApiError);
+    assert.equal(error.category, "protocol");
+    assert.equal(error.status, 200);
+    assert.equal(error.code, "INVALID_JSON_RESPONSE");
+    assert.equal(error.retryable, false);
+    assert.equal(error.requestId, "request_malformed");
+    assert.match(error.message, /invalid JSON/i);
+    return true;
+  });
+});
+
 test("client keeps video IDs as strings and sends bearer auth", async () => {
   const calls = [];
   const credentials = { ["api" + "Key"]: "test-api-key" };

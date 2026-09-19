@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { runVideoJob } from "../src/jobs.js";
+import { resumeGrowthStudioJob, runVideoJob } from "../src/jobs.js";
 
 test("runVideoJob writes durable job artifacts and returns final output", async () => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-api-job-"));
@@ -158,6 +158,125 @@ test("runVideoJob resolves an auto folder before creating the video", async () =
   assert.equal(result.folder_name, "REVOLVE");
   assert.equal(folder.source, "existing-folder");
   assert.equal(originalPayload.folder_id, undefined);
+});
+
+test("runVideoJob writes private atomic artifacts with recursive credential redaction", async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-api-job-"));
+  const payload = {
+    product: { source_url: "https://shop.example.com/item", api_key: "payload-" + "fixture" },
+    video: { aspect_ratio: "9:16" },
+    metadata: { authorization: "Bearer fixture-authorization-value" },
+  };
+  const client = {
+    async createVideo() {
+      return {
+        body: {
+          video_id: "627410861853514292",
+          status: "processing",
+          access_token: "response-secret",
+        },
+      };
+    },
+  };
+
+  const result = await runVideoJob(client, payload, { jobsDir: root, poll: false });
+  const request = JSON.parse(await fs.readFile(path.join(result.job_dir, "request.json"), "utf8"));
+  const created = JSON.parse(await fs.readFile(path.join(result.job_dir, "create-response.json"), "utf8"));
+  const entries = await fs.readdir(result.job_dir);
+
+  assert.equal(request.payload.product.api_key, "[REDACTED]");
+  assert.equal(request.payload.metadata.authorization, "[REDACTED]");
+  assert.equal(created.access_token, "[REDACTED]");
+  assert.equal(entries.some((entry) => entry.endsWith(".tmp")), false);
+  assert.equal((await fs.stat(result.job_dir)).mode & 0o777, 0o700);
+  assert.equal((await fs.stat(path.join(result.job_dir, "request.json"))).mode & 0o777, 0o600);
+});
+
+test("resumeGrowthStudioJob polls a saved video ID without resubmitting", async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-api-resume-"));
+  const jobDir = path.join(root, "known-job");
+  await fs.mkdir(jobDir);
+  await fs.writeFile(path.join(jobDir, "request.json"), JSON.stringify({
+    trace_id: "trace-known",
+    payload: { product: { source_url: "https://shop.example.com/item" } },
+  }));
+  await fs.writeFile(path.join(jobDir, "video-id.json"), JSON.stringify({
+    video_id: "627410861853514292",
+  }));
+  await fs.writeFile(path.join(jobDir, "final.json"), JSON.stringify({
+    video_id: "627410861853514292",
+    status: "processing",
+  }));
+  let creates = 0;
+  const client = {
+    async createVideo() { creates += 1; },
+    async pollVideo(videoId, options) {
+      assert.equal(videoId, "627410861853514292");
+      assert.equal(options.traceId, "trace-known-poll");
+      await options.onSnapshot({ video_id: videoId, status: "succeeded" });
+      return { video_id: videoId, status: "succeeded" };
+    },
+  };
+
+  const result = await resumeGrowthStudioJob(client, jobDir, { initialDelaySeconds: 0 });
+
+  assert.equal(creates, 0);
+  assert.equal(result.status, "succeeded");
+  assert.equal(result.video_id, "627410861853514292");
+  assert.equal(result.job_dir, jobDir);
+  assert.equal(JSON.parse(await fs.readFile(path.join(jobDir, "final.json"), "utf8")).status, "succeeded");
+  assert.equal(JSON.parse(await fs.readFile(path.join(jobDir, "final-prior-1.json"), "utf8")).status, "processing");
+});
+
+test("resumeGrowthStudioJob without a saved ID requires reconciliation and performs no request", async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-api-resume-"));
+  const jobDir = path.join(root, "unknown-job");
+  await fs.mkdir(jobDir);
+  await fs.writeFile(path.join(jobDir, "request.json"), JSON.stringify({
+    trace_id: "trace-unknown",
+    payload: { product: { source_url: "https://shop.example.com/item" } },
+  }));
+  let calls = 0;
+  const client = new Proxy({}, { get() { calls += 1; return async () => {}; } });
+
+  const result = await resumeGrowthStudioJob(client, jobDir);
+
+  assert.equal(calls, 0);
+  assert.deepEqual(result, {
+    provider: "growth-studio",
+    trace_id: "trace-unknown",
+    job_dir: jobDir,
+    status: "reconciliation_required",
+    retryable: false,
+  });
+});
+
+test("runVideoJob persists a redacted recovery error without exposing upstream details", async () => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-api-error-"));
+  let jobDir;
+  await assert.rejects(
+    runVideoJob({
+      async createVideo() {
+        const error = new Error("upstream rejected api_key=super-secret");
+        error.code = "UPSTREAM_REJECTED";
+        throw error;
+      },
+    }, {
+      product: { source_url: "https://shop.example.com/item" },
+      video: { aspect_ratio: "9:16" },
+    }, {
+      jobsDir: root,
+      traceId: "trace-error",
+    }),
+    /super-secret/,
+  );
+  [jobDir] = (await fs.readdir(root)).map((entry) => path.join(root, entry));
+  const failure = JSON.parse(await fs.readFile(path.join(jobDir, "error.json"), "utf8"));
+
+  assert.equal(failure.provider, "growth-studio");
+  assert.equal(failure.code, "UPSTREAM_REJECTED");
+  assert.equal(failure.trace_id, "trace-error");
+  assert.equal(JSON.stringify(failure).includes("super-secret"), false);
 });
 
 async function fileExists(filePath) {

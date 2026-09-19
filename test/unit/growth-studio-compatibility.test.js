@@ -41,6 +41,7 @@ test("Growth Studio config has a provider-specific name and preserves folder key
     PIXVERSE_GROWTH_FOLDER_API_KEY: "mh_" + "live_fixture_folder",
     PIXVERSE_GROWTH_FOLDER_API_PREFIX: "/openapi/v1/growth-studio",
     PIXVERSE_GROWTH_BASE_URL: "https://growth.example.test",
+    PIXVERSE_GROWTH_ALLOW_CUSTOM_BASE_URL: "true",
   });
 
   assert.deepEqual(config, {
@@ -63,16 +64,51 @@ test("Growth Studio config rejects missing or non-production API keys", () => {
   );
 });
 
-test("Growth Studio dotenv loader preserves existing environment values", async () => {
+test("Growth Studio config constrains credentials to official, loopback, or opted-in origins", () => {
+  const apiKey = "mh_" + "live_fixture_video";
+  assert.equal(growthConfig.getGrowthStudioConfig({
+    PIXVERSE_GROWTH_API_KEY: apiKey,
+    PIXVERSE_GROWTH_BASE_URL: "https://growth-api.pixverse.ai/",
+  }).baseUrl, "https://growth-api.pixverse.ai");
+  assert.equal(growthConfig.getGrowthStudioConfig({
+    PIXVERSE_GROWTH_API_KEY: apiKey,
+    PIXVERSE_GROWTH_BASE_URL: "http://127.0.0.1:4312/",
+  }).baseUrl, "http://127.0.0.1:4312");
+
+  assert.throws(() => growthConfig.getGrowthStudioConfig({
+    PIXVERSE_GROWTH_API_KEY: apiKey,
+    PIXVERSE_GROWTH_BASE_URL: "http://growth-api.pixverse.ai",
+  }), /official HTTPS origin|custom base URL/i);
+  assert.throws(() => growthConfig.getGrowthStudioConfig({
+    PIXVERSE_GROWTH_API_KEY: apiKey,
+    PIXVERSE_GROWTH_BASE_URL: "https://proxy.example.test",
+    PIXVERSE_PLATFORM_ALLOW_CUSTOM_BASE_URL: "true",
+  }), /PIXVERSE_GROWTH_ALLOW_CUSTOM_BASE_URL=true/);
+
+  assert.equal(growthConfig.getGrowthStudioConfig({
+    PIXVERSE_GROWTH_API_KEY: apiKey,
+    PIXVERSE_GROWTH_BASE_URL: "https://proxy.example.test/",
+    PIXVERSE_GROWTH_ALLOW_CUSTOM_BASE_URL: "true",
+  }).baseUrl, "https://proxy.example.test");
+});
+
+test("Growth Studio dotenv loader allowlists provider keys and preserves existing values", async () => {
   const envPath = path.join(await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-growth-env-")), ".env");
-  const existing = process.env.PIXVERSE_COMPAT_EXISTING;
-  const loaded = process.env.PIXVERSE_COMPAT_LOADED;
-  process.env.PIXVERSE_COMPAT_EXISTING = "original";
-  delete process.env.PIXVERSE_COMPAT_LOADED;
+  const existing = process.env.PIXVERSE_GROWTH_BASE_URL;
+  const loaded = process.env.PIXVERSE_GROWTH_API_KEY;
+  const unrelated = process.env.PIXVERSE_COMPAT_UNRELATED;
+  const platformApiKeyName = "PIXVERSE_PLATFORM_" + "API_KEY";
+  const platformApiKey = process.env[platformApiKeyName];
+  process.env.PIXVERSE_GROWTH_BASE_URL = "https://growth-api.pixverse.ai";
+  delete process.env.PIXVERSE_GROWTH_API_KEY;
+  delete process.env.PIXVERSE_COMPAT_UNRELATED;
+  delete process.env[platformApiKeyName];
   await fs.writeFile(envPath, [
     "# comment",
-    "PIXVERSE_COMPAT_EXISTING=from_file",
-    "PIXVERSE_COMPAT_LOADED='from_file'",
+    "PIXVERSE_GROWTH_BASE_URL=https://proxy.example.test",
+    "PIXVERSE_GROWTH_API_KEY='mh_live_fixture_from_file'",
+    "PIXVERSE_COMPAT_UNRELATED=must_not_load",
+    "PIXVERSE_PLATFORM_API_KEY=fixture_must_not_cross_provider_boundary",
     "MALFORMED_LINE",
     "",
   ].join("\n"));
@@ -80,13 +116,19 @@ test("Growth Studio dotenv loader preserves existing environment values", async 
   try {
     growthConfig.loadDotEnv(envPath);
 
-    assert.equal(process.env.PIXVERSE_COMPAT_EXISTING, "original");
-    assert.equal(process.env.PIXVERSE_COMPAT_LOADED, "from_file");
+    assert.equal(process.env.PIXVERSE_GROWTH_BASE_URL, "https://growth-api.pixverse.ai");
+    assert.equal(process.env.PIXVERSE_GROWTH_API_KEY, "mh_live_fixture_from_file");
+    assert.equal(process.env.PIXVERSE_COMPAT_UNRELATED, undefined);
+    assert.equal(process.env[platformApiKeyName], undefined);
   } finally {
-    if (existing === undefined) delete process.env.PIXVERSE_COMPAT_EXISTING;
-    else process.env.PIXVERSE_COMPAT_EXISTING = existing;
-    if (loaded === undefined) delete process.env.PIXVERSE_COMPAT_LOADED;
-    else process.env.PIXVERSE_COMPAT_LOADED = loaded;
+    if (existing === undefined) delete process.env.PIXVERSE_GROWTH_BASE_URL;
+    else process.env.PIXVERSE_GROWTH_BASE_URL = existing;
+    if (loaded === undefined) delete process.env.PIXVERSE_GROWTH_API_KEY;
+    else process.env.PIXVERSE_GROWTH_API_KEY = loaded;
+    if (unrelated === undefined) delete process.env.PIXVERSE_COMPAT_UNRELATED;
+    else process.env.PIXVERSE_COMPAT_UNRELATED = unrelated;
+    if (platformApiKey === undefined) delete process.env[platformApiKeyName];
+    else process.env[platformApiKeyName] = platformApiKey;
   }
 });
 
@@ -227,6 +269,7 @@ test("Growth Studio command adapter can create its client from provider context"
     env: {
       PIXVERSE_GROWTH_API_KEY: "mh_" + "live_context_fixture",
       PIXVERSE_GROWTH_BASE_URL: "https://growth.example.test",
+      PIXVERSE_GROWTH_ALLOW_CUSTOM_BASE_URL: "true",
     },
     fetchImpl: async (url, init) => {
       calls.push({ url: url.toString(), init });
@@ -400,12 +443,47 @@ test("recognized Growth Studio commands validate arguments before configuration"
   }
 });
 
+test("run-job rejects non-finite and out-of-range timing options before loading configuration", async () => {
+  const cases = [
+    ["--timeout-minutes", "NaN"],
+    ["--timeout-minutes", "0"],
+    ["--timeout-minutes", "Infinity"],
+    ["--initial-delay-seconds", "-1"],
+    ["--fallback-delay-seconds", "-1"],
+  ];
+
+  for (const [option, value] of cases) {
+    await assert.rejects(
+      runGrowthStudioCommand(["run-job", "--payload", "unused.json", option, value], { env: {} }),
+      new RegExp(`${option} must be`),
+    );
+  }
+});
+
+test("Growth Studio resume delegates to poll-only recovery", async () => {
+  const calls = [];
+  const client = { async pollVideo() { throw new Error("not reached by injected resume"); } };
+  const result = await runGrowthStudioCommand(["resume", "/tmp/growth-job"], {
+    client,
+    resumeGrowthStudioJob: async (...args) => {
+      calls.push(args);
+      return { status: "succeeded", video_id: "627410861853514292" };
+    },
+  });
+
+  assert.equal(result.status, "succeeded");
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0][0], client);
+  assert.equal(calls[0][1], "/tmp/growth-job");
+});
+
 test("Growth Studio help documents the canonical command tree", () => {
   const help = getGrowthStudioHelp();
   assert.match(help, /pixverse-api growth-studio avatars list/);
   assert.match(help, /pixverse-api growth-studio folders ensure/);
   assert.match(help, /pixverse-api growth-studio video status/);
   assert.match(help, /pixverse-api growth-studio run-job/);
+  assert.match(help, /pixverse-api growth-studio resume/);
 });
 
 test("legacy command mapper returns canonical paths without mutating mappings", () => {

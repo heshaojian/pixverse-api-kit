@@ -1,5 +1,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import {
+  appendJsonLineArtifact,
+  createJobDirectory,
+  readJsonArtifact,
+  writeJsonArtifact,
+} from "../core/artifacts.js";
+import { serializeError } from "../core/errors.js";
+import { redact } from "../core/redaction.js";
 import { resolveFolderForPayload } from "./folders.js";
 
 const DEFAULT_JOBS_DIR = "jobs";
@@ -7,47 +15,103 @@ const DEFAULT_JOBS_DIR = "jobs";
 export async function runVideoJob(client, payload, options = {}) {
   const jobDir = await createJobDir(options.jobsDir || DEFAULT_JOBS_DIR, options.jobName);
   const traceBase = options.traceId || path.basename(jobDir);
-  const folder = await resolveFolderForPayload(client, payload, {
-    autoFolder: options.autoFolder,
-    folderId: options.folderId,
-    folderName: options.folderName,
-    traceId: traceBase,
-  });
-  const createPayload = withFolderId(payload, folder?.folderId);
-
-  if (folder) await writeJson(path.join(jobDir, "folder.json"), folder);
-
-  await writeJson(path.join(jobDir, "request.json"), {
-    trace_id: traceBase,
-    created_at: new Date().toISOString(),
-    payload: createPayload,
-  });
-
-  const createResult = await client.createVideo(createPayload, { traceId: `${traceBase}-create` });
-  await writeJson(path.join(jobDir, "create-response.json"), createResult.body);
-
-  const videoId = createResult.body.video_id;
-  if (typeof videoId !== "string") {
-    throw new Error("Create response did not include a string video_id.");
-  }
-
-  await writeJson(path.join(jobDir, "video-id.json"), { video_id: videoId });
-
-  let final = createResult.body;
-  if (options.poll !== false) {
-    final = await client.pollVideo(videoId, {
-      traceId: `${traceBase}-poll`,
-      timeoutMs: options.timeoutMs,
-      initialDelaySeconds: options.initialDelaySeconds,
-      fallbackDelaySeconds: options.fallbackDelaySeconds,
-      onSnapshot: async (snapshot) => {
-        await appendJsonLine(path.join(jobDir, "polling.jsonl"), snapshot);
-      },
+  try {
+    const folder = await resolveFolderForPayload(client, payload, {
+      autoFolder: options.autoFolder,
+      folderId: options.folderId,
+      folderName: options.folderName,
+      traceId: traceBase,
     });
+    const createPayload = withFolderId(payload, folder?.folderId);
+
+    if (folder) await writeArtifact(jobDir, "folder.json", redact(folder));
+
+    await writeArtifact(jobDir, "request.json", redact({
+      provider: "growth-studio",
+      trace_id: traceBase,
+      created_at: new Date().toISOString(),
+      payload: createPayload,
+    }));
+
+    const createResult = await client.createVideo(createPayload, { traceId: `${traceBase}-create` });
+    await writeArtifact(jobDir, "create-response.json", redact(createResult.body));
+
+    const videoId = createResult.body.video_id;
+    if (typeof videoId !== "string" || videoId === "") {
+      throw new Error("Create response did not include a string video_id.");
+    }
+
+    await writeArtifact(jobDir, "video-id.json", { video_id: videoId });
+
+    const final = options.poll === false
+      ? createResult.body
+      : await pollKnownVideo(client, jobDir, videoId, traceBase, options);
+
+    if (options.poll === false) await writeArtifact(jobDir, "final.json", redact(final));
+
+    return resultFromFinal(jobDir, videoId, final, folder);
+  } catch (error) {
+    await persistFailure(jobDir, error, traceBase);
+    throw error;
+  }
+}
+
+export const runGrowthStudioJob = runVideoJob;
+
+export async function resumeGrowthStudioJob(client, jobDirectory, options = {}) {
+  const jobDir = path.resolve(jobDirectory);
+  const request = await readJsonArtifact(path.join(jobDir, "request.json"), { rootDir: jobDir });
+  const completed = await readOptionalArtifact(jobDir, "final.json");
+  if (completed && isTerminal(completed.status)) {
+    const id = (await readOptionalArtifact(jobDir, "video-id.json"))?.video_id;
+    return resultFromFinal(jobDir, id, completed);
   }
 
-  await writeJson(path.join(jobDir, "final.json"), final);
+  const videoId = (await readOptionalArtifact(jobDir, "video-id.json"))?.video_id;
+  if (typeof videoId !== "string" || videoId === "") {
+    return {
+      provider: "growth-studio",
+      trace_id: request.trace_id,
+      job_dir: jobDir,
+      status: "reconciliation_required",
+      retryable: false,
+    };
+  }
 
+  if (completed) await archivePriorFinal(jobDir);
+
+  try {
+    const final = await pollKnownVideo(client, jobDir, videoId, request.trace_id, options);
+    return resultFromFinal(jobDir, videoId, final);
+  } catch (error) {
+    await persistFailure(jobDir, error, request.trace_id);
+    throw error;
+  }
+}
+
+export async function readJsonFile(filePath) {
+  return JSON.parse(await fs.readFile(filePath, "utf8"));
+}
+
+export async function createJobDir(rootDir, jobName) {
+  return createJobDirectory(path.resolve(rootDir), { name: jobName || "pixverse-api-job" });
+}
+
+async function pollKnownVideo(client, jobDir, videoId, traceBase, options) {
+  const final = await client.pollVideo(videoId, {
+    traceId: `${traceBase}-poll`,
+    timeoutMs: options.timeoutMs,
+    initialDelaySeconds: options.initialDelaySeconds,
+    fallbackDelaySeconds: options.fallbackDelaySeconds,
+    onSnapshot: async (snapshot) => {
+      await appendJsonLineArtifact(path.join(jobDir, "polling.jsonl"), redact(snapshot), { rootDir: jobDir });
+    },
+  });
+  await writeArtifact(jobDir, "final.json", redact(final));
+  return final;
+}
+
+function resultFromFinal(jobDir, videoId, final, folder) {
   return {
     job_dir: jobDir,
     video_id: videoId,
@@ -60,35 +124,56 @@ export async function runVideoJob(client, payload, options = {}) {
   };
 }
 
-export const runGrowthStudioJob = runVideoJob;
-
-export async function readJsonFile(filePath) {
-  return JSON.parse(await fs.readFile(filePath, "utf8"));
+async function writeArtifact(jobDir, name, value) {
+  await writeJsonArtifact(path.join(jobDir, name), value, { rootDir: jobDir });
 }
 
-export async function createJobDir(rootDir, jobName) {
-  await fs.mkdir(rootDir, { recursive: true });
-  const safeName = slugify(jobName || "pixverse-api-job");
-  const stamp = new Date().toISOString().replaceAll(/[:.]/g, "-");
-  const jobDir = path.join(rootDir, `${stamp}-${safeName}`);
-  await fs.mkdir(jobDir, { recursive: false });
-  return jobDir;
+async function readOptionalArtifact(jobDir, name) {
+  try {
+    return await readJsonArtifact(path.join(jobDir, name), { rootDir: jobDir });
+  } catch (error) {
+    if (error?.code === "ENOENT") return undefined;
+    throw error;
+  }
 }
 
-async function writeJson(filePath, value) {
-  await fs.writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`);
+async function writeArtifactIfMissing(jobDir, name, value) {
+  if (await readOptionalArtifact(jobDir, name)) return;
+  await writeArtifact(jobDir, name, value);
 }
 
-async function appendJsonLine(filePath, value) {
-  await fs.appendFile(filePath, `${JSON.stringify(value)}\n`);
+async function persistFailure(jobDir, error, traceId) {
+  const publicError = serializeError(error);
+  await writeArtifactIfMissing(jobDir, "error.json", redact({
+    name: publicError.name,
+    message: "Growth Studio job failed. Inspect saved artifacts before recovery.",
+    category: publicError.category ?? (error instanceof TypeError ? "transport" : "unknown"),
+    provider: "growth-studio",
+    ...(publicError.status === undefined ? {} : { status: publicError.status }),
+    ...(publicError.code === undefined ? {} : { code: publicError.code }),
+    ...(publicError.retryable === undefined ? {} : { retryable: publicError.retryable }),
+    ...(publicError.retry_after === undefined ? {} : { retry_after: publicError.retry_after }),
+    trace_id: publicError.trace_id ?? traceId,
+  }));
 }
 
-function slugify(value) {
-  return String(value)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80) || "job";
+async function archivePriorFinal(jobDir) {
+  const source = path.join(jobDir, "final.json");
+  for (let index = 1; index < Number.MAX_SAFE_INTEGER; index += 1) {
+    const target = path.join(jobDir, `final-prior-${index}.json`);
+    try {
+      await fs.link(source, target);
+      await fs.unlink(source);
+      return;
+    } catch (error) {
+      if (error?.code !== "EEXIST") throw error;
+    }
+  }
+  throw new Error("Could not preserve the prior Growth Studio final artifact.");
+}
+
+function isTerminal(status) {
+  return status === "succeeded" || status === "failed" || status === "canceled";
 }
 
 function withFolderId(payload, folderId) {

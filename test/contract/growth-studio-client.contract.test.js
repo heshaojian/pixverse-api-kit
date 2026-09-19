@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { GrowthStudioClient } from "../../src/growth-studio/client.js";
+import {
+  GrowthStudioApiError,
+  GrowthStudioClient,
+  parseResponse,
+} from "../../src/growth-studio/client.js";
 import { createRecordingFetch, describeRecordedBody, jsonResponse } from "../helpers/recording-fetch.js";
 
 test("Growth Studio client uses bearer auth only and never sends Platform headers", async () => {
@@ -68,4 +72,22 @@ test("Growth Studio client preserves string identifiers through create and poll"
     "/openapi/v1/videos/627410861853514292",
   ]);
   assert.equal(calls.every(({ headers }) => !headers.has("API-KEY")), true);
+});
+
+test("Growth Studio successful responses reject malformed JSON as a protocol error", async () => {
+  await assert.rejects(
+    parseResponse(new Response("not-json", {
+      status: 200,
+      headers: { "x-request-id": "request_malformed" },
+    })),
+    (error) => {
+      assert.ok(error instanceof GrowthStudioApiError);
+      assert.equal(error.category, "protocol");
+      assert.equal(error.code, "INVALID_JSON_RESPONSE");
+      assert.equal(error.status, 200);
+      assert.equal(error.retryable, false);
+      assert.equal(error.requestId, "request_malformed");
+      return true;
+    },
+  );
 });
