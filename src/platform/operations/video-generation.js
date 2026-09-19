@@ -1,0 +1,20 @@
+export const VIDEO_GENERATION_OPERATIONS = [
+  ["video.text", "text", "/openapi/v2/video/text/generate"],
+  ["video.image", "image", "/openapi/v2/video/img/generate"],
+  ["video.template", "template", "/openapi/v2/video/img/generate"],
+  ["video.transition", "transition", "/openapi/v2/video/transition/generate"],
+  ["video.multi-transition", "multi-transition", "/openapi/v2/video/multi_transition/generate"],
+  ["video.lip-sync", "lip-sync", "/openapi/v2/video/lip_sync/generate"],
+  ["video.fusion", "fusion", "/openapi/v2/video/fusion/generate"],
+  ["video.avatar", "avatar", "/openapi/v2/video/avatar/generate"],
+].map(([id, command, path]) => ({
+  id,
+  command: ["video", command],
+  method: "POST",
+  path,
+  bodyMode: "json",
+  validationPolicy: id,
+  billing: "billable",
+  asynchronous: true,
+  resultIdPath: "Resp.video_id",
+}));
