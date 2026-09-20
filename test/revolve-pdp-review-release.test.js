@@ -96,3 +96,16 @@ test("every product has a nonempty local poster", async () => {
     assert.ok(stat.size > 10_000, `${product.id} poster is unexpectedly small`);
   }
 });
+
+test("each Standard/high video appears once as a player and once as a direct link", async () => {
+  const [catalog, html] = await Promise.all([
+    readJson(new URL("catalog.json", reviewRoot)),
+    fs.readFile(new URL("index.html", reviewRoot), "utf8"),
+  ]);
+  assert.equal(new Set(catalog.products.map(({ videoUrl }) => videoUrl)).size, 14);
+  for (const { id, videoUrl } of catalog.products) {
+    const escaped = videoUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    assert.match(videoUrl, /^https:\/\/media\.pixverse\.ai\//);
+    assert.equal((html.match(new RegExp(escaped, "g")) ?? []).length, 2, id);
+  }
+});

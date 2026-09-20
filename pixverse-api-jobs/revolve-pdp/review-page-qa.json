@@ -1,0 +1,31 @@
+{
+  "release_root": "deploy/brand-pitches/revolve/pdp-review",
+  "canonical_url": "https://revolve-pdp-review.pages.dev/",
+  "publication_status": "local-only",
+  "products": 14,
+  "videos_verified": 14,
+  "posters_verified": 14,
+  "video_encoding": {
+    "codec": "h264",
+    "width": 1440,
+    "height": 2560,
+    "fps": 30
+  },
+  "desktop_viewports": [
+    "1265x900",
+    "1920x1080"
+  ],
+  "mobile_viewports": [
+    "375x812",
+    "320x700"
+  ],
+  "initial_poster_requests": {
+    "desktop": 3,
+    "mobile": 1
+  },
+  "posters_after_full_scroll": 14,
+  "horizontal_overflow": false,
+  "console_errors": 0,
+  "v4_sha256": "f845fcfadeb49776d7ad1e03d57b06f7bf8ff77d16f76175936776a816a1d948",
+  "result": "passed"
+}
