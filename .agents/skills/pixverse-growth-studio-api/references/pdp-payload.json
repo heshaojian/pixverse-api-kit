@@ -1,0 +1,19 @@
+{
+  "product": {
+    "title": "Linen Summer Shirt",
+    "description": "Breathable linen with a relaxed fit.",
+    "images": [
+      { "url": "https://media.pixverse.ai/example/front.webp" },
+      { "url": "https://media.pixverse.ai/example/back.webp" }
+    ],
+    "brand": "Example Brand",
+    "price": { "amount": "59.90", "currency": "USD" }
+  },
+  "video": {
+    "mode": "pro",
+    "duration": 10,
+    "quality": "high",
+    "aspect_ratio": "9:16",
+    "additional_prompt": "Soft morning light and clean product-focused styling."
+  }
+}

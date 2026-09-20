@@ -10,7 +10,7 @@
 
 ## Durable Jobs
 
-Use `run-job` to start billable work. The command writes a durable, redacted request artifact before submission. A new Platform job gets a fresh UUID `Ai-trace-id`; recovery may reuse only the saved trace from `request.json`. Growth Studio stores its own trace and never borrows Platform credentials or identifiers.
+Use the durable submission surface for billable work: Platform `run-job`, Growth Studio `run-job`, or Growth Studio `pdp create --confirm-billable`. Each writes a durable, redacted request artifact before submission. A new Platform job gets a fresh UUID `Ai-trace-id`; recovery may reuse only the saved trace from `request.json`. Growth Studio stores its own trace and never borrows Platform credentials or identifiers.
 
 Depending on the provider and how far the job reached, its directory can contain:
 
@@ -18,6 +18,7 @@ Depending on the provider and how far the job reached, its directory can contain
 - `folder.json` when Growth Studio folder resolution was used
 - `create-response.json`
 - `video-id.json` or `image-id.json`
+- `ledger-source-id.json` for a PDP job when the API returns `ledger_source_id`
 - `polling.jsonl`
 - `final.json`
 - `error.json` on failures
@@ -29,9 +30,26 @@ Resume with the matching provider:
 ```bash
 pixverse-api platform resume /absolute/path/pixverse-api-jobs/platform/<job-dir>
 pixverse-api growth-studio resume /absolute/path/jobs/<job-dir>
+pixverse-api growth-studio pdp resume /absolute/path/jobs/<job-dir>
 ```
 
 `resume` is poll-only. It reads the saved result ID and continues status checks; it never calls a create endpoint. If the submission response was ambiguous and no result ID was saved, it returns `reconciliation_required` instead of risking a duplicate charged generation. Inspect the saved request, error, recent remote jobs, and any provider request ID before deciding whether to submit again.
+
+## Growth Studio PDP
+
+PDP live creation requires `--confirm-billable`. First use its credential-free `--dry-run`, optionally inspect the wallet balance snapshot, and obtain explicit approval immediately before the confirmed command. Wallet balance is not a price quote, reservation, entitlement check, or authorization to spend.
+
+Submit a confirmed PDP create once. The endpoint has no caller-provided idempotency key, and a `202 Accepted` response means charged and queued rather than complete. A timeout or transport failure after submission is ambiguous; never automatically retry create.
+
+PDP recovery preserves `video_id`, optional `ledger_source_id`, ledger IDs, and amounts as strings. When an ID was saved, use `growth-studio pdp resume`. When no `video_id` was saved, preserve `reconciliation_required` and, when useful, query:
+
+```bash
+pixverse-api growth-studio wallet ledgers --offset 0 --limit 20
+```
+
+Match a ledger item with `source_type: "video"` and a string `source_id` equal to the saved string `ledger_source_id` or `video_id`. No matching item is not proof of failure: a generation can be free, or ledger visibility can be delayed. A `403` from PDP or wallet calls normally indicates missing account or key entitlement; resolve access rather than retrying a billable create.
+
+See [Growth Studio PDP Videos](growth-studio-pdp.md) for its seller-neutral fashion/apparel payload and full workflow.
 
 ## Webhooks
 

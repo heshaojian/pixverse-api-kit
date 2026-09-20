@@ -85,14 +85,18 @@ Growth Studio examples:
 ```bash
 npm run cli -- growth-studio avatars list
 npm run cli -- growth-studio folders list
-npm run cli -- growth-studio folders ensure "REVOLVE"
+npm run cli -- growth-studio folders ensure "Campaign Alpha"
 npm run cli -- growth-studio upload image /absolute/path/product.webp
+npm run cli -- growth-studio pdp create --payload /absolute/path/pdp.json --dry-run
+npm run cli -- growth-studio wallet balance
 npm run cli -- growth-studio video create-from-url "https://shop.example.com/products/item"
 npm run cli -- growth-studio video create-from-json /absolute/path/payload.json
-npm run cli -- growth-studio run-job --payload /absolute/path/payload.json --folder-name "REVOLVE"
+npm run cli -- growth-studio run-job --payload /absolute/path/payload.json --folder-name "Campaign Alpha"
 npm run cli -- growth-studio resume /absolute/path/jobs/<job-dir>
 npm run cli -- growth-studio video poll 627410861853514292
 ```
+
+PDP is the merchant-neutral product-detail-page video workflow for the currently supported fashion/apparel category. It uses uploaded PixVerse image URLs, has a credential-free `--dry-run`, and requires explicit approval immediately before a live `--confirm-billable` submission. A live create is submitted once and recorded durably. See [`docs/api/growth-studio-pdp.md`](docs/api/growth-studio-pdp.md).
 
 Legacy Growth Studio aliases such as `get`, `poll`, `run-job`, and `create-from-url` still work during `0.x` and emit one deprecation warning.
 
@@ -102,6 +106,7 @@ Legacy Growth Studio aliases such as `get`, `poll`, `run-job`, and `create-from-
 - Growth Studio uses `Authorization: Bearer <PIXVERSE_GROWTH_API_KEY>`.
 - Keep all IDs as strings.
 - Use `run-job` for new billable work and `resume` for an existing durable job.
+- For PDP, use `--dry-run`, optionally inspect the wallet snapshot, obtain approval immediately before `--confirm-billable`, and submit only once. A `202 Accepted` result is charged and queued.
 - After an ambiguous billable response, inspect saved artifacts and known IDs before retrying.
 - `resume` polls a saved ID only; it never resubmits a generation. If no ID was saved, it reports that reconciliation is required.
 - Default automated tests use loopback or injected clients and do not submit paid jobs.
@@ -109,6 +114,7 @@ Legacy Growth Studio aliases such as `get`, `poll`, `run-job`, and `create-from-
 ## Docs
 
 - `docs/api/command-reference.md`
+- `docs/api/growth-studio-pdp.md`
 - `docs/api/platform-operations.md`
 - `docs/api/safety-and-recovery.md`
 - `.agents/skills/pixverse-api/SKILL.md`
@@ -117,4 +123,4 @@ Legacy Growth Studio aliases such as `get`, `poll`, `run-job`, and `create-from-
 
 ## Job Artifacts
 
-Platform `run-job` writes under `pixverse-api-jobs/platform/` by default. Growth Studio `run-job` writes under `jobs/` by default. Both providers preserve redacted request evidence, known IDs, polling snapshots, final state, and safe error records. Use the provider's `resume` command with that job directory to continue polling without submitting another generation.
+Platform `run-job` writes under `pixverse-api-jobs/platform/` by default. Growth Studio `run-job` and live PDP create write under `jobs/` by default. Both providers preserve redacted request evidence, known IDs, polling snapshots, final state, and safe error records. PDP can additionally preserve `ledger-source-id.json`. Use the matching provider or PDP `resume` command with that job directory to continue polling without submitting another generation.

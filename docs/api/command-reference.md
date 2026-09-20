@@ -106,13 +106,50 @@ The raw escape hatch accepts `GET`, `HEAD`, `POST`, `PUT`, `PATCH`, and `DELETE`
 ```bash
 pixverse-api growth-studio avatars list
 pixverse-api growth-studio folders list
-pixverse-api growth-studio folders ensure "REVOLVE"
+pixverse-api growth-studio folders ensure "Campaign Alpha"
 pixverse-api growth-studio upload image /absolute/path/product.webp
 ```
 
 `folders ensure` accepts either the positional name shown above or `--folder-name <name>`.
 
-### Create and inspect videos
+### PDP videos
+
+PDP is a seller-neutral product-detail-page video workflow for the currently documented fashion/apparel category. Upload local images first and place only the returned `https://media.pixverse.ai/...` URLs in the public payload.
+
+```bash
+pixverse-api growth-studio pdp create \
+  --payload /absolute/path/pdp.json \
+  --dry-run
+
+pixverse-api growth-studio pdp create \
+  --payload /absolute/path/pdp.json \
+  --confirm-billable \
+  [--jobs-dir /absolute/path/jobs] \
+  [--job-name product-name] \
+  [--timeout-minutes 10] \
+  [--initial-delay-seconds 5] \
+  [--fallback-delay-seconds 5] \
+  [--no-poll]
+
+pixverse-api growth-studio pdp get <video_id>
+pixverse-api growth-studio pdp poll <video_id> [polling options]
+pixverse-api growth-studio pdp resume /absolute/path/jobs/<job-dir> [polling options]
+```
+
+`--dry-run` and `--confirm-billable` are mutually exclusive. Dry run validates and prints the normalized request without credentials, network access, job artifacts, or billing. A live submission requires explicit approval immediately beforehand and is sent exactly once. Treat `202 Accepted` as charged and queued, then poll or resume rather than creating again.
+
+The public PDP payload contains only `product` and `video`; it rejects `type`, `source_url`, folder fields, seller fields, and arbitrary metadata. Brand and price are optional record fields, not documented generation controls. See [Growth Studio PDP Videos](growth-studio-pdp.md) for the complete payload, approval, artifact, and reconciliation contract.
+
+### Wallet reads
+
+```bash
+pixverse-api growth-studio wallet balance
+pixverse-api growth-studio wallet ledgers [--offset 0] [--limit 20]
+```
+
+These calls are read-only. Balance is a snapshot, not a price quote, reservation, entitlement check, or substitute for billable approval. Ledger `offset` must be a non-negative integer and `limit` must be an integer from 1 through 100.
+
+### Existing URL-based and general videos
 
 ```bash
 pixverse-api growth-studio video create-from-url \
@@ -134,7 +171,7 @@ Folder options for creation are mutually exclusive targeting choices:
 - `--folder-name <name>` reuses a case-insensitive match or creates the folder.
 - `--auto-folder` infers a name from supported payload metadata or the merchant URL.
 
-Growth Studio has no dry-run command. Direct `create-from-url`, `create-from-json`, and `video edit` calls can create billable asynchronous work and do not provide the full durable job workflow. Prefer `run-job` for new video generation.
+The existing general `create-from-url`, `create-from-json`, and `video edit` commands have no dry-run mode. They can create billable asynchronous work and do not provide the full durable job workflow. Prefer `run-job` for new general video generation. PDP is a separate workflow and does provide `pdp create --dry-run`.
 
 ### Durable Growth Studio jobs
 
@@ -159,7 +196,7 @@ Timing values must be finite: `--timeout-minutes` must be greater than zero, whi
 
 `resume` reads `video-id.json` and continues polling only. It never calls the create endpoint. With no saved video ID it reports `reconciliation_required`, preserving the evidence needed to investigate an ambiguous submission.
 
-Growth Studio jobs use `jobs/` by default and can contain `request.json`, `folder.json`, `create-response.json`, `video-id.json`, `polling.jsonl`, `final.json`, and `error.json`. A resumed nonterminal `final.json` is preserved as `final-prior-N.json`. JSON artifacts are private, atomic, and recursively redacted.
+Growth Studio jobs use `jobs/` by default and can contain `request.json`, `folder.json`, `create-response.json`, `video-id.json`, `polling.jsonl`, `final.json`, and `error.json`. PDP jobs omit folder resolution and can additionally contain `ledger-source-id.json`. A resumed nonterminal `final.json` is preserved as `final-prior-N.json`. JSON artifacts are private, atomic, and recursively redacted.
 
 ### Growth Studio folder configuration
 
@@ -192,4 +229,4 @@ There is no legacy alias for provider-qualified `resume`.
 
 ## Recovery rule
 
-After a timeout, connection loss, malformed response, or any other ambiguous billable submission, do not rerun the create command. Keep the job directory and use the matching provider's `resume` command. See [Safety and Recovery](safety-and-recovery.md) for the artifact and webhook contracts.
+After a timeout, connection loss, malformed response, or any other ambiguous billable submission, do not rerun the create command. Keep the job directory and use the matching provider's `resume` command; for PDP, use `growth-studio pdp resume`. With no saved result ID, stop at `reconciliation_required` and inspect ledger evidence instead of resubmitting. See [Safety and Recovery](safety-and-recovery.md) for the artifact and webhook contracts.
