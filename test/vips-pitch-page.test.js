@@ -8,6 +8,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 const pitchRoot = path.join(repoRoot, "deploy/brand-pitches/vips/human-reviewed-ecommerce");
 const pagePath = path.join(pitchRoot, "index.html");
 const cssPath = path.join(pitchRoot, "styles.css");
+const appPath = path.join(pitchRoot, "app.js");
 
 const readPage = async () => fs.readFile(pagePath, "utf8");
 const position = (html, needle) => {
@@ -79,4 +80,24 @@ test("VIPS styles follow PixVerse tokens and product-media constraints", async (
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
   assert.match(css, /@media\s*\(max-width:\s*639px\)/);
   assert.doesNotMatch(css, /box-shadow\s*:|object-fit:\s*cover|letter-spacing\s*:/);
+});
+
+test("VIPS app safely renders and progressively loads the ledger", async () => {
+  const source = await fs.readFile(appPath, "utf8");
+  const imports = [...source.matchAll(/import\s+[^;]+?\s+from\s+["']([^"']+)["']/g)].map((match) => match[1]);
+  assert.ok(imports.length >= 2);
+  assert.ok(imports.every((specifier) => specifier.startsWith("./")), imports.join(", "));
+  assert.match(source, /const DATA_URL = "\.\/data\/cases\.json"/);
+  assert.ok(source.indexOf("validatePitchData") < source.indexOf("renderLedger"));
+  assert.doesNotMatch(source, /innerHTML\s*=|eval\s*\(|new Function|analytics|gtag|fetch\(["']https?:|form\.submit|app\.pixverse\.ai/i);
+  assert.match(source, /document\.createElement\("template"\)/);
+  assert.match(source, /replaceChildren\(/);
+  assert.match(source, /new IntersectionObserver\(/);
+  assert.match(source, /rootMargin:\s*"[^"]*[1-9]\d*px/);
+  assert.match(source, /dataset\.src[\s\S]*setAttribute\("src"/);
+  assert.match(source, /dataset\.poster[\s\S]*setAttribute\("poster"/);
+  assert.match(source, /attachDeferredMedia/);
+  assert.match(source, /addEventListener\("error"/);
+  assert.match(source, /视频暂不可用/);
+  assert.match(source, /完整评审暂不可用，请稍后重试。/);
 });
