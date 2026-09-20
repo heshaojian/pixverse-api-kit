@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const pitchRoot = path.join(repoRoot, "deploy/brand-pitches/vips/human-reviewed-ecommerce");
 const dataPath = path.join(pitchRoot, "data/cases.json");
+const manifestPath = path.join(pitchRoot, "data/media-manifest.json");
 const expectedCounts = Object.freeze({
   "viral-remix-and-editing": 11,
   "presenter-commerce": 3,
@@ -163,6 +164,25 @@ test("every local evidence asset exists inside the pitch root", async () => {
     const absolute = path.resolve(pitchRoot, media.url);
     assert.ok(absolute.startsWith(`${pitchRoot}${path.sep}`), media.url);
     await fs.access(absolute);
+  }
+});
+
+test("every manifest-backed local asset uses the probed dimensions", async () => {
+  const [data, manifest] = await Promise.all([
+    readData(),
+    fs.readFile(manifestPath, "utf8").then(JSON.parse),
+  ]);
+  const assetsById = new Map(manifest.assets.map((asset) => [asset.id, asset]));
+  const localMedia = collectMedia(data).filter(({ url }) => typeof url === "string" && !/^https:/i.test(url));
+  for (const media of localMedia) {
+    const asset = assetsById.get(media.id);
+    assert.ok(asset, `${media.id}:manifest`);
+    assert.equal(media.dimensions.width, asset.width, `${media.id}:width`);
+    assert.equal(media.dimensions.height, asset.height, `${media.id}:height`);
+    assert.ok(
+      Math.abs(media.dimensions.aspectRatio - (asset.width / asset.height)) < 0.0001,
+      `${media.id}:aspect ratio`,
+    );
   }
 });
 

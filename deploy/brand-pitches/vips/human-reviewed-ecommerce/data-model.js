@@ -62,7 +62,7 @@ export function isSafeMediaUrl(value) {
   if (/^https:/i.test(value)) {
     try {
       const parsed = new URL(value);
-      return parsed.protocol === "https:" && !parsed.username && !parsed.password;
+      return parsed.protocol === "https:" && !parsed.username && !parsed.password && !parsed.search && !parsed.hash;
     } catch {
       return false;
     }

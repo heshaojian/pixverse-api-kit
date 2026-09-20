@@ -3,6 +3,10 @@ import { renderLedger } from "./render.js";
 
 const DATA_URL = "./data/cases.json";
 const FAILURE_MESSAGE = "完整评审暂不可用，请稍后重试。";
+const FEATURED_POSTER_PATHS = new Set([
+  "./assets/images/featured-creative-poster.jpg",
+  "./assets/images/featured-product-motion-poster.jpg",
+]);
 
 export async function loadPitchData(fetchImpl = fetch) {
   const response = await fetchImpl(DATA_URL, { credentials: "omit" });
@@ -53,6 +57,26 @@ export function attachDeferredMedia(root, observerFactory = null) {
   return observer;
 }
 
+export function attachDesktopPosters(root, mediaQuery = null) {
+  const desktopQuery = mediaQuery ?? window.matchMedia("(min-width: 900px)");
+  const applyPosters = () => {
+    if (!desktopQuery.matches) return 0;
+    let attached = 0;
+    for (const element of root.querySelectorAll("video[data-desktop-poster]")) {
+      const poster = element.dataset.desktopPoster;
+      if (!FEATURED_POSTER_PATHS.has(poster)) continue;
+      element.setAttribute("poster", poster);
+      attached += 1;
+    }
+    desktopQuery.removeEventListener?.("change", applyPosters);
+    return attached;
+  };
+
+  const attached = applyPosters();
+  if (!attached) desktopQuery.addEventListener?.("change", applyPosters, { once: true });
+  return attached;
+}
+
 const openDeepLink = (root, hash = window.location.hash) => {
   if (!hash || hash.length < 2) return;
   const id = decodeURIComponent(hash.slice(1));
@@ -89,6 +113,7 @@ export async function initPitchPage({
   documentRef = document,
   fetchImpl = fetch,
 } = {}) {
+  attachDesktopPosters(documentRef);
   const mount = documentRef.querySelector("#ledger-mount");
   const fallback = documentRef.querySelector(".ledger-fallback");
   if (!mount) return;

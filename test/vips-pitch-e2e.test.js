@@ -69,6 +69,9 @@ test("VIPS pitch artifact is self-contained over static HTTP", async () => {
       "/data-model.js",
       "/render.js",
       "/assets/brand/pixverse-logo.svg",
+      "/assets/images/featured-presenter-poster.jpg",
+      "/assets/images/featured-creative-poster.jpg",
+      "/assets/images/featured-product-motion-poster.jpg",
       ...(await collectLocalMediaPaths()).map((assetPath) => `/${assetPath}`),
     ];
 

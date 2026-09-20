@@ -4,6 +4,8 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
+import { attachDesktopPosters } from "../deploy/brand-pitches/vips/human-reviewed-ecommerce/app.js";
+
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const pitchRoot = path.join(repoRoot, "deploy/brand-pitches/vips/human-reviewed-ecommerce");
 const pagePath = path.join(pitchRoot, "index.html");
@@ -47,6 +49,12 @@ test("three featured cases remain usable without JavaScript", async () => {
   assert.equal((html.match(/class="[^"]*featured-case/g) ?? []).length, 3);
   assert.equal((html.match(/preload="metadata"/g) ?? []).length, 1);
   assert.equal((html.match(/preload="none"/g) ?? []).length, 2);
+  assert.match(
+    html,
+    /preload="metadata"[^>]*poster="\.\/assets\/images\/featured-presenter-poster\.jpg"/,
+  );
+  assert.equal((html.match(/data-desktop-poster="\.\/assets\/images\/featured-(?:creative|product-motion)-poster\.jpg"/g) ?? []).length, 2);
+  assert.equal((html.match(/\sposter="\.\/assets\/images\/featured-(?:creative|product-motion)-poster\.jpg"/g) ?? []).length, 0);
   assert.match(html, /男式牛仔裤/);
   assert.match(html, /冰晶护肤/);
   assert.match(html, /商品动效/);
@@ -97,7 +105,37 @@ test("VIPS app safely renders and progressively loads the ledger", async () => {
   assert.match(source, /dataset\.src[\s\S]*setAttribute\("src"/);
   assert.match(source, /dataset\.poster[\s\S]*setAttribute\("poster"/);
   assert.match(source, /attachDeferredMedia/);
+  assert.match(source, /matchMedia\("\(min-width: 900px\)"\)/);
+  assert.match(source, /dataset\.desktopPoster[\s\S]*setAttribute\("poster"/);
+  assert.doesNotMatch(source, /innerHTML\s*=|insertAdjacentHTML|outerHTML\s*=/);
   assert.match(source, /addEventListener\("error"/);
   assert.match(source, /视频暂不可用/);
   assert.match(source, /完整评审暂不可用，请稍后重试。/);
+});
+
+test("featured posters preserve the mobile request budget and use a desktop allowlist", () => {
+  const makeVideo = (desktopPoster) => ({
+    dataset: { desktopPoster },
+    poster: null,
+    setAttribute(name, value) {
+      if (name === "poster") this.poster = value;
+    },
+  });
+  const videos = [
+    makeVideo("./assets/images/featured-creative-poster.jpg"),
+    makeVideo("./assets/images/featured-product-motion-poster.jpg"),
+    makeVideo("https://example.invalid/untrusted.jpg"),
+  ];
+  const root = { querySelectorAll: () => videos };
+  const mobileQuery = { matches: false, addEventListener() {}, removeEventListener() {} };
+  const desktopQuery = { matches: true, addEventListener() {}, removeEventListener() {} };
+
+  assert.equal(attachDesktopPosters(root, mobileQuery), 0);
+  assert.deepEqual(videos.map(({ poster }) => poster), [null, null, null]);
+  assert.equal(attachDesktopPosters(root, desktopQuery), 2);
+  assert.deepEqual(videos.map(({ poster }) => poster), [
+    "./assets/images/featured-creative-poster.jpg",
+    "./assets/images/featured-product-motion-poster.jpg",
+    null,
+  ]);
 });

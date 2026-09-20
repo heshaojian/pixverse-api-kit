@@ -108,6 +108,9 @@ test("isSafeMediaUrl rejects malformed and ambiguous paths", () => {
   assert.equal(isSafeMediaUrl("//example.com/video.mp4"), false);
   assert.equal(isSafeMediaUrl("assets/videos/../secret.mp4"), false);
   assert.equal(isSafeMediaUrl("assets/videos/example.mp4?token=secret"), false);
+  assert.equal(isSafeMediaUrl("https://example.com/video.mp4?download=1"), false);
+  assert.equal(isSafeMediaUrl("https://example.com/video.mp4#preview"), false);
+  assert.equal(isSafeMediaUrl("https://example.com/video.mp4"), true);
 });
 
 test("validatePitchData rejects unsupported nested records and top-level drift", async () => {

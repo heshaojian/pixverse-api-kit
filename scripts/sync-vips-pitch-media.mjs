@@ -23,18 +23,33 @@ const FEATURE_ALIASES = Object.freeze([
     sourceName: "男式牛仔裤_GrowthStudio_Agent_无声.mp4",
     id: "featured-presenter",
     path: "assets/videos/featured-presenter.mp4",
+    poster: Object.freeze({
+      id: "featured-presenter-poster",
+      path: "assets/images/featured-presenter-poster.jpg",
+      atSecond: 4,
+    }),
   }),
   Object.freeze({
     caseId: "creative-skincare-ice",
     sourceName: "PixVerseAgent_720P_FOR.mp4",
     id: "featured-creative",
     path: "assets/videos/featured-creative.mp4",
+    poster: Object.freeze({
+      id: "featured-creative-poster",
+      path: "assets/images/featured-creative-poster.jpg",
+      atSecond: 1,
+    }),
   }),
   Object.freeze({
     caseId: "product-motion-multi-pose",
     sourceName: "06.mp4",
     id: "featured-product-motion",
     path: "assets/videos/featured-product-motion.mp4",
+    poster: Object.freeze({
+      id: "featured-product-motion-poster",
+      path: "assets/images/featured-product-motion-poster.jpg",
+      atSecond: 4,
+    }),
   }),
 ]);
 
@@ -166,6 +181,49 @@ const probeMedia = async (filePath) => {
   });
 };
 
+const hasForbiddenBinaryMetadata = (value) =>
+  /c2pa|jumb|jumd/.test(value) || /BytePlus|ModelArk|dreamina|flog_idx|log_idx|certificate@/i.test(value);
+
+const probeStreams = async (filePath) => {
+  const { stdout } = await execFile("ffprobe", [
+    "-v", "error", "-show_entries",
+    "format=duration:stream=index,codec_type,codec_name,width,height,sample_rate,channels",
+    "-of", "json", filePath,
+  ], { encoding: "utf8", maxBuffer: 8 * 1024 * 1024 });
+  const parsed = JSON.parse(stdout);
+  return Object.freeze({
+    duration: Number(parsed.format?.duration),
+    streams: Object.freeze((parsed.streams ?? [])
+      .filter(({ codec_type: type }) => type === "video" || type === "audio")
+      .map(({ index, codec_type: type, codec_name: codec, width, height, sample_rate: sampleRate, channels }) =>
+        Object.freeze({ index, type, codec, width: width ?? null, height: height ?? null, sampleRate: sampleRate ?? null, channels: channels ?? null })
+      )),
+  });
+};
+
+export async function sanitizeMp4({ sourcePath, destinationPath }) {
+  if (path.resolve(sourcePath) === path.resolve(destinationPath)) throw new Error("MP4 sanitation requires a distinct destination");
+  const before = await probeStreams(sourcePath);
+  const seiFilter = before.streams.find(({ type }) => type === "video")?.codec === "h264" ? "filter_units=remove_types=6" : null;
+  if (!seiFilter) throw new Error("MP4 sanitation supports H.264 video only");
+  await execFile("ffmpeg", [
+    "-y", "-v", "error", "-i", sourcePath,
+    "-map", "0:v?", "-map", "0:a?", "-map_metadata", "-1", "-map_chapters", "-1",
+    "-metadata", "title=", "-metadata", "comment=", "-metadata", "encoder=",
+    "-metadata:s:v", "encoder=", "-metadata:s:a", "encoder=",
+    "-c", "copy", "-bsf:v", seiFilter, "-movflags", "+faststart", destinationPath,
+  ], { maxBuffer: 8 * 1024 * 1024 });
+  const after = await probeStreams(destinationPath);
+  if (JSON.stringify(before.streams) !== JSON.stringify(after.streams)) throw new Error("MP4 sanitation changed A/V streams");
+  if (!Number.isFinite(before.duration) || !Number.isFinite(after.duration) || Math.abs(before.duration - after.duration) > 0.001) {
+    throw new Error("MP4 sanitation changed duration");
+  }
+  if (hasForbiddenBinaryMetadata((await fs.readFile(destinationPath)).toString("latin1"))) {
+    throw new Error("Sanitized MP4 still contains forbidden metadata");
+  }
+  return Object.freeze({ before, after });
+}
+
 const writeWithoutConflict = async ({ stagingPath, destinationPath, incomingHash }) => {
   try {
     const currentHash = await sha256File(destinationPath);
@@ -191,6 +249,50 @@ const publicManifestEntry = ({ id, publicPath, mimeType, bytes, sha256, probe, s
   duration: probe.duration,
   sourceKind,
 });
+
+export async function generateFeaturedPoster({ sourcePath, destinationPath, atSecond, id, publicPath }) {
+  if (path.resolve(sourcePath) === path.resolve(destinationPath)) {
+    throw new Error("Poster extraction requires a distinct destination");
+  }
+  if (!Number.isFinite(atSecond) || atSecond < 0) throw new Error("Poster timestamp must be non-negative");
+  if (typeof id !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*-poster$/.test(id)) {
+    throw new Error("Poster id must be a safe featured-poster identifier");
+  }
+  const safePublicPath = assertPublicPath(publicPath);
+  if (path.posix.extname(safePublicPath) !== ".jpg") throw new Error("Featured posters must use .jpg");
+
+  await fs.mkdir(path.dirname(destinationPath), { recursive: true });
+  await execFile("ffmpeg", [
+    "-y", "-v", "error", "-i", sourcePath, "-ss", String(atSecond),
+    "-frames:v", "1", "-an", "-map_metadata", "-1", "-map_chapters", "-1",
+    "-metadata", "title=", "-metadata", "comment=", "-metadata", "encoder=",
+    "-fflags", "+bitexact", "-flags:v", "+bitexact",
+    "-q:v", "2", "-pix_fmt", "yuvj420p", destinationPath,
+  ], { maxBuffer: 8 * 1024 * 1024 });
+
+  const [{ detectedMime, bytes }, sha256, probe, binary] = await Promise.all([
+    inspectFile(destinationPath),
+    sha256File(destinationPath),
+    probeMedia(destinationPath),
+    fs.readFile(destinationPath),
+  ]);
+  await validateDownloadedMedia({ declaredMime: "image/jpeg", detectedMime, extension: ".jpg" });
+  if (!Number.isSafeInteger(probe.width) || !Number.isSafeInteger(probe.height)) {
+    throw new Error("Featured poster has invalid dimensions");
+  }
+  if (hasForbiddenBinaryMetadata(binary.toString("latin1"))) {
+    throw new Error("Featured poster contains forbidden metadata");
+  }
+  return publicManifestEntry({
+    id,
+    publicPath: safePublicPath,
+    mimeType: detectedMime,
+    bytes,
+    sha256,
+    probe: Object.freeze({ width: probe.width, height: probe.height, duration: null }),
+    sourceKind: "featured-poster",
+  });
+}
 
 const copyAlias = async ({ outputRoot, alias, sourcePath, entry }) => {
   const destination = path.join(outputRoot, alias.path);
@@ -260,12 +362,12 @@ export async function syncMedia({ sourcePath, corpusPath, outputRoot, larkBin = 
       }
 
       const stagingName = `${reference.publicId}${expectedExtension}`;
-      const stagingPath = path.join(stagingRoot, stagingName);
-      await fs.rm(stagingPath, { force: true });
+      const downloadPath = path.join(stagingRoot, `download-${stagingName}`);
+      await fs.rm(downloadPath, { force: true });
       await execFile(larkBin, [
         "docs", "+media-download",
         "--token", reference.token,
-        "--output", path.relative(outputRoot, stagingPath),
+        "--output", path.relative(outputRoot, downloadPath),
         "--as", "user",
         "--format", "json",
       ], {
@@ -279,6 +381,14 @@ export async function syncMedia({ sourcePath, corpusPath, outputRoot, larkBin = 
         },
       });
 
+      const stagingPath = reference.mimeType === "video/mp4"
+        ? path.join(stagingRoot, stagingName)
+        : downloadPath;
+      if (reference.mimeType === "video/mp4") {
+        await fs.rm(stagingPath, { force: true });
+        await sanitizeMp4({ sourcePath: downloadPath, destinationPath: stagingPath });
+        await fs.rm(downloadPath, { force: true });
+      }
       const { detectedMime, bytes } = await inspectFile(stagingPath);
       await validateDownloadedMedia({
         declaredMime: reference.mimeType,
@@ -306,6 +416,14 @@ export async function syncMedia({ sourcePath, corpusPath, outputRoot, larkBin = 
       );
       if (alias) {
         entries.push(await copyAlias({ outputRoot, alias, sourcePath: destinationPath, entry }));
+        const posterDestination = path.join(outputRoot, alias.poster.path);
+        entries.push(await generateFeaturedPoster({
+          sourcePath: path.join(outputRoot, alias.path),
+          destinationPath: posterDestination,
+          atSecond: alias.poster.atSecond,
+          id: alias.poster.id,
+          publicPath: alias.poster.path,
+        }));
       }
     }
   } finally {
