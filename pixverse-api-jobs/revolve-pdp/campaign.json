@@ -1,0 +1,687 @@
+{
+  "schema_version": "revolve-pdp-campaign.v1",
+  "source_url": "https://revolve-pixverse-0911.pages.dev/",
+  "source_page_sha256": "f845fcfadeb49776d7ad1e03d57b06f7bf8ff77d16f76175936776a816a1d948",
+  "target_url": "https://revolve-pdp.pages.dev/",
+  "provider": "growth-studio",
+  "capability": "pdp",
+  "settings": {
+    "mode": "standard",
+    "quality": "high",
+    "aspect_ratio": "9:16"
+  },
+  "products": [
+    {
+      "display_order": 1,
+      "product_id": "SDYS-WD257",
+      "product_name": "SNDYS x REVOLVE Avani Dress in Pear",
+      "brand": "SNDYS",
+      "product_url": "https://www.revolve.com/sndys-x-revolve-avani-dress-in-pear/dp/SDYS-WD257/",
+      "product_type": "dress",
+      "duration_seconds": 8,
+      "source_images": [
+        "assets/revolve-pilot-controlled-images/SDYS-WD257/SDYS-WD257_V1.jpg",
+        "assets/revolve-pilot-controlled-images/SDYS-WD257/SDYS-WD257_V2.jpg",
+        "assets/revolve-pilot-controlled-images/SDYS-WD257/SDYS-WD257_V3.jpg"
+      ],
+      "input_hashes": [
+        {
+          "path": "assets/revolve-pilot-controlled-images/SDYS-WD257/SDYS-WD257_V1.jpg",
+          "sha256": "2417b5140a8712b366ba20f8efa84fe6d453c3fdc87b986f553c250af77a50bf"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/SDYS-WD257/SDYS-WD257_V2.jpg",
+          "sha256": "926954bfbd3d0623627b8f2a733db81f029400e0500d7d74275ae8e540ec11c4"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/SDYS-WD257/SDYS-WD257_V3.jpg",
+          "sha256": "52db255d879be9b3103e79eb7fcf8ed4de2d45935d6039c4349887cc2a84e060"
+        }
+      ],
+      "upload_urls": [
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/2417b5140a8712b366ba20f8efa84fe6d453c3fdc87b986f553c250af77a50bf.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/926954bfbd3d0623627b8f2a733db81f029400e0500d7d74275ae8e540ec11c4.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/52db255d879be9b3103e79eb7fcf8ed4de2d45935d6039c4349887cc2a84e060.jpg"
+      ],
+      "payload_path": "pixverse-api-jobs/revolve-pdp/payloads/01-sdys-wd257.json",
+      "payload_sha256": "0808271cdb33742bceeec29e437f1f961d54756641aec5e23363087459799143",
+      "status": "prepared",
+      "job_dir": null,
+      "video_id": null,
+      "ledger_source_id": null,
+      "output_url": null,
+      "thumbnail_url": null,
+      "qa": null
+    },
+    {
+      "display_order": 2,
+      "product_id": "COEL-WK115",
+      "product_name": "Camila Coelho Wynter Boiled Knit Jacket in Dark Taupe",
+      "brand": "Camila Coelho",
+      "product_url": "https://www.revolve.com/camila-coelho-wynter-boiled-knit-jacket-in-dark-taupe/dp/COEL-WK115/",
+      "product_type": "outerwear",
+      "duration_seconds": 8,
+      "source_images": [
+        "assets/revolve-pilot-controlled-images/COEL-WK115/COEL-WK115_V1.jpg",
+        "assets/revolve-pilot-controlled-images/COEL-WK115/COEL-WK115_V2.jpg",
+        "assets/revolve-pilot-controlled-images/COEL-WK115/COEL-WK115_V3.jpg",
+        "assets/revolve-pilot-controlled-images/COEL-WK115/COEL-WK115_V4.jpg"
+      ],
+      "input_hashes": [
+        {
+          "path": "assets/revolve-pilot-controlled-images/COEL-WK115/COEL-WK115_V1.jpg",
+          "sha256": "60a2aed11e796f04c5297148cdb45853a50e7455462d3b6a1b05777a077b34e0"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/COEL-WK115/COEL-WK115_V2.jpg",
+          "sha256": "c5f9004990402e5c673d79b4007810c227fa4bf0dc0e61b417baaa3cad730139"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/COEL-WK115/COEL-WK115_V3.jpg",
+          "sha256": "ce4de9408518232ddd601c616f1e9ba9593e908ed72d02ac1c01cbd6ed0f1158"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/COEL-WK115/COEL-WK115_V4.jpg",
+          "sha256": "023d5c31c835ce06fd315494d4375cbf8f4bf0991189a6010cef01b9eea17f22"
+        }
+      ],
+      "upload_urls": [
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/60a2aed11e796f04c5297148cdb45853a50e7455462d3b6a1b05777a077b34e0.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/c5f9004990402e5c673d79b4007810c227fa4bf0dc0e61b417baaa3cad730139.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/ce4de9408518232ddd601c616f1e9ba9593e908ed72d02ac1c01cbd6ed0f1158.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/023d5c31c835ce06fd315494d4375cbf8f4bf0991189a6010cef01b9eea17f22.jpg"
+      ],
+      "payload_path": "pixverse-api-jobs/revolve-pdp/payloads/02-coel-wk115.json",
+      "payload_sha256": "e37bb4589bfe62402fe37434e0511a1f314d38a8cb03ae08989f3352c350c6be",
+      "status": "prepared",
+      "job_dir": null,
+      "video_id": null,
+      "ledger_source_id": null,
+      "output_url": null,
+      "thumbnail_url": null,
+      "qa": null
+    },
+    {
+      "display_order": 3,
+      "product_id": "PCHR-WS7",
+      "product_name": "Porsche x REVOLVE 959 Unisex Jersey in Blue & Red",
+      "brand": "Porsche x REVOLVE",
+      "product_url": "https://www.revolve.com/porsche-x-revolve-959-unisex-jersey-in-blue-red/dp/PCHR-WS7/",
+      "product_type": "top",
+      "duration_seconds": 8,
+      "source_images": [
+        "assets/revolve-pilot-controlled-images/PCHR-WS7/PCHR-WS7_V1.jpg",
+        "assets/revolve-pilot-controlled-images/PCHR-WS7/PCHR-WS7_V2.jpg",
+        "assets/revolve-pilot-controlled-images/PCHR-WS7/PCHR-WS7_V3.jpg",
+        "assets/revolve-pilot-controlled-images/PCHR-WS7/PCHR-WS7_V4.jpg",
+        "assets/revolve-pilot-controlled-images/PCHR-WS7/PCHR-WS7_V5.jpg",
+        "assets/revolve-pilot-controlled-images/PCHR-WS7/PCHR-WS7_V6.jpg",
+        "assets/revolve-pilot-controlled-images/PCHR-WS7/PCHR-WS7_V7.jpg"
+      ],
+      "input_hashes": [
+        {
+          "path": "assets/revolve-pilot-controlled-images/PCHR-WS7/PCHR-WS7_V1.jpg",
+          "sha256": "79f636dac42bde4c8a0eba8dcf0c392cf62ae6c7679d316dc4edb484038d99b7"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/PCHR-WS7/PCHR-WS7_V2.jpg",
+          "sha256": "c8001292b2140a3e6c7cefc31f49b732c69eeadef804ae1f92cc82ead9bceb8f"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/PCHR-WS7/PCHR-WS7_V3.jpg",
+          "sha256": "4f171979b459230132f23d64d48fb4fb354cd10ada8c47c68ca5acf784bd65b7"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/PCHR-WS7/PCHR-WS7_V4.jpg",
+          "sha256": "7282c1b88f48ba62159259b25111cc570feb394cc2c26ab7ac7b0fe145ad4628"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/PCHR-WS7/PCHR-WS7_V5.jpg",
+          "sha256": "1bb3f3ee71ead34c6539e05b5462655bbadecc648e2d52cf0474a537a22b4a20"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/PCHR-WS7/PCHR-WS7_V6.jpg",
+          "sha256": "375a920512e04af813c8990a37bf799956d770c377614f54c9a6437f28b19018"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/PCHR-WS7/PCHR-WS7_V7.jpg",
+          "sha256": "b2ee7e6c29106d925e51e05540f6746e482ecbbef1b7b5e3bf484f0a5ed98be8"
+        }
+      ],
+      "upload_urls": [
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/79f636dac42bde4c8a0eba8dcf0c392cf62ae6c7679d316dc4edb484038d99b7.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/c8001292b2140a3e6c7cefc31f49b732c69eeadef804ae1f92cc82ead9bceb8f.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/4f171979b459230132f23d64d48fb4fb354cd10ada8c47c68ca5acf784bd65b7.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/7282c1b88f48ba62159259b25111cc570feb394cc2c26ab7ac7b0fe145ad4628.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/1bb3f3ee71ead34c6539e05b5462655bbadecc648e2d52cf0474a537a22b4a20.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/375a920512e04af813c8990a37bf799956d770c377614f54c9a6437f28b19018.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/b2ee7e6c29106d925e51e05540f6746e482ecbbef1b7b5e3bf484f0a5ed98be8.jpg"
+      ],
+      "payload_path": "pixverse-api-jobs/revolve-pdp/payloads/03-pchr-ws7.json",
+      "payload_sha256": "4c8dee122afb6123d24c8a648eabdb352c500917e84474fe81704a129f13146b",
+      "status": "prepared",
+      "job_dir": null,
+      "video_id": null,
+      "ledger_source_id": null,
+      "output_url": null,
+      "thumbnail_url": null,
+      "qa": null
+    },
+    {
+      "display_order": 4,
+      "product_id": "LIOR-WD140",
+      "product_name": "LIONESS Stars Align Mini Dress in Onyx",
+      "brand": "LIONESS",
+      "product_url": "https://www.revolve.com/lioness-stars-align-mini-dress-in-onyx/dp/LIOR-WD140/",
+      "product_type": "dress",
+      "duration_seconds": 8,
+      "source_images": [
+        "assets/revolve-pilot-controlled-images/LIOR-WD140/LIOR-WD140_V1.jpg",
+        "assets/revolve-pilot-controlled-images/LIOR-WD140/LIOR-WD140_V2.jpg",
+        "assets/revolve-pilot-controlled-images/LIOR-WD140/LIOR-WD140_V3.jpg"
+      ],
+      "input_hashes": [
+        {
+          "path": "assets/revolve-pilot-controlled-images/LIOR-WD140/LIOR-WD140_V1.jpg",
+          "sha256": "9154cf8f0e73f12ea1da3e2492c40c3777d9eb41a7b2061d04edc4d6021f6c2f"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/LIOR-WD140/LIOR-WD140_V2.jpg",
+          "sha256": "48a74eab44e4a0547452b1ea6c64e6d317bb3a19dd896a8d968494a7e9158dda"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/LIOR-WD140/LIOR-WD140_V3.jpg",
+          "sha256": "fbc2a546f6bda1d60a725e8103e517afda37e16a4862fae72fa5a749f4dc4bd0"
+        }
+      ],
+      "upload_urls": [
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/9154cf8f0e73f12ea1da3e2492c40c3777d9eb41a7b2061d04edc4d6021f6c2f.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/48a74eab44e4a0547452b1ea6c64e6d317bb3a19dd896a8d968494a7e9158dda.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/fbc2a546f6bda1d60a725e8103e517afda37e16a4862fae72fa5a749f4dc4bd0.jpg"
+      ],
+      "payload_path": "pixverse-api-jobs/revolve-pdp/payloads/04-lior-wd140.json",
+      "payload_sha256": "2faf39a85fcd318773b6e5edd3621dd5e3b0522bc00f1f0bc2c05d8ed91e0d22",
+      "status": "approved",
+      "job_dir": "pixverse-api-jobs/revolve-pdp/jobs/2026-09-20T21-55-17-020Z-04-lior-wd140",
+      "video_id": "638224955376403767",
+      "ledger_source_id": "638224955376403767",
+      "output_url": "https://media.pixverse.ai/pixverse/mp4/media/workflow-studio/concat_11755_20260920T215854Z_compose_video_and_music.mp4",
+      "thumbnail_url": "https://media.pixverse.ai/marketing_hub_website/first_frames/pixverse/mp4/media/workflow-studio/concat_11755_20260920T215854Z_compose_video_and_music.mp4_first_frame.jpg",
+      "qa": "pixverse-api-jobs/revolve-pdp/jobs/2026-09-20T21-55-17-020Z-04-lior-wd140/qa.json"
+    },
+    {
+      "display_order": 5,
+      "product_id": "BARD-WS308",
+      "product_name": "Bardot Eva Poplin Top in Orchid White",
+      "brand": "Bardot",
+      "product_url": "https://www.revolve.com/bardot-eva-poplin-top-in-orchid-white/dp/BARD-WS308/",
+      "product_type": "top",
+      "duration_seconds": 8,
+      "source_images": [
+        "assets/revolve-pilot-controlled-images/BARD-WS308/BARD-WS308_V1.jpg",
+        "assets/revolve-pilot-controlled-images/BARD-WS308/BARD-WS308_V2.jpg",
+        "assets/revolve-pilot-controlled-images/BARD-WS308/BARD-WS308_V3.jpg",
+        "assets/revolve-pilot-controlled-images/BARD-WS308/BARD-WS308_V4.jpg"
+      ],
+      "input_hashes": [
+        {
+          "path": "assets/revolve-pilot-controlled-images/BARD-WS308/BARD-WS308_V1.jpg",
+          "sha256": "08d5bd1bee63ec69a88103a0397a983d89f5dacc4a36e7a8137d1b8e99d159f9"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/BARD-WS308/BARD-WS308_V2.jpg",
+          "sha256": "12899ea7c249db98ee9cec0191f65bbc60e4d918646e56bb25cc6ca60a75487e"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/BARD-WS308/BARD-WS308_V3.jpg",
+          "sha256": "87ab4909202b6164d03d43bcab9e6a4e71483e300dd78638df9254c8f396de24"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/BARD-WS308/BARD-WS308_V4.jpg",
+          "sha256": "8ced39ecc9dc98d51bfac486b1ae5edd48952411341f50269af61cf7813234a0"
+        }
+      ],
+      "upload_urls": [
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/08d5bd1bee63ec69a88103a0397a983d89f5dacc4a36e7a8137d1b8e99d159f9.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/12899ea7c249db98ee9cec0191f65bbc60e4d918646e56bb25cc6ca60a75487e.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/87ab4909202b6164d03d43bcab9e6a4e71483e300dd78638df9254c8f396de24.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/8ced39ecc9dc98d51bfac486b1ae5edd48952411341f50269af61cf7813234a0.jpg"
+      ],
+      "payload_path": "pixverse-api-jobs/revolve-pdp/payloads/05-bard-ws308.json",
+      "payload_sha256": "56103a32eaf9e62597e7ab5efaa9e340c35f21e978e136848b41e44949c44fae",
+      "status": "prepared",
+      "job_dir": null,
+      "video_id": null,
+      "ledger_source_id": null,
+      "output_url": null,
+      "thumbnail_url": null,
+      "qa": null
+    },
+    {
+      "display_order": 6,
+      "product_id": "HELO-WD29",
+      "product_name": "HAELO Braided Tubular Dress in White",
+      "brand": "HAELO",
+      "product_url": "https://www.revolve.com/haelo-braided-tubular-dress-in-white/dp/HELO-WD29/",
+      "product_type": "dress",
+      "duration_seconds": 8,
+      "source_images": [
+        "assets/revolve-pilot-controlled-images/HELO-WD29/HELO-WD29_V1.jpg",
+        "assets/revolve-pilot-controlled-images/HELO-WD29/HELO-WD29_V2.jpg",
+        "assets/revolve-pilot-controlled-images/HELO-WD29/HELO-WD29_V3.jpg",
+        "assets/revolve-pilot-controlled-images/HELO-WD29/HELO-WD29_V4.jpg"
+      ],
+      "input_hashes": [
+        {
+          "path": "assets/revolve-pilot-controlled-images/HELO-WD29/HELO-WD29_V1.jpg",
+          "sha256": "c189b02322e0bbe2f6f1c0cb5e84cdb6b7ce4db2cd1018900b41cae25a0b525a"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/HELO-WD29/HELO-WD29_V2.jpg",
+          "sha256": "28012d860cdf7b744d6b03b384d23a6fff58af8723abf4e00ec499ab8686507b"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/HELO-WD29/HELO-WD29_V3.jpg",
+          "sha256": "cb00dd53ddfe5835cc43d564448a3cc2381d6641cb930459be9153e6b33b9b44"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/HELO-WD29/HELO-WD29_V4.jpg",
+          "sha256": "5828c4e36457f36234ad0b73d5b41f3a01255d9bee37ebe53bc59ddd34a9c225"
+        }
+      ],
+      "upload_urls": [
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/c189b02322e0bbe2f6f1c0cb5e84cdb6b7ce4db2cd1018900b41cae25a0b525a.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/28012d860cdf7b744d6b03b384d23a6fff58af8723abf4e00ec499ab8686507b.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/cb00dd53ddfe5835cc43d564448a3cc2381d6641cb930459be9153e6b33b9b44.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/5828c4e36457f36234ad0b73d5b41f3a01255d9bee37ebe53bc59ddd34a9c225.jpg"
+      ],
+      "payload_path": "pixverse-api-jobs/revolve-pdp/payloads/06-helo-wd29.json",
+      "payload_sha256": "b34aa7475898d724d53e450a92d5a6be678ac523311a842cdaa5ff9c0b320bf2",
+      "status": "prepared",
+      "job_dir": null,
+      "video_id": null,
+      "ledger_source_id": null,
+      "output_url": null,
+      "thumbnail_url": null,
+      "qa": null
+    },
+    {
+      "display_order": 7,
+      "product_id": "SPDW-WP244",
+      "product_name": "superdown Chaya Capri in Black",
+      "brand": "superdown",
+      "product_url": "https://www.revolve.com/superdown-chaya-capri-in-black/dp/SPDW-WP244/",
+      "product_type": "pants",
+      "duration_seconds": 8,
+      "source_images": [
+        "assets/revolve-pilot-controlled-images/SPDW-WP244/SPDW-WP244_V1.jpg",
+        "assets/revolve-pilot-controlled-images/SPDW-WP244/SPDW-WP244_V2.jpg",
+        "assets/revolve-pilot-controlled-images/SPDW-WP244/SPDW-WP244_V3.jpg",
+        "assets/revolve-pilot-controlled-images/SPDW-WP244/SPDW-WP244_V4.jpg"
+      ],
+      "input_hashes": [
+        {
+          "path": "assets/revolve-pilot-controlled-images/SPDW-WP244/SPDW-WP244_V1.jpg",
+          "sha256": "1e0ffb323202575ad59fba2691199e0b6bb69fced359abfe2925b1b8cc9872ee"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/SPDW-WP244/SPDW-WP244_V2.jpg",
+          "sha256": "e9f2b42065dde281fcfd9bf8c9c0ee641e603d176fa782dda71368f0eb105c3b"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/SPDW-WP244/SPDW-WP244_V3.jpg",
+          "sha256": "37e352dad118ca67b45be1b85117d3324a1fd5f78be93cc7b754299da42f7ae7"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/SPDW-WP244/SPDW-WP244_V4.jpg",
+          "sha256": "afdc71c206cb733b787e0139d62b673013af75c514c3b943985afa56d859a14e"
+        }
+      ],
+      "upload_urls": [
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/1e0ffb323202575ad59fba2691199e0b6bb69fced359abfe2925b1b8cc9872ee.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/e9f2b42065dde281fcfd9bf8c9c0ee641e603d176fa782dda71368f0eb105c3b.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/37e352dad118ca67b45be1b85117d3324a1fd5f78be93cc7b754299da42f7ae7.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/afdc71c206cb733b787e0139d62b673013af75c514c3b943985afa56d859a14e.jpg"
+      ],
+      "payload_path": "pixverse-api-jobs/revolve-pdp/payloads/07-spdw-wp244.json",
+      "payload_sha256": "13e07d0b53ed238b848f055d026d5b9975f3d400580eb40ad97a2d497ae1a0bc",
+      "status": "prepared",
+      "job_dir": null,
+      "video_id": null,
+      "ledger_source_id": null,
+      "output_url": null,
+      "thumbnail_url": null,
+      "qa": null
+    },
+    {
+      "display_order": 8,
+      "product_id": "LIOR-WD229",
+      "product_name": "LIONESS Stars Align Midi Dress in Honey Check",
+      "brand": "LIONESS",
+      "product_url": "https://www.revolve.com/lioness-stars-align-midi-dress-in-honey-check/dp/LIOR-WD229/",
+      "product_type": "dress",
+      "duration_seconds": 10,
+      "source_images": [
+        "assets/revolve-pilot-controlled-images/LIOR-WD229/LIOR-WD229_V1.jpg",
+        "assets/revolve-pilot-controlled-images/LIOR-WD229/LIOR-WD229_V2.jpg",
+        "assets/revolve-pilot-controlled-images/LIOR-WD229/LIOR-WD229_V3.jpg",
+        "assets/revolve-pilot-controlled-images/LIOR-WD229/LIOR-WD229_V4.jpg"
+      ],
+      "input_hashes": [
+        {
+          "path": "assets/revolve-pilot-controlled-images/LIOR-WD229/LIOR-WD229_V1.jpg",
+          "sha256": "00412f5ddda1c17cddad476e0cf40589bf7960a00429209f1ebaee191f419a41"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/LIOR-WD229/LIOR-WD229_V2.jpg",
+          "sha256": "1df5da1725a6737a80b9a471f2d00186c103a2a6514bbe46a432fdfbebda5229"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/LIOR-WD229/LIOR-WD229_V3.jpg",
+          "sha256": "8c24a3df06d1bcbab0627adaed300fb3dc828ef4d5e8497c59e4e5419bbe6ca9"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/LIOR-WD229/LIOR-WD229_V4.jpg",
+          "sha256": "f4b40731f44ef2a1c6f50d27c772d55f33e433895c7ff62249a72e4f58ee5fd0"
+        }
+      ],
+      "upload_urls": [
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/00412f5ddda1c17cddad476e0cf40589bf7960a00429209f1ebaee191f419a41.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/1df5da1725a6737a80b9a471f2d00186c103a2a6514bbe46a432fdfbebda5229.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/8c24a3df06d1bcbab0627adaed300fb3dc828ef4d5e8497c59e4e5419bbe6ca9.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/f4b40731f44ef2a1c6f50d27c772d55f33e433895c7ff62249a72e4f58ee5fd0.jpg"
+      ],
+      "payload_path": "pixverse-api-jobs/revolve-pdp/payloads/08-lior-wd229.json",
+      "payload_sha256": "a8affd2e9f3ed4a91c24e8535046a101eb691fcb9e90bb65d1eadc05c61fb2b3",
+      "status": "prepared",
+      "job_dir": null,
+      "video_id": null,
+      "ledger_source_id": null,
+      "output_url": null,
+      "thumbnail_url": null,
+      "qa": null
+    },
+    {
+      "display_order": 9,
+      "product_id": "LEIV-WO65",
+      "product_name": "LEVI'S 90s Trucker in Soft As Butter",
+      "brand": "LEVI'S",
+      "product_url": "https://www.revolve.com/levis-90s-trucker-in-soft-as-butter/dp/LEIV-WO65/",
+      "product_type": "outerwear",
+      "duration_seconds": 8,
+      "source_images": [
+        "assets/revolve-pilot-controlled-images/LEIV-WO65/LEIV-WO65_V1.jpg",
+        "assets/revolve-pilot-controlled-images/LEIV-WO65/LEIV-WO65_V2.jpg",
+        "assets/revolve-pilot-controlled-images/LEIV-WO65/LEIV-WO65_V3.jpg",
+        "assets/revolve-pilot-controlled-images/LEIV-WO65/LEIV-WO65_V4.jpg"
+      ],
+      "input_hashes": [
+        {
+          "path": "assets/revolve-pilot-controlled-images/LEIV-WO65/LEIV-WO65_V1.jpg",
+          "sha256": "b61bab78f1a3d6527576aadb0ce848c7c08e8627c3aadb9dc8663f0c23f6a4c7"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/LEIV-WO65/LEIV-WO65_V2.jpg",
+          "sha256": "6f9bd236977fc0e8085cc5c68e1e92b11f87340363f0663831ffe72e97f76592"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/LEIV-WO65/LEIV-WO65_V3.jpg",
+          "sha256": "50f5c5a9d6746605d32b927502e00d64e1108ddb834d4658e5fa482563ff4bed"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/LEIV-WO65/LEIV-WO65_V4.jpg",
+          "sha256": "d702043dfe2a80abe4791e761ac7ac29e11c189236ea1a7a127463d151ff6a60"
+        }
+      ],
+      "upload_urls": [
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/b61bab78f1a3d6527576aadb0ce848c7c08e8627c3aadb9dc8663f0c23f6a4c7.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/6f9bd236977fc0e8085cc5c68e1e92b11f87340363f0663831ffe72e97f76592.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/50f5c5a9d6746605d32b927502e00d64e1108ddb834d4658e5fa482563ff4bed.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/d702043dfe2a80abe4791e761ac7ac29e11c189236ea1a7a127463d151ff6a60.jpg"
+      ],
+      "payload_path": "pixverse-api-jobs/revolve-pdp/payloads/09-leiv-wo65.json",
+      "payload_sha256": "52f2c801ee30f4af31aa8c834ad75d11548d8554179bb110228ea3ac3c6cf612",
+      "status": "prepared",
+      "job_dir": null,
+      "video_id": null,
+      "ledger_source_id": null,
+      "output_url": null,
+      "thumbnail_url": null,
+      "qa": null
+    },
+    {
+      "display_order": 10,
+      "product_id": "HELO-WD5",
+      "product_name": "HAELO Deep-v Brace Dress in Black",
+      "brand": "HAELO",
+      "product_url": "https://www.revolve.com/haelo-deepv-brace-dress-in-black/dp/HELO-WD5/",
+      "product_type": "dress",
+      "duration_seconds": 10,
+      "source_images": [
+        "assets/revolve-pilot-controlled-images/HELO-WD5/HELO-WD5_V1.jpg",
+        "assets/revolve-pilot-controlled-images/HELO-WD5/HELO-WD5_V2.jpg",
+        "assets/revolve-pilot-controlled-images/HELO-WD5/HELO-WD5_V3.jpg",
+        "assets/revolve-pilot-controlled-images/HELO-WD5/HELO-WD5_V4.jpg"
+      ],
+      "input_hashes": [
+        {
+          "path": "assets/revolve-pilot-controlled-images/HELO-WD5/HELO-WD5_V1.jpg",
+          "sha256": "6da762d0812429b1ac6a310730f58897c07c6ffd864b6ed661b9c7b41c4ff54e"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/HELO-WD5/HELO-WD5_V2.jpg",
+          "sha256": "d2e07f91ed84cb6ed1e113e88c6aef3dff7ed1828ebd29111e95e959fe58d8cf"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/HELO-WD5/HELO-WD5_V3.jpg",
+          "sha256": "dc733749105c0c1fd06c6609e4ffb6c0b83cee4f2ce24cb3ecf0d832e92388d3"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/HELO-WD5/HELO-WD5_V4.jpg",
+          "sha256": "35024e98442119827d4f78467c646a229b8ba5237e24e5994727f261da9f1f73"
+        }
+      ],
+      "upload_urls": [
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/6da762d0812429b1ac6a310730f58897c07c6ffd864b6ed661b9c7b41c4ff54e.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/d2e07f91ed84cb6ed1e113e88c6aef3dff7ed1828ebd29111e95e959fe58d8cf.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/dc733749105c0c1fd06c6609e4ffb6c0b83cee4f2ce24cb3ecf0d832e92388d3.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/35024e98442119827d4f78467c646a229b8ba5237e24e5994727f261da9f1f73.jpg"
+      ],
+      "payload_path": "pixverse-api-jobs/revolve-pdp/payloads/10-helo-wd5.json",
+      "payload_sha256": "8d2fe9c02ebfa379b95f2f6192c2bbefd3d934b680d0f6a7ed94a035ebf4b90d",
+      "status": "prepared",
+      "job_dir": null,
+      "video_id": null,
+      "ledger_source_id": null,
+      "output_url": null,
+      "thumbnail_url": null,
+      "qa": null
+    },
+    {
+      "display_order": 11,
+      "product_id": "HELO-WD27",
+      "product_name": "HAELO Gradient Studded Dress in Fog Grey",
+      "brand": "HAELO",
+      "product_url": "https://www.revolve.com/haelo-gradient-studded-dress-in-fog-grey/dp/HELO-WD27/",
+      "product_type": "dress",
+      "duration_seconds": 8,
+      "source_images": [
+        "assets/revolve-pilot-controlled-images/HELO-WD27/HELO-WD27_V1.jpg",
+        "assets/revolve-pilot-controlled-images/HELO-WD27/HELO-WD27_V2.jpg",
+        "assets/revolve-pilot-controlled-images/HELO-WD27/HELO-WD27_V3.jpg",
+        "assets/revolve-pilot-controlled-images/HELO-WD27/HELO-WD27_V4.jpg"
+      ],
+      "input_hashes": [
+        {
+          "path": "assets/revolve-pilot-controlled-images/HELO-WD27/HELO-WD27_V1.jpg",
+          "sha256": "c4884a1281531c436119871566ce3f0d80613a9784007bdefe8f1af7b3f3b813"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/HELO-WD27/HELO-WD27_V2.jpg",
+          "sha256": "a5dfd27b7cf09357348927753b57210ab408155aec848708acbf7efccb1a6df6"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/HELO-WD27/HELO-WD27_V3.jpg",
+          "sha256": "2eb9bf6b55dffb15c197f243a10bc2bab5a73f7b4c5ee1ecb97cfc708d22cbd0"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/HELO-WD27/HELO-WD27_V4.jpg",
+          "sha256": "15eec86e9760bcf4bfbe15ec11b7e080a452c4776905d35a0e946adb6064ec94"
+        }
+      ],
+      "upload_urls": [
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/c4884a1281531c436119871566ce3f0d80613a9784007bdefe8f1af7b3f3b813.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/a5dfd27b7cf09357348927753b57210ab408155aec848708acbf7efccb1a6df6.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/2eb9bf6b55dffb15c197f243a10bc2bab5a73f7b4c5ee1ecb97cfc708d22cbd0.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/15eec86e9760bcf4bfbe15ec11b7e080a452c4776905d35a0e946adb6064ec94.jpg"
+      ],
+      "payload_path": "pixverse-api-jobs/revolve-pdp/payloads/11-helo-wd27.json",
+      "payload_sha256": "2614ce1812932fd2c2b9eb88a9e01097118217cf69a1a70ca3c340318dda68d6",
+      "status": "prepared",
+      "job_dir": null,
+      "video_id": null,
+      "ledger_source_id": null,
+      "output_url": null,
+      "thumbnail_url": null,
+      "qa": null
+    },
+    {
+      "display_order": 12,
+      "product_id": "AAYR-WO4",
+      "product_name": "ALL THE WAYS Claire Faux Leather Trench in Black",
+      "brand": "ALL THE WAYS",
+      "product_url": "https://www.revolve.com/all-the-ways-claire-faux-leather-trench-in-black/dp/AAYR-WO4/",
+      "product_type": "outerwear",
+      "duration_seconds": 10,
+      "source_images": [
+        "assets/revolve-pilot-controlled-images/AAYR-WO4/AAYR-WO4_V1.jpg",
+        "assets/revolve-pilot-controlled-images/AAYR-WO4/AAYR-WO4_V2.jpg",
+        "assets/revolve-pilot-controlled-images/AAYR-WO4/AAYR-WO4_V3.jpg",
+        "assets/revolve-pilot-controlled-images/AAYR-WO4/AAYR-WO4_V4.jpg"
+      ],
+      "input_hashes": [
+        {
+          "path": "assets/revolve-pilot-controlled-images/AAYR-WO4/AAYR-WO4_V1.jpg",
+          "sha256": "d49b8f418f5958b5275aedb16e92b530fec4f9e5341c260c0f8866b97c4dbd27"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/AAYR-WO4/AAYR-WO4_V2.jpg",
+          "sha256": "0effd2d467eeec394f4a5e33b473c57f09ecc9a44a71f0d148f623f2ff252ac9"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/AAYR-WO4/AAYR-WO4_V3.jpg",
+          "sha256": "77e0befcbf1f144f1ebcd1a7b07a794cb335e454235c384a9a0187f5d7a879bc"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/AAYR-WO4/AAYR-WO4_V4.jpg",
+          "sha256": "7c691a46150baaa2003f3011072ce6a26c3ad7d0b0d6251895acb01dcbbf3381"
+        }
+      ],
+      "upload_urls": [
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/d49b8f418f5958b5275aedb16e92b530fec4f9e5341c260c0f8866b97c4dbd27.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/0effd2d467eeec394f4a5e33b473c57f09ecc9a44a71f0d148f623f2ff252ac9.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/77e0befcbf1f144f1ebcd1a7b07a794cb335e454235c384a9a0187f5d7a879bc.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/7c691a46150baaa2003f3011072ce6a26c3ad7d0b0d6251895acb01dcbbf3381.jpg"
+      ],
+      "payload_path": "pixverse-api-jobs/revolve-pdp/payloads/12-aayr-wo4.json",
+      "payload_sha256": "1ade549370452f596f8b323ac647936f37629335bf66742e83d2aa729417cba9",
+      "status": "prepared",
+      "job_dir": null,
+      "video_id": null,
+      "ledger_source_id": null,
+      "output_url": null,
+      "thumbnail_url": null,
+      "qa": null
+    },
+    {
+      "display_order": 13,
+      "product_id": "AAYR-WD195",
+      "product_name": "ALL THE WAYS Madley Mini Dress in Black",
+      "brand": "ALL THE WAYS",
+      "product_url": "https://www.revolve.com/all-the-ways-madley-mini-dress-in-black/dp/AAYR-WD195/",
+      "product_type": "dress",
+      "duration_seconds": 8,
+      "source_images": [
+        "assets/revolve-pilot-controlled-images/AAYR-WD195/AAYR-WD195_V1.jpg",
+        "assets/revolve-pilot-controlled-images/AAYR-WD195/AAYR-WD195_V2.jpg",
+        "assets/revolve-pilot-controlled-images/AAYR-WD195/AAYR-WD195_V3.jpg"
+      ],
+      "input_hashes": [
+        {
+          "path": "assets/revolve-pilot-controlled-images/AAYR-WD195/AAYR-WD195_V1.jpg",
+          "sha256": "c759819448ad51aafa2802ed3ab05981484fbca93a70c572cb7d94d8729c044f"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/AAYR-WD195/AAYR-WD195_V2.jpg",
+          "sha256": "b1f89d1e6e76cb8ff514d092fecf8be19b88e14d6e779de252c0e96112bd0c91"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/AAYR-WD195/AAYR-WD195_V3.jpg",
+          "sha256": "97241df665f93fb1bbffd955755f5b9a8fc21855377d8165aed56bffc44793cd"
+        }
+      ],
+      "upload_urls": [
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/c759819448ad51aafa2802ed3ab05981484fbca93a70c572cb7d94d8729c044f.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/b1f89d1e6e76cb8ff514d092fecf8be19b88e14d6e779de252c0e96112bd0c91.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/632167131017904206/392859175989350/97241df665f93fb1bbffd955755f5b9a8fc21855377d8165aed56bffc44793cd.jpg"
+      ],
+      "payload_path": "pixverse-api-jobs/revolve-pdp/payloads/13-aayr-wd195.json",
+      "payload_sha256": "c430c990e31583d20a4bf8d8ed700e09526d2aeddee76abd987115a0d1d8a003",
+      "status": "prepared",
+      "job_dir": null,
+      "video_id": null,
+      "ledger_source_id": null,
+      "output_url": null,
+      "thumbnail_url": null,
+      "qa": null
+    },
+    {
+      "display_order": 14,
+      "product_id": "LIOR-WS152",
+      "product_name": "LIONESS Palisades Halter in Oyster",
+      "brand": "LIONESS",
+      "product_url": "https://www.revolve.com/lioness-palisades-halter-in-oyster/dp/LIOR-WS152/",
+      "product_type": "top",
+      "duration_seconds": 8,
+      "source_images": [
+        "assets/revolve-pilot-controlled-images/LIOR-WS152/LIOR-WS152_V1.jpg",
+        "assets/revolve-pilot-controlled-images/LIOR-WS152/LIOR-WS152_V2.jpg",
+        "assets/revolve-pilot-controlled-images/LIOR-WS152/LIOR-WS152_V3.jpg",
+        "assets/revolve-pilot-controlled-images/LIOR-WS152/LIOR-WS152_V4.jpg"
+      ],
+      "input_hashes": [
+        {
+          "path": "assets/revolve-pilot-controlled-images/LIOR-WS152/LIOR-WS152_V1.jpg",
+          "sha256": "d5ca3f5ac837940f8f06b19301c6a51e10d3480ecdc87c1e0304af21f08c95e6"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/LIOR-WS152/LIOR-WS152_V2.jpg",
+          "sha256": "d505b7e91c1a8ef2bf453e11ad9b6d61209f96c9b0868ef182048aabcbd17bf4"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/LIOR-WS152/LIOR-WS152_V3.jpg",
+          "sha256": "61aaee6e9efcc8a3eb5198c7f24ef46078880374ed1ee91265bf50aa8d6e31b7"
+        },
+        {
+          "path": "assets/revolve-pilot-controlled-images/LIOR-WS152/LIOR-WS152_V4.jpg",
+          "sha256": "6cdd82ef814866ad0a3d17f472fdbcc5df791287dd867270ff2f3e143ea57a20"
+        }
+      ],
+      "upload_urls": [
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/d5ca3f5ac837940f8f06b19301c6a51e10d3480ecdc87c1e0304af21f08c95e6.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/d505b7e91c1a8ef2bf453e11ad9b6d61209f96c9b0868ef182048aabcbd17bf4.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/61aaee6e9efcc8a3eb5198c7f24ef46078880374ed1ee91265bf50aa8d6e31b7.jpg",
+        "https://media.pixverse.ai/marketing_hub_website/openapi_video_inputs/uploads/630251569832526907/396367117962919/6cdd82ef814866ad0a3d17f472fdbcc5df791287dd867270ff2f3e143ea57a20.jpg"
+      ],
+      "payload_path": "pixverse-api-jobs/revolve-pdp/payloads/14-lior-ws152.json",
+      "payload_sha256": "9fed59ef3cc132091069da84c8aec61f71dcac013475efdb325b31178343c1fd",
+      "status": "prepared",
+      "job_dir": null,
+      "video_id": null,
+      "ledger_source_id": null,
+      "output_url": null,
+      "thumbnail_url": null,
+      "qa": null
+    }
+  ]
+}
