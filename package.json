@@ -12,7 +12,8 @@
     "compare:revolve": "node ./qa/revolve-v3-v4-comparison/server.js",
     "test": "npm run test:api",
     "test:api": "node --import ./scripts/no-paid-network.js --test test/unit/*.test.js test/contract/*.test.js test/integration/*.test.js test/e2e/*.test.js test/catalog-completeness.test.js test/no-paid-network.test.js test/client.test.js test/folders.test.js test/jobs.test.js test/platform-skill.test.js test/growth-studio-skill.test.js",
-    "test:pitches": "node --test test/brand-pitch*.test.js test/plaud-*.test.js test/revolve-*.test.js",
+    "test:pitches": "node --test test/brand-pitch*.test.js test/plaud-*.test.js test/revolve-*.test.js test/vips-*.test.js test/unit/vips-pitch-*.test.js",
+    "test:vips-pitch:coverage": "c8 --check-coverage --lines 80 --branches 80 --functions 80 --statements 80 --include 'deploy/brand-pitches/vips/human-reviewed-ecommerce/data-model.js' --include 'deploy/brand-pitches/vips/human-reviewed-ecommerce/render.js' node --test test/unit/vips-pitch-data-model.test.js test/unit/vips-pitch-render.test.js",
     "test:coverage": "c8 --check-coverage --lines 80 --branches 80 --functions 80 --statements 80 --include 'src/**/*.js' node --import ./scripts/no-paid-network.js --test test/unit/*.test.js test/contract/*.test.js test/integration/*.test.js test/e2e/*.test.js test/catalog-completeness.test.js test/no-paid-network.test.js test/client.test.js test/folders.test.js test/jobs.test.js test/platform-skill.test.js test/growth-studio-skill.test.js",
     "check": "node scripts/check-syntax.js",
     "security:scan": "node scripts/scan-secrets.js"
