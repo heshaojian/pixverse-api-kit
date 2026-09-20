@@ -86,3 +86,13 @@ test("deployable review files expose no credentials or internal artifacts", asyn
   assert.doesNotMatch(raw, /mh_live_|PIXVERSE_GROWTH_API_KEY|Authorization:\s*Bearer|\/Users\//i);
   assert.doesNotMatch(raw, /job_dir|video_id|ledger_source|wallet|generation-command/i);
 });
+
+test("every product has a nonempty local poster", async () => {
+  const catalog = await readJson(new URL("catalog.json", reviewRoot));
+  for (const product of catalog.products) {
+    const poster = new URL(product.poster.replace(/^\.\//, ""), reviewRoot);
+    const stat = await fs.stat(poster);
+    assert.ok(stat.isFile(), product.id);
+    assert.ok(stat.size > 10_000, `${product.id} poster is unexpectedly small`);
+  }
+});
