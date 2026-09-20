@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const pitchRoot = path.join(repoRoot, "deploy/brand-pitches/vips/human-reviewed-ecommerce");
 const pagePath = path.join(pitchRoot, "index.html");
+const cssPath = path.join(pitchRoot, "styles.css");
 
 const readPage = async () => fs.readFile(pagePath, "utf8");
 const position = (html, needle) => {
@@ -62,4 +63,20 @@ test("VIPS page has private provenance and semantic navigation", async () => {
   assert.match(visibleText(html), /私人能力提案/);
   assert.match(visibleText(html), /不代表唯品会公开背书/);
   assert.doesNotMatch(visibleText(html), /YEE4dcLZAoiZC9x9vhzcZKLknsc|job[_ -]?id|video[_ -]?id|token/i);
+});
+
+test("VIPS styles follow PixVerse tokens and product-media constraints", async () => {
+  const css = await fs.readFile(cssPath, "utf8");
+  assert.match(css, /--background-primary:\s*#000000/);
+  assert.match(css, /--text-secondary:\s*rgba\(255, 255, 255, 0\.6\)/);
+  assert.match(css, /--create:\s*linear-gradient\(90deg, #ffa052 0%, #e046a4 45%, #6851eb 100%\)/);
+  assert.match(css, /font-family:\s*"Plus Jakarta Sans"/);
+  assert.match(css, /font-family:\s*"Inconsolata"/);
+  assert.match(css, /\.evidence-media video[\s\S]*object-fit:\s*contain/);
+  assert.match(css, /video:-webkit-full-screen[\s\S]*object-fit:\s*contain/);
+  assert.match(css, /min-height:\s*44px/);
+  assert.match(css, /:focus-visible/);
+  assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
+  assert.match(css, /@media\s*\(max-width:\s*639px\)/);
+  assert.doesNotMatch(css, /box-shadow\s*:|object-fit:\s*cover|letter-spacing\s*:/);
 });
