@@ -9,11 +9,11 @@ Keep this as prompt and QA guidance, not as a customer-facing claim. The reviewe
 | Workflow | V6 fit | Prompt implication |
 | --- | --- | --- |
 | Single-shot product replacement | Partial to strong | Use the original clip as motion authority, then attach SKU references for the replacement object. Expect motion following to be stronger than text/logo preservation. |
-| Short viral-video adaptation | Partial | V6 reference output is lower-cost and can preserve the original audio, but longer source videos need clipping, generation, and stitching. High-speed motion and complex camera work are risky. |
 | Product-page motion loops | Strong | Make the first image the only visual master, use other references only for pose or action, and return exactly to the first frame. |
 | Simple product presentation | Partial | Keep one action per shot, write explicit no-speaking/no-lip-sync constraints, and avoid demonstrations that require a chain of precise hand operations. |
+| Person or background replacement | Partial | Make the requested edit the primary instruction, explicitly lock product color and texture, and handle captions or exact text separately. |
+| Multi-step functional demonstration | Weak | Reduce each shot to one physical action or route the job to an Agent workflow. Zippers, pockets, steam, and multi-prop sequences remained unreliable. |
 | Creative commercial effects | Not reliable as direct V6-only work | Use Agent or storyboarded workflows for shot design. V6 direct output can lose physical logic, final composition, or packaging text. |
-| Outfit generation stills | Adjacent, not V6 video | Structured outfit prompts work well through the image/design Agent when every garment, model, pose, background, and styling detail is specified. Color still needs review. |
 
 ## Core Prompt Rules
 
@@ -71,6 +71,49 @@ The VIPS review warns against long chains of hand and body operations. A better 
 
 This applies to lacing shoes, steaming fabric, unboxing, applying skincare, opening boxes, and any multi-step product demonstration.
 
+### 6. Describe mechanics and state transitions
+
+Name the physical start state, contact, movement path, and end state instead of only naming the desired result.
+
+Weak:
+
+> The model puts on the hood.
+
+Stronger:
+
+> Both hands grasp the hood edge behind the head and continuously pull it forward over the head. The jacket front remains open throughout the action.
+
+Weak:
+
+> Show that the zipper works smoothly.
+
+Stronger:
+
+> The jacket begins fully open. The right hand visibly grips the zipper pull at the bottom and moves it continuously upward to the collar while the zipper teeth close progressively below it.
+
+Useful mechanical constraints include:
+
+- Hands remain visibly in contact with the manipulated object.
+- Objects do not appear, disappear, duplicate, or teleport.
+- Only one model appears and no extra hands enter the frame.
+- Product and prop state remain consistent in the following shot.
+
+These constraints improved individual actions in review, but they did not make dense zipper, pocket, steam, or multi-prop demonstrations fully reliable.
+
+### 7. Rank constraints and split conflicting goals
+
+V6 may satisfy one requirement by sacrificing another. The reviewed retries showed stronger background instructions damaging product identity, stronger color locks weakening the background edit, and subtitle-removal instructions changing garment details.
+
+Use this default priority:
+
+1. Product and SKU consistency
+2. Person and accessory consistency
+3. Natural physical motion
+4. Pose similarity
+5. Camera movement and atmosphere
+
+When two difficult requirements must both be exact, such as complete background replacement and exact packaging text, split them into separate generation or post-production stages.
+
 ## Workflow-Specific Guidance
 
 ### Single-shot editing with V6 reference mode
@@ -95,6 +138,7 @@ Known limits from review:
 - Background replacement can change foreground clothing color, texture, or material.
 - Extra rounded output duration can create trailing frames with corrupted text; trim and QA the tail.
 - Constraints about color can compete with background replacement. Put the highest-priority requirement first and review whether the model sacrificed another requirement.
+- Warm backgrounds can shift off-white garments toward yellow or khaki and turn matte fabric glossy. Prefer neutral white light, overcast daylight, or even diffuse illumination when product color and texture are acceptance criteria.
 
 ### Product-page motion loops
 
@@ -131,6 +175,19 @@ For physical demonstrations:
 - Put tool/object placement in the shot text, not only in the concept. Example: "The steamer reaches inside the T-shirt and releases steam through the fabric."
 - Protect visual anchors: "The embroidery stays fixed on the left chest and appears only once."
 - Limit the shot to one clear action. Complex hand interactions should go to Agent or storyboarded workflows.
+
+### Delivery parameters and deterministic finishing
+
+Prompt language does not override generation settings. The reviewed prompts requested “8K,” while the actual V6 outputs were generated at 720p. Configure aspect ratio, resolution, duration, audio, and candidate count through generation parameters.
+
+Use deterministic finishing for details V6 did not preserve reliably:
+
+1. Generate or edit the visual motion.
+2. Remove existing subtitles or watermarks in a dedicated step when required.
+3. Reapply exact subtitles, prices, logos, legal copy, and end cards in post-production.
+4. Trim to the exact approved duration and inspect the final frames.
+
+For high-value shots, generate more than one candidate and select through human review. In the reviewed shoe-replacement test, all three V6 candidates completed, but one was visibly stronger and another introduced background drift.
 
 ### Creative commercial effects
 
