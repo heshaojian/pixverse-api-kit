@@ -49,3 +49,40 @@ test("review catalog is presentation-only and contains no private operations dat
   assert.doesNotMatch(raw, /mh_live_|PIXVERSE_GROWTH_API_KEY|Authorization:\s*Bearer/i);
   assert.doesNotMatch(raw, /\/Users\/|job_dir|video_id|ledger|price|wallet|prompt|created_at/i);
 });
+
+test("review page is isolated, no-index, and renders fourteen product proofs", async () => {
+  const [catalog, html, css, app, headers, robots] = await Promise.all([
+    readJson(new URL("catalog.json", reviewRoot)),
+    fs.readFile(new URL("index.html", reviewRoot), "utf8"),
+    fs.readFile(new URL("styles.css", reviewRoot), "utf8"),
+    fs.readFile(new URL("app.js", reviewRoot), "utf8"),
+    fs.readFile(new URL("_headers", reviewRoot), "utf8"),
+    fs.readFile(new URL("robots.txt", reviewRoot), "utf8"),
+  ]);
+
+  assert.match(html, /<meta name="robots" content="noindex, nofollow, noarchive">/);
+  assert.match(html, /<title>REVOLVE × PixVerse \| PDP Video Review<\/title>/);
+  assert.equal((html.match(/<video\b/g) ?? []).length, 14);
+  assert.equal((html.match(/aria-describedby="motion-/g) ?? []).length, 14);
+  assert.equal((html.match(/preload="metadata"/g) ?? []).length, 1);
+  assert.equal((html.match(/preload="none"/g) ?? []).length, 13);
+  assert.ok(catalog.products.every(({ videoUrl, productUrl }) =>
+    html.includes(videoUrl) && html.includes(productUrl)
+  ));
+  assert.match(html, />Internal Review</);
+  assert.doesNotMatch(html, /Pilot|Schedule|mailto:|revolve-pdp\.pages\.dev/);
+  assert.match(css, /\.demo-media video[^}]*object-fit:\s*contain/s);
+  assert.doesNotMatch(css, /object-fit:\s*cover/);
+  assert.match(app, /IntersectionObserver/);
+  assert.match(headers, /X-Robots-Tag:\s*noindex, nofollow, noarchive/i);
+  assert.match(robots, /Disallow:\s*\//);
+});
+
+test("deployable review files expose no credentials or internal artifacts", async () => {
+  const names = ["index.html", "styles.css", "app.js", "catalog.json", "_headers", "robots.txt"];
+  const raw = (await Promise.all(names.map((name) =>
+    fs.readFile(new URL(name, reviewRoot), "utf8")
+  ))).join("\n");
+  assert.doesNotMatch(raw, /mh_live_|PIXVERSE_GROWTH_API_KEY|Authorization:\s*Bearer|\/Users\//i);
+  assert.doesNotMatch(raw, /job_dir|video_id|ledger_source|wallet|generation-command/i);
+});
