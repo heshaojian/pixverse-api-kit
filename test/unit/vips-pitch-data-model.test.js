@@ -5,10 +5,14 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import {
+  buildPilotSummary,
   flattenCases,
   getFeaturedCases,
   getVerdictMeta,
   isSafeMediaUrl,
+  resolveEvidenceTarget,
+  toAttemptDomId,
+  toggleWorkflowSelection,
   validatePitchData,
 } from "../../deploy/brand-pitches/vips/human-reviewed-ecommerce/data-model.js";
 
@@ -111,6 +115,72 @@ test("isSafeMediaUrl rejects malformed and ambiguous paths", () => {
   assert.equal(isSafeMediaUrl("https://example.com/video.mp4?download=1"), false);
   assert.equal(isSafeMediaUrl("https://example.com/video.mp4#preview"), false);
   assert.equal(isSafeMediaUrl("https://example.com/video.mp4"), true);
+});
+
+test("pilot selection is immutable, reversible, and rejects a fourth workflow", async () => {
+  const fixture = await readFixture();
+  const ids = Object.freeze(fixture.chapters.slice(0, 3).map(({ id }) => id));
+  const rejected = toggleWorkflowSelection(ids, fixture.chapters[3].id);
+
+  assert.deepEqual(rejected, { selectedIds: ids, reason: "limit-reached" });
+  assert.ok(Object.isFrozen(rejected));
+  assert.ok(Object.isFrozen(rejected.selectedIds));
+
+  const deselected = toggleWorkflowSelection(ids, ids[1]);
+  assert.deepEqual(deselected, {
+    selectedIds: [ids[0], ids[2]],
+    reason: null,
+  });
+  assert.deepEqual(ids, fixture.chapters.slice(0, 3).map(({ id }) => id));
+});
+
+test("pilot summary requires exactly three valid workflows in chapter order", async () => {
+  const fixture = await readFixture();
+  const selectedIds = [fixture.chapters[2].id, fixture.chapters[0].id, fixture.chapters[1].id];
+  const safeguards = ["确认商品", "确认边界", "确认评审标准", "比较返工原因"];
+  const summary = buildPilotSummary({ data: fixture, selectedIds, safeguards });
+
+  assert.match(summary, /修订版 1214/);
+  assert.match(summary, new RegExp(fixture.source.reviewedAt));
+  const orderedTitles = fixture.chapters.slice(0, 3).map(({ title }) => title);
+  assert.ok(summary.indexOf(orderedTitles[0]) < summary.indexOf(orderedTitles[1]));
+  assert.ok(summary.indexOf(orderedTitles[1]) < summary.indexOf(orderedTitles[2]));
+  assert.ok(safeguards.every((item) => summary.includes(item)));
+  assert.throws(
+    () => buildPilotSummary({ data: fixture, selectedIds: selectedIds.slice(0, 2), safeguards }),
+    /exactly three/i,
+  );
+  assert.throws(
+    () => buildPilotSummary({ data: fixture, selectedIds: [selectedIds[0], selectedIds[1], "missing"], safeguards }),
+    /unknown workflow/i,
+  );
+});
+
+test("evidence targets use globally unique composite attempt ids", async () => {
+  const fixture = await readFixture();
+  const chapter = fixture.chapters[0];
+  const record = chapter.cases[0];
+  const attempt = record.attempts[0];
+  const attemptDomId = toAttemptDomId(record.id, attempt.id);
+
+  assert.equal(attemptDomId, `${record.id}--${attempt.id}`);
+  assert.deepEqual(resolveEvidenceTarget(fixture, chapter.id), {
+    chapterId: chapter.id,
+    caseId: null,
+    attemptDomId: null,
+  });
+  assert.deepEqual(resolveEvidenceTarget(fixture, record.id), {
+    chapterId: chapter.id,
+    caseId: record.id,
+    attemptDomId: null,
+  });
+  assert.deepEqual(resolveEvidenceTarget(fixture, attemptDomId), {
+    chapterId: chapter.id,
+    caseId: record.id,
+    attemptDomId,
+  });
+  assert.equal(resolveEvidenceTarget(fixture, attempt.id), null);
+  assert.equal(resolveEvidenceTarget(fixture, "missing"), null);
 });
 
 test("validatePitchData rejects unsupported nested records and top-level drift", async () => {

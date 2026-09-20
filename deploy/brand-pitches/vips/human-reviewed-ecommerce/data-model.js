@@ -178,6 +178,81 @@ export function getFeaturedCases(data) {
   return Object.freeze(featured);
 }
 
+export function toggleWorkflowSelection(selectedIds, workflowId, maxSelections = 3) {
+  if (!Array.isArray(selectedIds)) throw new Error("selectedIds must be an array");
+  assertString(workflowId, "workflowId");
+  if (!Number.isInteger(maxSelections) || maxSelections < 1) {
+    throw new Error("maxSelections must be a positive integer");
+  }
+  const current = Object.freeze([...selectedIds]);
+  if (current.includes(workflowId)) {
+    return Object.freeze({
+      selectedIds: Object.freeze(current.filter((id) => id !== workflowId)),
+      reason: null,
+    });
+  }
+  if (current.length >= maxSelections) {
+    return Object.freeze({ selectedIds: current, reason: "limit-reached" });
+  }
+  return Object.freeze({
+    selectedIds: Object.freeze([...current, workflowId]),
+    reason: null,
+  });
+}
+
+export function buildPilotSummary({ data, selectedIds, safeguards }) {
+  const validated = validatePitchData(data);
+  if (!Array.isArray(selectedIds) || selectedIds.length !== 3 || new Set(selectedIds).size !== 3) {
+    throw new Error("Pilot summary requires exactly three workflows");
+  }
+  if (!Array.isArray(safeguards) || safeguards.some((item) => typeof item !== "string" || !item.trim())) {
+    throw new Error("safeguards must be non-empty strings");
+  }
+  const selected = new Set(selectedIds);
+  const workflows = validated.chapters.filter(({ id }) => selected.has(id));
+  if (workflows.length !== selected.size) throw new Error("Unknown workflow selection");
+  return [
+    "唯品会电商视频受控试点",
+    "",
+    "优先工作流：",
+    ...workflows.map(({ title }) => `- ${title}`),
+    "",
+    "共同评审边界：",
+    ...safeguards.map((item) => `- ${item}`),
+    "",
+    `来源：人工评审材料修订版 ${validated.source.revisionId}`,
+    `评审日期：${validated.source.reviewedAt}`,
+  ].join("\n");
+}
+
+export function toAttemptDomId(caseId, attemptId) {
+  assertString(caseId, "caseId");
+  assertString(attemptId, "attemptId");
+  return `${caseId}--${attemptId}`;
+}
+
+export function resolveEvidenceTarget(data, hashId) {
+  const validated = validatePitchData(data);
+  if (typeof hashId !== "string" || !hashId) return null;
+  for (const chapter of validated.chapters) {
+    if (chapter.id === hashId) {
+      return Object.freeze({ chapterId: chapter.id, caseId: null, attemptDomId: null });
+    }
+    for (const record of chapter.cases) {
+      if (record.id === hashId) {
+        return Object.freeze({ chapterId: chapter.id, caseId: record.id, attemptDomId: null });
+      }
+      for (const attempt of record.attempts) {
+        const attemptDomId = toAttemptDomId(record.id, attempt.id);
+        if (attemptDomId === hashId) {
+          return Object.freeze({ chapterId: chapter.id, caseId: record.id, attemptDomId });
+        }
+      }
+    }
+  }
+  return null;
+}
+
 export function validatePitchData(data) {
   if (!isObject(data)) throw new Error("Pitch data must be an object");
   if (data.schemaVersion !== "vips-pitch.v1") throw new Error("Unsupported schemaVersion");
