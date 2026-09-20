@@ -8,6 +8,8 @@ Add a merchant-neutral PDP video capability to the PixVerse API Kit. Agents and 
 
 The feature must work for products supplied by any seller or merchant. No command, schema, example, validation rule, folder rule, or agent instruction may assume a specific retailer, merchant domain, brand, or customer.
 
+Merchant neutrality does not broaden the current upstream product scope: the documented `ecommerce_fashion_pdp` type is for apparel/fashion products. Public guidance must state that current category boundary without tying the workflow to any particular seller.
+
 ## Scope
 
 This change adds:
