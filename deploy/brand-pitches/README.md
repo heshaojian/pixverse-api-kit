@@ -21,3 +21,6 @@ Current brand pitch pages:
 - `revolve/v2/`
 - `revolve/v3/`
 - `revolve/v4/`
+- `vips/human-reviewed-ecommerce/` — private local preview for the human-reviewed VIPS ecommerce evidence page.
+
+For `vips/human-reviewed-ecommerce/`, public deployment, external distribution, analytics, and asset uploads remain unapproved.

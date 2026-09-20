@@ -16,3 +16,10 @@ docs/brand-pitches/
 - `specs/` holds design and QA specs for pitch pages and review tools.
 
 Deployable customer pages live separately under `deploy/brand-pitches/<brand>/<pitch-name>/`.
+
+VIPS human-reviewed ecommerce pitch references:
+
+- `specs/2026-09-20-vips-human-reviewed-pitch-design.md`
+- `plans/2026-09-20-vips-human-reviewed-pitch.md`
+
+The VIPS page is a private local preview. Public deployment, external distribution, analytics, and asset uploads remain unapproved.
