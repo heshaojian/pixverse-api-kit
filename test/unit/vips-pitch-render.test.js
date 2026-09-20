@@ -34,9 +34,22 @@ test("renderCase keeps review evidence inside native independent disclosures", a
   const html = renderCase(fixture.chapters[0].cases[0]);
 
   assert.match(html, /<details class="case-record"/);
-  assert.match(html, /<details class="review-detail"/);
-  assert.match(html, /评审详情/);
+  assert.match(html, /<details class="complete-review-record"/);
+  assert.match(html, /完整评审记录/);
   assert.doesNotMatch(html, /name="accordion"/);
+});
+
+test("case summary keeps implementation detail in the complete review record", async () => {
+  const fixture = await readFixture();
+  const html = renderCase(fixture.chapters[0].cases[0]);
+  const recordStart = html.indexOf('<details class="complete-review-record"');
+
+  assert.ok(recordStart > 0);
+  assert.ok(html.indexOf("提示词：") > recordStart);
+  assert.ok(html.indexOf("attempt-parameters") > recordStart);
+  assert.ok(html.indexOf("review-summary") < recordStart);
+  assert.ok(html.indexOf("review-observations") < recordStart);
+  assert.match(html.slice(0, recordStart), /representative-evidence/);
 });
 
 test("rendered external links are HTTPS and noreferrer", async () => {
@@ -61,6 +74,39 @@ test("rendered media uses accessible lazy local evidence", async () => {
   assert.match(html, /aria-label="[^"]*评审视频/);
   assert.match(html, /class="media-unavailable"/);
   assert.doesNotMatch(html, /<video\b[^>]*\ssrc="/);
+});
+
+test("rendered media reserves validated intrinsic dimensions", async () => {
+  const fixture = await readFixture();
+  const html = renderLedger(fixture);
+  const dimensioned = fixture.chapters.flatMap(({ cases }) => cases)
+    .flatMap(({ inputs, attempts }) => [...inputs, ...attempts.flatMap(({ media }) => media)])
+    .find(({ dimensions }) => dimensions.width !== null);
+
+  assert.match(html, new RegExp(`width="${dimensioned.dimensions.width}"`));
+  assert.match(html, new RegExp(`height="${dimensioned.dimensions.height}"`));
+  assert.match(html, new RegExp(`aspect-ratio: ${dimensioned.dimensions.width} / ${dimensioned.dimensions.height}`));
+});
+
+test("attempt ids are composite and globally unique", async () => {
+  const fixture = await readFixture();
+  const html = renderLedger(fixture);
+  const expectedAttempts = fixture.chapters.flatMap(({ cases }) => cases)
+    .reduce((total, { attempts }) => total + attempts.length, 0);
+  const ids = [...html.matchAll(/<li class="attempt" id="([^"]+--[^"]+)"/g)]
+    .map((match) => match[1]);
+
+  assert.equal(ids.length, expectedAttempts);
+  assert.equal(new Set(ids).size, ids.length);
+});
+
+test("chapters are collapsed native disclosures", async () => {
+  const fixture = await readFixture();
+  const html = renderLedger(fixture);
+
+  assert.equal((html.match(/<details class="ledger-chapter"/g) ?? []).length, 5);
+  assert.equal((html.match(/<summary class="chapter-summary">/g) ?? []).length, 5);
+  assert.doesNotMatch(html, /<details class="ledger-chapter"[^>]*\sopen/);
 });
 
 test("safeUrl rejects executable schemes and userinfo", () => {

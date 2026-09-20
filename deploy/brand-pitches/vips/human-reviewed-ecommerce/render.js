@@ -2,6 +2,7 @@ import {
   flattenCases,
   getVerdictMeta,
   isSafeMediaUrl,
+  toAttemptDomId,
   validatePitchData,
 } from "./data-model.js";
 
@@ -50,11 +51,18 @@ const renderExternalMediaLink = (media) => {
   ].join("");
 };
 
+const renderDimensions = (media) => {
+  const { width, height } = media.dimensions;
+  if (width === null || height === null) return "";
+  return ` width="${width}" height="${height}" style="aspect-ratio: ${width} / ${height}"`;
+};
+
 const renderLocalImage = (media) => {
   const url = escapeHtml(safeUrl(media.url));
+  const dimensions = renderDimensions(media);
   return [
     `<figure class="media-frame media-frame-image" data-source-kind="${escapeHtml(media.sourceKind)}">`,
-    `<img data-src="${url}" loading="lazy" decoding="async" alt="${escapeHtml(media.alt)}">`,
+    `<img data-src="${url}" loading="lazy" decoding="async"${dimensions} alt="${escapeHtml(media.alt)}">`,
     `<figcaption>${escapeHtml(mediaLabel(media))}</figcaption>`,
     `<p class="media-unavailable" hidden>素材暂不可用。</p>`,
     "</figure>",
@@ -63,9 +71,10 @@ const renderLocalImage = (media) => {
 
 const renderLocalVideo = (media) => {
   const url = escapeHtml(safeUrl(media.url));
+  const dimensions = renderDimensions(media);
   return [
     `<figure class="media-frame media-frame-video" data-source-kind="${escapeHtml(media.sourceKind)}">`,
-    `<video controls playsinline preload="none" data-src="${url}" aria-label="${escapeHtml(mediaLabel(media))}"></video>`,
+    `<video controls playsinline preload="none" data-src="${url}"${dimensions} aria-label="${escapeHtml(mediaLabel(media))}"></video>`,
     `<figcaption>${escapeHtml(media.alt)}</figcaption>`,
     `<p class="media-unavailable" hidden>视频暂不可用。</p>`,
     "</figure>",
@@ -87,12 +96,15 @@ const renderMediaGroup = (items, title) => {
   ].join("");
 };
 
-const renderAttempt = (attempt) => {
+const renderAttempt = (recordId, attempt, representativeAttemptId) => {
   const prompt = attempt.prompt
     ? `<p class="attempt-prompt"><span>提示词：</span>${escapeHtml(attempt.prompt)}</p>`
     : "";
+  const media = attempt.id === representativeAttemptId && attempt.media.length
+    ? `<a class="representative-evidence-link" href="#${slug(recordId)}-representative-evidence">查看上方代表性结果</a>`
+    : renderMediaGroup(attempt.media, "输出素材");
   return [
-    `<li class="attempt" id="${slug(attempt.id)}">`,
+    `<li class="attempt" id="${slug(toAttemptDomId(recordId, attempt.id))}">`,
     `<div class="attempt-head">`,
     `<h5>${escapeHtml(attempt.label)}</h5>`,
     renderVerdict(attempt.verdict),
@@ -101,12 +113,24 @@ const renderAttempt = (attempt) => {
     renderList(attempt.parameters, "attempt-parameters"),
     prompt,
     renderList(attempt.observations, "attempt-observations"),
-    renderMediaGroup(attempt.media, "输出素材"),
+    media,
     "</li>",
   ].join("");
 };
 
+const findRepresentativeAttempt = (record) => [...record.attempts]
+  .reverse()
+  .find(({ media }) => media.length) ?? null;
+
 export function renderCase(record) {
+  const representativeAttempt = findRepresentativeAttempt(record);
+  const representativeEvidence = representativeAttempt
+    ? [
+      `<div class="representative-evidence" id="${slug(record.id)}-representative-evidence">`,
+      renderMediaGroup(representativeAttempt.media, "代表性结果"),
+      `</div>`,
+    ].join("")
+    : "";
   return [
     `<details class="case-record" id="${slug(record.id)}">`,
     `<summary>`,
@@ -115,12 +139,15 @@ export function renderCase(record) {
     `</summary>`,
     `<div class="case-body">`,
     `<p class="case-request">${escapeHtml(record.request)}</p>`,
-    renderMediaGroup(record.inputs, "输入与参考"),
-    `<ol class="attempts">${record.attempts.map(renderAttempt).join("")}</ol>`,
-    `<details class="review-detail">`,
-    `<summary>评审详情</summary>`,
-    `<p>${escapeHtml(record.review.summary)}</p>`,
+    `<p class="review-summary">${escapeHtml(record.review.summary)}</p>`,
     renderList(record.review.observations, "review-observations"),
+    representativeEvidence,
+    `<details class="complete-review-record">`,
+    `<summary>完整评审记录</summary>`,
+    `<div class="complete-review-body">`,
+    renderMediaGroup(record.inputs, "输入与参考"),
+    `<ol class="attempts">${record.attempts.map((attempt) => renderAttempt(record.id, attempt, representativeAttempt?.id)).join("")}</ol>`,
+    `</div>`,
     `</details>`,
     `</div>`,
     `</details>`,
@@ -129,19 +156,21 @@ export function renderCase(record) {
 
 export function renderChapter(chapter) {
   return [
-    `<section class="ledger-chapter" id="${slug(chapter.id)}">`,
-    `<header class="chapter-header">`,
-    `<p class="chapter-kicker">${renderVerdict(chapter.verdict)}</p>`,
-    `<h3>${escapeHtml(chapter.title)}</h3>`,
-    `<p>${escapeHtml(chapter.summary)}</p>`,
-    `</header>`,
+    `<details class="ledger-chapter" id="${slug(chapter.id)}">`,
+    `<summary class="chapter-summary">`,
+    `<span class="chapter-title">${escapeHtml(chapter.title)}</span>`,
+    renderVerdict(chapter.verdict),
+    `</summary>`,
+    `<div class="chapter-body">`,
+    `<p class="chapter-description">${escapeHtml(chapter.summary)}</p>`,
     `<div class="chapter-notes">`,
     renderList(chapter.strengths, "chapter-strengths"),
     renderList(chapter.limitations, "chapter-limitations"),
     renderList(chapter.operatingConditions, "chapter-operating-conditions"),
     `</div>`,
     chapter.cases.map(renderCase).join(""),
-    `</section>`,
+    `</div>`,
+    `</details>`,
   ].join("");
 }
 
