@@ -9,6 +9,7 @@ import {
 import { serializeError } from "../core/errors.js";
 import { redact } from "../core/redaction.js";
 import { resolveFolderForPayload } from "./folders.js";
+import { PDP_CREATE_PATH, normalizePdpPayload } from "./pdp.js";
 
 const DEFAULT_JOBS_DIR = "jobs";
 
@@ -26,30 +27,13 @@ export async function runVideoJob(client, payload, options = {}) {
 
     if (folder) await writeArtifact(jobDir, "folder.json", redact(folder));
 
-    await writeArtifact(jobDir, "request.json", redact({
-      provider: "growth-studio",
-      trace_id: traceBase,
-      created_at: new Date().toISOString(),
-      payload: createPayload,
-    }));
-
-    const createResult = await client.createVideo(createPayload, { traceId: `${traceBase}-create` });
-    await writeArtifact(jobDir, "create-response.json", redact(createResult.body));
-
-    const videoId = createResult.body.video_id;
-    if (typeof videoId !== "string" || videoId === "") {
-      throw new Error("Create response did not include a string video_id.");
-    }
-
-    await writeArtifact(jobDir, "video-id.json", { video_id: videoId });
-
-    const final = options.poll === false
-      ? createResult.body
-      : await pollKnownVideo(client, jobDir, videoId, traceBase, options);
-
-    if (options.poll === false) await writeArtifact(jobDir, "final.json", redact(final));
-
-    return resultFromFinal(jobDir, videoId, final, folder);
+    return await runDurableVideoSubmission(
+      client,
+      createPayload,
+      { ...options, workflow: undefined, endpoint: undefined },
+      (requestOptions) => client.createVideo(createPayload, requestOptions),
+      { jobDir, traceBase, folder, deferFailure: true },
+    );
   } catch (error) {
     await persistFailure(jobDir, error, traceBase);
     throw error;
@@ -58,31 +42,51 @@ export async function runVideoJob(client, payload, options = {}) {
 
 export const runGrowthStudioJob = runVideoJob;
 
+export async function runPdpJob(client, publicPayload, options = {}) {
+  const wirePayload = normalizePdpPayload(publicPayload);
+  const submissionPayload = {
+    product: wirePayload.product,
+    video: wirePayload.video,
+  };
+  return runDurableVideoSubmission(client, wirePayload, {
+    ...options,
+    workflow: "pdp",
+    endpoint: PDP_CREATE_PATH,
+  }, (requestOptions) => client.createPdpVideo(submissionPayload, requestOptions));
+}
+
 export async function resumeGrowthStudioJob(client, jobDirectory, options = {}) {
   const jobDir = path.resolve(jobDirectory);
   const request = await readJsonArtifact(path.join(jobDir, "request.json"), { rootDir: jobDir });
-  const completed = await readOptionalArtifact(jobDir, "final.json");
-  if (completed && isTerminal(completed.status)) {
-    const id = (await readOptionalArtifact(jobDir, "video-id.json"))?.video_id;
-    return resultFromFinal(jobDir, id, completed);
+  if (options.expectedWorkflow && request.workflow !== options.expectedWorkflow) {
+    throw new Error(`Growth Studio job is not a ${options.expectedWorkflow} workflow.`);
   }
 
+  const ledgerSourceId = await readSavedLedgerSourceId(jobDir);
+  const resultOptions = {
+    workflow: request.workflow,
+    ledgerSourceId,
+    includeFolderFields: request.workflow !== "pdp",
+  };
   const videoId = (await readOptionalArtifact(jobDir, "video-id.json"))?.video_id;
+  if (request.workflow === "pdp" && !isNonEmptyString(videoId)) {
+    return reconciliationResult(jobDir, request, ledgerSourceId);
+  }
+
+  const completed = await readOptionalArtifact(jobDir, "final.json");
+  if (completed && isTerminal(completed.status)) {
+    return resultFromFinal(jobDir, videoId, completed, undefined, resultOptions);
+  }
+
   if (typeof videoId !== "string" || videoId === "") {
-    return {
-      provider: "growth-studio",
-      trace_id: request.trace_id,
-      job_dir: jobDir,
-      status: "reconciliation_required",
-      retryable: false,
-    };
+    return reconciliationResult(jobDir, request, ledgerSourceId);
   }
 
   if (completed) await archivePriorFinal(jobDir);
 
   try {
     const final = await pollKnownVideo(client, jobDir, videoId, request.trace_id, options);
-    return resultFromFinal(jobDir, videoId, final);
+    return resultFromFinal(jobDir, videoId, final, undefined, resultOptions);
   } catch (error) {
     await persistFailure(jobDir, error, request.trace_id, { preserveExisting: true });
     throw error;
@@ -95,6 +99,59 @@ export async function readJsonFile(filePath) {
 
 export async function createJobDir(rootDir, jobName) {
   return createJobDirectory(path.resolve(rootDir), { name: jobName || "pixverse-api-job" });
+}
+
+async function runDurableVideoSubmission(client, artifactPayload, options, submission, context = {}) {
+  const jobDir = context.jobDir
+    ?? await createJobDir(options.jobsDir || DEFAULT_JOBS_DIR, options.jobName);
+  const traceBase = context.traceBase ?? options.traceId ?? path.basename(jobDir);
+
+  try {
+    await writeArtifact(jobDir, "request.json", redact({
+      provider: "growth-studio",
+      ...(options.workflow ? { workflow: options.workflow } : {}),
+      ...(options.endpoint ? { endpoint: options.endpoint } : {}),
+      trace_id: traceBase,
+      created_at: new Date().toISOString(),
+      payload: artifactPayload,
+    }));
+    const createResult = await submission({ traceId: `${traceBase}-create` });
+    return persistCreatedVideo(client, jobDir, createResult, traceBase, options, context.folder);
+  } catch (error) {
+    if (!context.deferFailure) await persistFailure(jobDir, error, traceBase);
+    throw error;
+  }
+}
+
+async function persistCreatedVideo(client, jobDir, createResult, traceBase, options, folder) {
+  await writeArtifact(jobDir, "create-response.json", redact(createResult.body));
+
+  const videoId = requireStringIdentifier(
+    createResult.body.video_id,
+    "Create response did not include a string video_id.",
+  );
+  await writeArtifact(jobDir, "video-id.json", { video_id: videoId });
+
+  let ledgerSourceId;
+  if (options.workflow === "pdp" && createResult.body.ledger_source_id !== undefined) {
+    ledgerSourceId = requireStringIdentifier(
+      createResult.body.ledger_source_id,
+      "Create response did not include a string ledger_source_id.",
+    );
+    await writeArtifact(jobDir, "ledger-source-id.json", { ledger_source_id: ledgerSourceId });
+  }
+
+  const final = options.poll === false
+    ? createResult.body
+    : await pollKnownVideo(client, jobDir, videoId, traceBase, options);
+
+  if (options.poll === false) await writeArtifact(jobDir, "final.json", redact(final));
+
+  return resultFromFinal(jobDir, videoId, final, folder, {
+    workflow: options.workflow,
+    ledgerSourceId,
+    includeFolderFields: options.workflow !== "pdp",
+  });
 }
 
 async function pollKnownVideo(client, jobDir, videoId, traceBase, options) {
@@ -111,17 +168,24 @@ async function pollKnownVideo(client, jobDir, videoId, traceBase, options) {
   return final;
 }
 
-function resultFromFinal(jobDir, videoId, final, folder) {
-  return {
+function resultFromFinal(jobDir, videoId, final, folder, options = {}) {
+  const result = {
     job_dir: jobDir,
     video_id: videoId,
     status: final.status,
     video_url: final.output?.video_url,
     thumbnail_url: final.output?.thumbnail_url,
     request_id: final.request_id,
-    folder_id: folder?.folderId,
-    folder_name: folder?.folderName,
   };
+  if (options.workflow !== undefined) result.workflow = options.workflow;
+  if (options.workflow === "pdp" && options.ledgerSourceId !== undefined) {
+    result.ledger_source_id = options.ledgerSourceId;
+  }
+  if (options.includeFolderFields !== false) {
+    result.folder_id = folder?.folderId;
+    result.folder_name = folder?.folderName;
+  }
+  return result;
 }
 
 async function writeArtifact(jobDir, name, value) {
@@ -135,6 +199,15 @@ async function readOptionalArtifact(jobDir, name) {
     if (error?.code === "ENOENT") return undefined;
     throw error;
   }
+}
+
+async function readSavedLedgerSourceId(jobDir) {
+  const artifact = await readOptionalArtifact(jobDir, "ledger-source-id.json");
+  if (artifact === undefined) return undefined;
+  return requireStringIdentifier(
+    artifact.ledger_source_id,
+    "Saved Growth Studio job did not include a string ledger_source_id.",
+  );
 }
 
 async function writeArtifactIfMissing(jobDir, name, value) {
@@ -180,6 +253,27 @@ async function archivePriorArtifact(jobDir, sourceName, targetPrefix) {
 
 function isTerminal(status) {
   return status === "succeeded" || status === "failed" || status === "canceled";
+}
+
+function reconciliationResult(jobDir, request, ledgerSourceId) {
+  return {
+    provider: "growth-studio",
+    ...(request.workflow === undefined ? {} : { workflow: request.workflow }),
+    ...(ledgerSourceId === undefined ? {} : { ledger_source_id: ledgerSourceId }),
+    trace_id: request.trace_id,
+    job_dir: jobDir,
+    status: "reconciliation_required",
+    retryable: false,
+  };
+}
+
+function isNonEmptyString(value) {
+  return typeof value === "string" && value.trim() !== "";
+}
+
+function requireStringIdentifier(value, message) {
+  if (!isNonEmptyString(value)) throw new Error(message);
+  return value;
 }
 
 function withFolderId(payload, folderId) {
