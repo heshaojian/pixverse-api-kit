@@ -85,7 +85,7 @@ test("rendered media reserves validated intrinsic dimensions", async () => {
 
   assert.match(html, new RegExp(`width="${dimensioned.dimensions.width}"`));
   assert.match(html, new RegExp(`height="${dimensioned.dimensions.height}"`));
-  assert.match(html, new RegExp(`aspect-ratio: ${dimensioned.dimensions.width} / ${dimensioned.dimensions.height}`));
+  assert.doesNotMatch(html, /style="[^"]*aspect-ratio/);
 });
 
 test("attempt ids are composite and globally unique", async () => {

@@ -54,7 +54,7 @@ const renderExternalMediaLink = (media) => {
 const renderDimensions = (media) => {
   const { width, height } = media.dimensions;
   if (width === null || height === null) return "";
-  return ` width="${width}" height="${height}" style="aspect-ratio: ${width} / ${height}"`;
+  return ` width="${width}" height="${height}"`;
 };
 
 const renderLocalImage = (media) => {
