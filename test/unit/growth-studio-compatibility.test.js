@@ -22,6 +22,16 @@ import * as growthJobs from "../../src/growth-studio/jobs.js";
 import * as growthPdp from "../../src/growth-studio/pdp.js";
 import * as growthValidation from "../../src/growth-studio/validation.js";
 
+function validPdpPayload() {
+  return {
+    product: {
+      title: "Linen Summer Shirt",
+      images: [{ url: "https://media.pixverse.ai/example/front.webp" }],
+    },
+    video: { mode: "standard" },
+  };
+}
+
 test("flat modules preserve Growth Studio named exports", () => {
   assert.equal(flatClient.GrowthStudioClient, growthClient.GrowthStudioClient);
   assert.equal(flatClient.createProductUrlPayload, growthClient.createProductUrlPayload);
@@ -498,6 +508,251 @@ test("Growth Studio resume can require reconciliation without loading configurat
   assert.equal(result.trace_id, "fixture-trace");
 });
 
+test("PDP dry run validates relative to context cwd without credentials, artifacts, or network", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-pdp-dry-run-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  await fs.writeFile(path.join(root, "pdp.json"), JSON.stringify(validPdpPayload()));
+  let clientAccesses = 0;
+
+  const result = await runGrowthStudioCommand([
+    "pdp", "create", "--payload", "pdp.json", "--dry-run",
+  ], {
+    env: {},
+    cwd: root,
+    get client() {
+      clientAccesses += 1;
+      return {};
+    },
+  });
+
+  assert.equal(result.billable, false);
+  assert.equal(result.body.type, "ecommerce_fashion_pdp");
+  assert.equal(clientAccesses, 0);
+  assert.deepEqual(await fs.readdir(root), ["pdp.json"]);
+});
+
+test("PDP create requires exactly one execution mode before client access", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-pdp-confirmation-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  await fs.writeFile(path.join(root, "pdp.json"), JSON.stringify(validPdpPayload()));
+  let clientAccesses = 0;
+  const context = {
+    env: {},
+    cwd: root,
+    get client() {
+      clientAccesses += 1;
+      return {};
+    },
+  };
+
+  await assert.rejects(
+    runGrowthStudioCommand(["pdp", "create", "--payload", "pdp.json"], context),
+    /requires --confirm-billable for a live submission/,
+  );
+  await assert.rejects(
+    runGrowthStudioCommand([
+      "pdp", "create", "--payload", "pdp.json", "--dry-run", "--confirm-billable",
+    ], context),
+    /either --dry-run or --confirm-billable, not both/,
+  );
+  await assert.rejects(
+    runGrowthStudioCommand(["pdp", "create", "--dry-run"], context),
+    /requires --payload <path>/,
+  );
+  assert.equal(clientAccesses, 0);
+});
+
+test("PDP dry run rejects every execution option instead of ignoring it", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-pdp-dry-options-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  await fs.writeFile(path.join(root, "pdp.json"), JSON.stringify(validPdpPayload()));
+  const cases = [
+    ["--jobs-dir", "jobs"],
+    ["--job-name", "pdp-job"],
+    ["--timeout-minutes", "1"],
+    ["--initial-delay-seconds", "0"],
+    ["--fallback-delay-seconds", "0"],
+    ["--no-poll"],
+  ];
+
+  for (const executionArgs of cases) {
+    await assert.rejects(
+      runGrowthStudioCommand([
+        "pdp", "create", "--payload", "pdp.json", "--dry-run", ...executionArgs,
+      ], { env: {}, cwd: root }),
+      /--dry-run does not accept job or polling options/,
+    );
+  }
+  assert.deepEqual(await fs.readdir(root), ["pdp.json"]);
+});
+
+test("PDP create rejects folders, positional URLs, and unknown options", async () => {
+  const cases = [
+    ["--folder-id", "630251570268735431"],
+    ["--folder-name", "Seller Folder"],
+    ["--auto-folder"],
+    ["https://shop.example.test/item"],
+    ["--unknown"],
+  ];
+
+  for (const extra of cases) {
+    await assert.rejects(
+      runGrowthStudioCommand([
+        "pdp", "create", "--payload", "pdp.json", "--dry-run", ...extra,
+      ], { env: {} }),
+      /Unknown pdp create option/,
+    );
+  }
+});
+
+test("PDP get and poll validate arity and pass bounded timing values", async () => {
+  const calls = [];
+  const client = {
+    async getVideo(videoId, options) {
+      calls.push(["get", videoId, options]);
+      return { body: { video_id: videoId, status: "processing" } };
+    },
+    async pollVideo(videoId, options) {
+      calls.push(["poll", videoId, options]);
+      return { video_id: videoId, status: "succeeded" };
+    },
+  };
+
+  const details = await runGrowthStudioCommand(["pdp", "get", "627410861853514292"], { client });
+  const final = await runGrowthStudioCommand([
+    "pdp", "poll", "627410861853514292",
+    "--timeout-minutes", "0.5",
+    "--initial-delay-seconds", "0",
+    "--fallback-delay-seconds", "2.5",
+  ], { client });
+
+  assert.equal(details.status, "processing");
+  assert.equal(final.status, "succeeded");
+  assert.equal(calls[0][0], "get");
+  assert.equal(calls[1][0], "poll");
+  assert.equal(calls[1][2].timeoutMs, 30_000);
+  assert.equal(calls[1][2].initialDelaySeconds, 0);
+  assert.equal(calls[1][2].fallbackDelaySeconds, 2.5);
+  await assert.rejects(
+    runGrowthStudioCommand(["pdp", "get"], { env: {} }),
+    /requires exactly one video_id/,
+  );
+  await assert.rejects(
+    runGrowthStudioCommand(["pdp", "get", "one", "two"], { env: {} }),
+    /requires exactly one video_id/,
+  );
+});
+
+test("PDP timing options reject non-finite and unsafe values before configuration", async () => {
+  const cases = [
+    ["--timeout-minutes", "0"],
+    ["--timeout-minutes", "NaN"],
+    ["--timeout-minutes", "Infinity"],
+    ["--timeout-minutes", "9007199254740992"],
+    ["--initial-delay-seconds", "-1"],
+    ["--fallback-delay-seconds", "1e309"],
+  ];
+
+  for (const [option, value] of cases) {
+    await assert.rejects(
+      runGrowthStudioCommand(["pdp", "poll", "627410861853514292", option, value], { env: {} }),
+      new RegExp(`${option} must be`),
+    );
+  }
+});
+
+test("PDP resume is workflow-scoped, cwd-relative, and lazy during reconciliation", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-pdp-resume-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const jobDirectory = path.join(root, "pdp-job");
+  await fs.mkdir(jobDirectory);
+  await fs.writeFile(path.join(jobDirectory, "request.json"), JSON.stringify({
+    workflow: "pdp",
+    trace_id: "pdp-reconcile-fixture",
+  }));
+  let clientAccesses = 0;
+
+  const result = await runGrowthStudioCommand([
+    "pdp", "resume", "pdp-job",
+    "--timeout-minutes", "1",
+    "--initial-delay-seconds", "0",
+    "--fallback-delay-seconds", "2",
+  ], {
+    cwd: root,
+    env: {},
+    get client() {
+      clientAccesses += 1;
+      throw new Error("client must remain lazy during reconciliation");
+    },
+  });
+
+  assert.equal(result.workflow, "pdp");
+  assert.equal(result.status, "reconciliation_required");
+  assert.equal(result.job_dir, jobDirectory);
+  assert.equal(clientAccesses, 0);
+
+  const delegated = [];
+  const providedClient = { pollVideo() {} };
+  await runGrowthStudioCommand(["pdp", "resume", "pdp-job"], {
+    cwd: root,
+    client: providedClient,
+    resumeGrowthStudioJob: async (...args) => {
+      delegated.push(args);
+      return { status: "succeeded" };
+    },
+  });
+  assert.equal(delegated[0][0], providedClient);
+  assert.equal(delegated[0][1], jobDirectory);
+  assert.equal(delegated[0][2].expectedWorkflow, "pdp");
+});
+
+test("wallet commands preserve monetary strings and pass integer pagination", async () => {
+  const calls = [];
+  const client = {
+    async getWalletBalance(options) {
+      calls.push(["balance", options]);
+      return { body: { balance: "100.00", currency: "USD" } };
+    },
+    async listWalletLedgers(options) {
+      calls.push(["ledgers", options]);
+      return {
+        body: {
+          ledgers: [{ amount: "-12.50", source_id: "627410861853514292" }],
+        },
+      };
+    },
+  };
+
+  const balance = await runGrowthStudioCommand(["wallet", "balance"], { client });
+  const ledgers = await runGrowthStudioCommand([
+    "wallet", "ledgers", "--offset", "2", "--limit", "50",
+  ], { client });
+
+  assert.equal(balance.balance, "100.00");
+  assert.equal(ledgers.ledgers[0].amount, "-12.50");
+  assert.equal(calls[1][1].offset, 2);
+  assert.equal(calls[1][1].limit, 50);
+  assert.equal(typeof calls[1][1].offset, "number");
+  assert.equal(typeof calls[1][1].limit, "number");
+});
+
+test("wallet pagination and arity reject before configuration", async () => {
+  const cases = [
+    [["wallet", "balance", "extra"], /does not accept arguments/],
+    [["wallet", "ledgers", "--offset", "-1"], /--offset must be/],
+    [["wallet", "ledgers", "--offset", "1.5"], /--offset must be/],
+    [["wallet", "ledgers", "--offset", "1e2"], /--offset must be/],
+    [["wallet", "ledgers", "--offset", "9007199254740992"], /--offset must be/],
+    [["wallet", "ledgers", "--limit", "0"], /--limit must be/],
+    [["wallet", "ledgers", "--limit", "101"], /--limit must be/],
+    [["wallet", "ledgers", "--unknown", "1"], /Unknown wallet ledgers option/],
+  ];
+
+  for (const [args, message] of cases) {
+    await assert.rejects(runGrowthStudioCommand(args, { env: {} }), message);
+  }
+});
+
 test("Growth Studio help documents the canonical command tree", () => {
   const help = getGrowthStudioHelp();
   assert.match(help, /pixverse-api growth-studio avatars list/);
@@ -505,6 +760,16 @@ test("Growth Studio help documents the canonical command tree", () => {
   assert.match(help, /pixverse-api growth-studio video status/);
   assert.match(help, /pixverse-api growth-studio run-job/);
   assert.match(help, /pixverse-api growth-studio resume/);
+  assert.match(help, /pixverse-api growth-studio pdp create --payload <pdp\.json> --dry-run/);
+  assert.match(help, /pixverse-api growth-studio pdp create --payload <pdp\.json> --confirm-billable/);
+  assert.match(help, /pixverse-api growth-studio pdp get <video_id>/);
+  assert.match(help, /pixverse-api growth-studio pdp poll <video_id>/);
+  assert.match(help, /pixverse-api growth-studio pdp resume <job-directory>/);
+  assert.match(help, /pixverse-api growth-studio wallet balance/);
+  assert.match(help, /pixverse-api growth-studio wallet ledgers/);
+  assert.match(help, /PDP video/);
+  assert.match(help, /billable/i);
+  assert.doesNotMatch(help, /KA video/i);
 });
 
 test("legacy command mapper returns canonical paths without mutating mappings", () => {

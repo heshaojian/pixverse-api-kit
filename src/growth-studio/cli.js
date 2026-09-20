@@ -2,7 +2,14 @@ import path from "node:path";
 import { GrowthStudioClient, createProductUrlPayload } from "./client.js";
 import { getGrowthStudioConfig } from "./config.js";
 import { resolveFolderForPayload } from "./folders.js";
-import { readJsonFile, resumeGrowthStudioJob, runGrowthStudioJob } from "./jobs.js";
+import {
+  readJsonFile,
+  resumeGrowthStudioJob,
+  runGrowthStudioJob,
+  runPdpJob,
+} from "./jobs.js";
+import { describePdpDryRun } from "./pdp.js";
+import { assertVideoId } from "./validation.js";
 
 export const GROWTH_STUDIO_LEGACY_COMMAND_MAPPINGS = Object.freeze({
   avatars: ["avatars", "list"],
@@ -78,6 +85,54 @@ export async function runGrowthStudioCommand(args, context = {}) {
       { traceId: traceId("edit-video") },
     )).body;
   }
+  if (resource === "pdp" && operation === "create") {
+    const options = parsePdpCreateOptions(rest);
+    if (!options.payloadPath) throw new Error("pdp create requires --payload <path>.");
+    if (options.dryRun && options.confirmBillable) {
+      throw new Error("pdp create accepts either --dry-run or --confirm-billable, not both.");
+    }
+    if (options.dryRun && hasPdpExecutionOptions(options)) {
+      throw new Error("pdp create --dry-run does not accept job or polling options.");
+    }
+    if (!options.dryRun && !options.confirmBillable) {
+      throw new Error("pdp create requires --confirm-billable for a live submission.");
+    }
+
+    const payload = await readJsonFile(resolveContextPath(context, options.payloadPath));
+    if (options.dryRun) return describePdpDryRun(payload);
+    return runPdpJob(getClient(), payload, toPdpJobOptions(options, context));
+  }
+  if (resource === "pdp" && operation === "get") {
+    const [videoId, ...extra] = rest;
+    if (!videoId || extra.length > 0) throw new Error("pdp get requires exactly one video_id.");
+    assertVideoId(videoId);
+    return (await getClient().getVideo(videoId, { traceId: traceId("get-pdp") })).body;
+  }
+  if (resource === "pdp" && operation === "poll") {
+    const options = parsePdpPollOptions(rest);
+    assertVideoId(options.videoId);
+    return getClient().pollVideo(options.videoId, toPdpPollingOptions(options, "poll-pdp"));
+  }
+  if (resource === "pdp" && operation === "resume") {
+    const options = parsePdpResumeOptions(rest);
+    const jobDirectory = resolveContextPath(context, options.jobDirectory);
+    const resumeClient = getContextClientValue(context) ?? createDeferredResumeClient(getClient);
+    return (context.resumeGrowthStudioJob ?? resumeGrowthStudioJob)(resumeClient, jobDirectory, {
+      expectedWorkflow: "pdp",
+      ...toPdpPollingOptions(options),
+    });
+  }
+  if (resource === "wallet" && operation === "balance") {
+    if (rest.length > 0) throw new Error("wallet balance does not accept arguments.");
+    return (await getClient().getWalletBalance({ traceId: traceId("wallet-balance") })).body;
+  }
+  if (resource === "wallet" && operation === "ledgers") {
+    const options = parseWalletLedgerOptions(rest);
+    return (await getClient().listWalletLedgers({
+      ...options,
+      traceId: traceId("wallet-ledgers"),
+    })).body;
+  }
   if (resource === "run-job") {
     const options = parseRunJobOptions([operation, ...rest].filter((value) => value !== undefined));
     if (!options.payloadPath) throw new Error("run-job requires --payload <path>.");
@@ -112,7 +167,19 @@ export function getGrowthStudioHelp() {
   pixverse-api growth-studio video list [--limit 20] [--status succeeded] [--cursor <cursor>]
   pixverse-api growth-studio video edit <video_id> <clip_index> <instruction>
   pixverse-api growth-studio run-job --payload <payload.json> [job options]
-  pixverse-api growth-studio resume <job-directory> [polling options]`;
+  pixverse-api growth-studio resume <job-directory> [polling options]
+
+PDP video:
+  pixverse-api growth-studio pdp create --payload <pdp.json> --dry-run
+  pixverse-api growth-studio pdp create --payload <pdp.json> --confirm-billable [job options]
+  pixverse-api growth-studio pdp get <video_id>
+  pixverse-api growth-studio pdp poll <video_id> [polling options]
+  pixverse-api growth-studio pdp resume <job-directory> [polling options]
+  PDP create is billable and requires --confirm-billable for live submission.
+
+Wallet (read-only):
+  pixverse-api growth-studio wallet balance
+  pixverse-api growth-studio wallet ledgers [--offset 0] [--limit 20]`;
 }
 
 function createClient(context) {
@@ -128,6 +195,11 @@ function createDeferredResumeClient(getClient) {
       return getClient().pollVideo(...args);
     },
   });
+}
+
+function getContextClientValue(context) {
+  const descriptor = Object.getOwnPropertyDescriptor(context, "client");
+  return descriptor && Object.hasOwn(descriptor, "value") ? descriptor.value : undefined;
 }
 
 async function createFromUrl(client, options) {
@@ -227,6 +299,157 @@ function parseListOptions(args) {
   return options;
 }
 
+function parsePdpCreateOptions(args) {
+  let options = {};
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === "--payload") {
+      options = addUniqueOption(options, "payloadPath", readOptionValue(args, ++index, arg), arg);
+    } else if (arg === "--dry-run") {
+      options = addUniqueOption(options, "dryRun", true, arg);
+    } else if (arg === "--confirm-billable") {
+      options = addUniqueOption(options, "confirmBillable", true, arg);
+    } else if (arg === "--jobs-dir") {
+      options = addUniqueOption(options, "jobsDir", readOptionValue(args, ++index, arg), arg);
+    } else if (arg === "--job-name") {
+      options = addUniqueOption(options, "jobName", readOptionValue(args, ++index, arg), arg);
+    } else if (arg === "--timeout-minutes") {
+      options = addUniqueOption(options, "timeoutMinutes", readPdpFiniteOption(
+        args,
+        ++index,
+        arg,
+        { minimum: 0, exclusive: true, scale: 60_000 },
+      ), arg);
+    } else if (arg === "--initial-delay-seconds") {
+      options = addUniqueOption(options, "initialDelaySeconds", readPdpFiniteOption(
+        args,
+        ++index,
+        arg,
+        { minimum: 0, scale: 1_000 },
+      ), arg);
+    } else if (arg === "--fallback-delay-seconds") {
+      options = addUniqueOption(options, "fallbackDelaySeconds", readPdpFiniteOption(
+        args,
+        ++index,
+        arg,
+        { minimum: 0, scale: 1_000 },
+      ), arg);
+    } else if (arg === "--no-poll") {
+      options = addUniqueOption(options, "noPoll", true, arg);
+    } else {
+      throw new Error(`Unknown pdp create option: ${arg}`);
+    }
+  }
+  return options;
+}
+
+function parsePdpPollOptions(args) {
+  return parsePdpTargetAndTimingOptions(args, "poll", "videoId", "video_id");
+}
+
+function parsePdpResumeOptions(args) {
+  return parsePdpTargetAndTimingOptions(args, "resume", "jobDirectory", "job directory");
+}
+
+function parsePdpTargetAndTimingOptions(args, command, targetKey, targetLabel) {
+  let options = {};
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === "--timeout-minutes") {
+      options = addUniqueOption(options, "timeoutMinutes", readPdpFiniteOption(
+        args,
+        ++index,
+        arg,
+        { minimum: 0, exclusive: true, scale: 60_000 },
+      ), arg);
+    } else if (arg === "--initial-delay-seconds") {
+      options = addUniqueOption(options, "initialDelaySeconds", readPdpFiniteOption(
+        args,
+        ++index,
+        arg,
+        { minimum: 0, scale: 1_000 },
+      ), arg);
+    } else if (arg === "--fallback-delay-seconds") {
+      options = addUniqueOption(options, "fallbackDelaySeconds", readPdpFiniteOption(
+        args,
+        ++index,
+        arg,
+        { minimum: 0, scale: 1_000 },
+      ), arg);
+    } else if (arg.startsWith("--")) {
+      throw new Error(`Unknown pdp ${command} option: ${arg}`);
+    } else if (!Object.hasOwn(options, targetKey)) {
+      options = { ...options, [targetKey]: arg };
+    } else {
+      throw new Error(`pdp ${command} requires exactly one ${targetLabel}.`);
+    }
+  }
+  if (!options[targetKey]) throw new Error(`pdp ${command} requires exactly one ${targetLabel}.`);
+  return options;
+}
+
+function parseWalletLedgerOptions(args) {
+  let options = { offset: 0, limit: 20 };
+  const seen = new Set();
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg !== "--offset" && arg !== "--limit") {
+      throw new Error(`Unknown wallet ledgers option: ${arg}`);
+    }
+    if (seen.has(arg)) throw new Error(`Duplicate wallet ledgers option: ${arg}`);
+    seen.add(arg);
+    const constraints = arg === "--offset"
+      ? { minimum: 0 }
+      : { minimum: 1, maximum: 100 };
+    options = {
+      ...options,
+      [arg === "--offset" ? "offset" : "limit"]: readSafeIntegerOption(
+        args,
+        ++index,
+        arg,
+        constraints,
+      ),
+    };
+  }
+  return options;
+}
+
+function hasPdpExecutionOptions(options) {
+  return [
+    "jobsDir",
+    "jobName",
+    "timeoutMinutes",
+    "initialDelaySeconds",
+    "fallbackDelaySeconds",
+    "noPoll",
+  ].some((key) => Object.hasOwn(options, key));
+}
+
+function toPdpJobOptions(options, context) {
+  return {
+    jobsDir: resolveContextPath(context, options.jobsDir ?? "jobs"),
+    ...(options.jobName === undefined ? {} : { jobName: options.jobName }),
+    poll: options.noPoll !== true,
+    ...toPdpPollingOptions(options),
+    traceId: traceId("pdp-job"),
+  };
+}
+
+function toPdpPollingOptions(options, tracePrefix) {
+  return {
+    ...(tracePrefix === undefined ? {} : { traceId: traceId(tracePrefix) }),
+    ...(options.timeoutMinutes === undefined
+      ? {}
+      : { timeoutMs: options.timeoutMinutes * 60 * 1000 }),
+    ...(options.initialDelaySeconds === undefined
+      ? {}
+      : { initialDelaySeconds: options.initialDelaySeconds }),
+    ...(options.fallbackDelaySeconds === undefined
+      ? {}
+      : { fallbackDelaySeconds: options.fallbackDelaySeconds }),
+  };
+}
+
 function parseRunJobOptions(args) {
   const options = { poll: true };
   for (let index = 0; index < args.length; index += 1) {
@@ -267,6 +490,48 @@ function readOptionValue(args, index, optionName) {
   return value;
 }
 
+function addUniqueOption(options, key, value, optionName) {
+  if (Object.hasOwn(options, key)) throw new Error(`Duplicate pdp option: ${optionName}`);
+  return { ...options, [key]: value };
+}
+
+function readPdpFiniteOption(args, index, optionName, constraints = {}) {
+  const rawValue = readOptionValue(args, index, optionName);
+  const strictDecimal = /^(?:0|[1-9]\d*)(?:\.\d+)?$/;
+  const value = Number(rawValue);
+  const scaledValue = value * (constraints.scale ?? 1);
+  const belowMinimum = constraints.exclusive
+    ? value <= constraints.minimum
+    : value < constraints.minimum;
+  if (
+    !strictDecimal.test(rawValue)
+    || !Number.isFinite(value)
+    || !Number.isFinite(scaledValue)
+    || Math.abs(scaledValue) > Number.MAX_SAFE_INTEGER
+    || belowMinimum
+  ) {
+    const comparison = constraints.exclusive ? "greater than" : "at least";
+    throw new Error(
+      `${optionName} must be a finite safe number ${comparison} ${constraints.minimum}.`,
+    );
+  }
+  return value;
+}
+
+function readSafeIntegerOption(args, index, optionName, constraints = {}) {
+  const rawValue = readOptionValue(args, index, optionName);
+  const value = Number(rawValue);
+  const outsideRange = value < constraints.minimum
+    || (constraints.maximum !== undefined && value > constraints.maximum);
+  if (!/^(?:0|[1-9]\d*)$/.test(rawValue) || !Number.isSafeInteger(value) || outsideRange) {
+    const range = constraints.maximum === undefined
+      ? `at least ${constraints.minimum}`
+      : `from ${constraints.minimum} through ${constraints.maximum}`;
+    throw new Error(`${optionName} must be a safe integer ${range}.`);
+  }
+  return value;
+}
+
 function readFiniteOption(args, index, optionName, constraints = {}) {
   const rawValue = readOptionValue(args, index, optionName);
   const value = Number(rawValue);
@@ -283,6 +548,10 @@ function readFiniteOption(args, index, optionName, constraints = {}) {
 function withFolderId(payload, folderId) {
   if (!folderId) return payload;
   return { ...payload, folder_id: folderId };
+}
+
+function resolveContextPath(context, value) {
+  return path.resolve(context.cwd ?? process.cwd(), value);
 }
 
 function traceId(prefix) {
