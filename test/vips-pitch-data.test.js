@@ -149,6 +149,23 @@ test("deployable data excludes confidential and executable references", async ()
   assert.doesNotMatch(raw, /(?:href|src)\\?"?\s*:\s*\\?"?(?:javascript:|data:text\/html)/i);
 });
 
+const collectMedia = (data) => data.chapters.flatMap(({ cases }) =>
+  cases.flatMap(({ inputs, attempts }) => [
+    ...inputs,
+    ...attempts.flatMap(({ media }) => media),
+  ])
+);
+
+test("every local evidence asset exists inside the pitch root", async () => {
+  const data = await readData();
+  const localMedia = collectMedia(data).filter(({ url }) => typeof url === "string" && !/^https:/i.test(url));
+  for (const media of localMedia) {
+    const absolute = path.resolve(pitchRoot, media.url);
+    assert.ok(absolute.startsWith(`${pitchRoot}${path.sep}`), media.url);
+    await fs.access(absolute);
+  }
+});
+
 function assertDimensions(media) {
   assert.ok(media.dimensions && typeof media.dimensions === "object", `${media.id}:dimensions`);
   const { width, height, aspectRatio } = media.dimensions;
