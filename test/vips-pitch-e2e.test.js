@@ -83,6 +83,13 @@ test("VIPS pitch artifact is self-contained over static HTTP", async () => {
       await response.arrayBuffer();
     }
 
+    const pageResponse = await fetch(`${baseUrl}/`);
+    assert.equal(pageResponse.status, 200);
+    const pageHtml = await pageResponse.text();
+    assert.match(pageHtml, /id="workflow-selector"/);
+    assert.match(pageHtml, /id="copy-pilot"/);
+    assert.match(pageHtml, /id="ledger-retry"/);
+
     const traversal = await fetch(`${baseUrl}/%2e%2e/package.json`);
     assert.notEqual(traversal.status, 200);
   } finally {
