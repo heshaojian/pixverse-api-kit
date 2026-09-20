@@ -9,6 +9,7 @@ const PUBLIC_FIELDS = [
   ["retryable", "retryable"],
   ["retryAfter", "retry_after"],
   ["traceId", "trace_id"],
+  ["requestId", "request_id"],
   ["details", "details"],
 ];
 

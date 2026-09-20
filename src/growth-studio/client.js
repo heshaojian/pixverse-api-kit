@@ -6,12 +6,22 @@ import {
   validateEditPayload,
   validateFolderPayload,
 } from "./validation.js";
+import { normalizePdpPayload } from "./pdp.js";
+import { normalizeWalletLedgerOptions } from "./wallet.js";
 
 export {
   validateCreatePayload,
   validateEditPayload,
   validateFolderPayload,
 } from "./validation.js";
+export {
+  PDP_CREATE_PATH,
+  PDP_WIRE_TYPE,
+  describePdpDryRun,
+  normalizePdpPayload,
+  validatePdpPayload,
+} from "./pdp.js";
+export { normalizeWalletLedgerOptions } from "./wallet.js";
 
 const API_PREFIX = "/openapi/v1";
 const DEFAULT_FOLDER_API_PREFIX = "/marketing_hub";
@@ -132,6 +142,27 @@ export class GrowthStudioClient {
     validateCreatePayload(payload);
     return this.request("POST", "/videos", {
       json: payload,
+      traceId: options.traceId,
+    });
+  }
+
+  async createPdpVideo(payload, options = {}) {
+    return this.request("POST", "/ka/videos", {
+      json: normalizePdpPayload(payload),
+      traceId: options.traceId,
+    });
+  }
+
+  async getWalletBalance(options = {}) {
+    return this.request("GET", "/wallet/balance", {
+      traceId: options.traceId,
+    });
+  }
+
+  async listWalletLedgers(options = {}) {
+    const query = normalizeWalletLedgerOptions(options);
+    return this.request("GET", "/wallet/ledgers", {
+      query,
       traceId: options.traceId,
     });
   }

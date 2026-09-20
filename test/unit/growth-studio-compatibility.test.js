@@ -19,6 +19,7 @@ import * as growthClient from "../../src/growth-studio/client.js";
 import * as growthConfig from "../../src/growth-studio/config.js";
 import * as growthFolders from "../../src/growth-studio/folders.js";
 import * as growthJobs from "../../src/growth-studio/jobs.js";
+import * as growthPdp from "../../src/growth-studio/pdp.js";
 import * as growthValidation from "../../src/growth-studio/validation.js";
 
 test("flat modules preserve Growth Studio named exports", () => {
@@ -27,6 +28,12 @@ test("flat modules preserve Growth Studio named exports", () => {
   assert.equal(flatClient.validateCreatePayload, growthValidation.validateCreatePayload);
   assert.equal(flatClient.validateEditPayload, growthValidation.validateEditPayload);
   assert.equal(flatClient.validateFolderPayload, growthValidation.validateFolderPayload);
+  assert.equal(flatClient.PDP_CREATE_PATH, growthPdp.PDP_CREATE_PATH);
+  assert.equal(flatClient.PDP_WIRE_TYPE, growthPdp.PDP_WIRE_TYPE);
+  assert.equal(flatClient.describePdpDryRun, growthPdp.describePdpDryRun);
+  assert.equal(flatClient.normalizePdpPayload, growthPdp.normalizePdpPayload);
+  assert.equal(flatClient.validatePdpPayload, growthPdp.validatePdpPayload);
+  assert.equal(flatClient.normalizeWalletLedgerOptions, growthClient.normalizeWalletLedgerOptions);
   assert.equal(flatConfig.getConfig, growthConfig.getConfig);
   assert.equal(flatFolders.resolveFolderForPayload, growthFolders.resolveFolderForPayload);
   assert.equal(flatJobs.runVideoJob, growthJobs.runVideoJob);
