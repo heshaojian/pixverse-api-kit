@@ -4,7 +4,11 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { attachDesktopPosters } from "../deploy/brand-pitches/vips/human-reviewed-ecommerce/app.js";
+import {
+  attachDesktopPosters,
+  attachPilotSelector,
+  openEvidenceTarget,
+} from "../deploy/brand-pitches/vips/human-reviewed-ecommerce/app.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const pitchRoot = path.join(repoRoot, "deploy/brand-pitches/vips/human-reviewed-ecommerce");
@@ -13,6 +17,7 @@ const cssPath = path.join(pitchRoot, "styles.css");
 const appPath = path.join(pitchRoot, "app.js");
 
 const readPage = async () => fs.readFile(pagePath, "utf8");
+const readData = async () => JSON.parse(await fs.readFile(path.join(pitchRoot, "data/cases.json"), "utf8"));
 const position = (html, needle) => {
   const index = html.indexOf(needle);
   assert.notEqual(index, -1, `${needle} should exist`);
@@ -147,4 +152,117 @@ test("featured posters preserve the mobile request budget and use a desktop allo
     "./assets/images/featured-creative-poster.jpg",
     null,
   ]);
+});
+
+const makeEventNode = (properties = {}) => {
+  const listeners = new Map();
+  return {
+    ...properties,
+    addEventListener(type, listener) {
+      listeners.set(type, listener);
+    },
+    removeEventListener(type) {
+      listeners.delete(type);
+    },
+    async dispatch(type) {
+      return listeners.get(type)?.({ currentTarget: this, preventDefault() {} });
+    },
+  };
+};
+
+test("pilot selection enables copy at three and rejects a fourth workflow", async () => {
+  const data = await readData();
+  const inputs = data.chapters.map(({ id }) => makeEventNode({ value: id, checked: false }));
+  const nodes = {
+    "selection-count": makeEventNode({ textContent: "" }),
+    "selection-limit-message": makeEventNode({ textContent: "" }),
+    "pilot-summary": makeEventNode({ textContent: "" }),
+    "copy-pilot": makeEventNode({ disabled: true }),
+    "copy-status": makeEventNode({ textContent: "" }),
+    "manual-copy": makeEventNode({ hidden: true, value: "", focus() {}, select() {} }),
+  };
+  const documentRef = {
+    querySelectorAll: () => inputs,
+    getElementById: (id) => nodes[id] ?? null,
+  };
+
+  attachPilotSelector({ documentRef, data, clipboard: { writeText: async () => {} } });
+  for (const input of inputs.slice(0, 3)) {
+    input.checked = true;
+    await input.dispatch("change");
+  }
+  assert.equal(nodes["selection-count"].textContent, "已选择 3 / 3");
+  assert.equal(nodes["copy-pilot"].disabled, false);
+  assert.match(nodes["pilot-summary"].textContent, /优先工作流/);
+
+  inputs[3].checked = true;
+  await inputs[3].dispatch("change");
+  assert.equal(inputs[3].checked, false);
+  assert.match(nodes["selection-limit-message"].textContent, /最多选择三类/);
+  assert.deepEqual(inputs.map(({ checked }) => checked), [true, true, true, false, false]);
+});
+
+test("clipboard failure exposes a selected manual-copy fallback", async () => {
+  const data = await readData();
+  const inputs = data.chapters.map(({ id }, index) => makeEventNode({ value: id, checked: index < 3 }));
+  const manualCopy = makeEventNode({
+    hidden: true,
+    value: "",
+    focused: false,
+    selected: false,
+    focus() { this.focused = true; },
+    select() { this.selected = true; },
+  });
+  const nodes = {
+    "selection-count": makeEventNode({ textContent: "" }),
+    "selection-limit-message": makeEventNode({ textContent: "" }),
+    "pilot-summary": makeEventNode({ textContent: "" }),
+    "copy-pilot": makeEventNode({ disabled: true }),
+    "copy-status": makeEventNode({ textContent: "" }),
+    "manual-copy": manualCopy,
+  };
+  const documentRef = {
+    querySelectorAll: () => inputs,
+    getElementById: (id) => nodes[id] ?? null,
+  };
+
+  attachPilotSelector({
+    documentRef,
+    data,
+    clipboard: { writeText: async () => { throw new Error("denied"); } },
+  });
+  await nodes["copy-pilot"].dispatch("click");
+
+  assert.equal(manualCopy.hidden, false);
+  assert.equal(manualCopy.value, nodes["pilot-summary"].textContent);
+  assert.equal(manualCopy.focused, true);
+  assert.equal(manualCopy.selected, true);
+  assert.match(nodes["copy-status"].textContent, /手动复制/);
+});
+
+test("deep links open only the required evidence ancestors", async () => {
+  const data = await readData();
+  const chapter = makeEventNode({ open: false, querySelector: () => null });
+  const record = makeEventNode({ open: false, querySelector: () => null });
+  const complete = makeEventNode({ open: false, querySelector: () => null });
+  const attempt = makeEventNode({
+    closest: (selector) => selector === ".complete-review-record" ? complete : null,
+    querySelector: () => null,
+  });
+  const sibling = makeEventNode({ open: false });
+  const firstChapter = data.chapters[0];
+  const firstCase = firstChapter.cases[0];
+  const attemptId = `${firstCase.id}--${firstCase.attempts[0].id}`;
+  const nodes = new Map([
+    [firstChapter.id, chapter],
+    [firstCase.id, record],
+    [attemptId, attempt],
+  ]);
+  const root = { querySelector: (selector) => nodes.get(selector.slice(1)) ?? null };
+
+  assert.equal(openEvidenceTarget({ root, data, hash: `#${attemptId}`, escapeSelector: (value) => value }), true);
+  assert.equal(chapter.open, true);
+  assert.equal(record.open, true);
+  assert.equal(complete.open, true);
+  assert.equal(sibling.open, false);
 });
