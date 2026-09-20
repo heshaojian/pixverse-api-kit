@@ -28,10 +28,11 @@ const visibleText = (html) => html
 test("VIPS page follows the approved Chinese proof-first story", async () => {
   const html = await readPage();
   assert.match(html, /<html lang="zh-CN">/);
-  assert.match(html, /真实商品，真实测试，人工评审/);
+  assert.match(html, /从真实商品样例中，选择三条最值得试点的电商视频工作流/);
+  assert.match(html, /class="hero-proof"/);
   assert.ok(position(html, 'id="featured"') < position(html, 'id="capabilities"'));
-  assert.ok(position(html, 'id="capabilities"') < position(html, 'id="ledger"'));
-  assert.ok(position(html, 'id="ledger"') < position(html, 'id="pilot"'));
+  assert.ok(position(html, 'id="capabilities"') < position(html, 'id="pilot"'));
+  assert.ok(position(html, 'id="pilot"') < position(html, 'id="ledger"'));
   assert.match(html, /name="robots" content="noindex, nofollow"/);
   assert.match(html, /1214/);
 });
@@ -39,22 +40,27 @@ test("VIPS page follows the approved Chinese proof-first story", async () => {
 test("VIPS page exposes one decision and one primary action", async () => {
   const html = await readPage();
   assert.equal((html.match(/class="[^"]*primary-action/g) ?? []).length, 1);
-  assert.match(html, /href="#pilot"[^>]*>\s*选择试点工作流\s*</);
+  assert.match(html, /id="copy-pilot"[^>]*disabled[^>]*>\s*复制试点方案\s*</);
   assert.match(visibleText(html), /选择三个优先电商工作流/);
+  assert.equal((html.match(/name="pilot-workflow"/g) ?? []).length, 5);
+  assert.match(html, /id="selection-count"[^>]*>\s*已选择 0 \/ 3\s*</);
+  assert.match(html, /id="copy-status"[^>]*aria-live="polite"/);
+  assert.match(html, /id="manual-copy"[^>]*hidden/);
   assert.doesNotMatch(visibleText(html), /价格|SLA|已约定|保证|承诺/);
 });
 
 test("three featured cases remain usable without JavaScript", async () => {
   const html = await readPage();
-  assert.equal((html.match(/class="[^"]*featured-case/g) ?? []).length, 3);
+  assert.equal((html.match(/class="[^"]*featured-case/g) ?? []).length, 2);
+  assert.equal((html.match(/class="hero-proof"/g) ?? []).length, 1);
   assert.equal((html.match(/preload="metadata"/g) ?? []).length, 1);
   assert.equal((html.match(/preload="none"/g) ?? []).length, 2);
   assert.match(
     html,
-    /preload="metadata"[^>]*poster="\.\/assets\/images\/featured-presenter-poster\.jpg"/,
+    /preload="metadata"[^>]*poster="\.\/assets\/images\/featured-product-motion-poster\.jpg"/,
   );
-  assert.equal((html.match(/data-desktop-poster="\.\/assets\/images\/featured-(?:creative|product-motion)-poster\.jpg"/g) ?? []).length, 2);
-  assert.equal((html.match(/\sposter="\.\/assets\/images\/featured-(?:creative|product-motion)-poster\.jpg"/g) ?? []).length, 0);
+  assert.equal((html.match(/data-desktop-poster="\.\/assets\/images\/featured-(?:presenter|creative)-poster\.jpg"/g) ?? []).length, 2);
+  assert.equal((html.match(/\sposter="\.\/assets\/images\/featured-(?:presenter|creative)-poster\.jpg"/g) ?? []).length, 0);
   assert.match(html, /男式牛仔裤/);
   assert.match(html, /冰晶护肤/);
   assert.match(html, /商品动效/);
@@ -66,7 +72,7 @@ test("VIPS page has private provenance and semantic navigation", async () => {
   assert.match(html, /<header class="site-header"/);
   assert.match(html, /<main id="main"/);
   assert.match(html, /<footer/);
-  for (const label of ["重点结果", "能力总览", "完整评审", "建议试点"]) {
+  for (const label of ["重点结果", "选择试点", "完整评审", "建议试点"]) {
     assert.match(html, new RegExp(label));
   }
   assert.match(visibleText(html), /私人能力提案/);
@@ -81,6 +87,9 @@ test("VIPS styles follow PixVerse tokens and product-media constraints", async (
   assert.match(css, /--create:\s*linear-gradient\(90deg, #ffa052 0%, #e046a4 45%, #6851eb 100%\)/);
   assert.match(css, /font-family:\s*"Plus Jakarta Sans"/);
   assert.match(css, /font-family:\s*"Inconsolata"/);
+  assert.match(css, /color-scheme:\s*dark/);
+  assert.match(css, /\.hero-layout/);
+  assert.match(css, /\.workflow-grid[\s\S]*grid-template-columns:\s*repeat\(5/);
   assert.match(css, /\.evidence-media video[\s\S]*object-fit:\s*contain/);
   assert.match(css, /video:-webkit-full-screen[\s\S]*object-fit:\s*contain/);
   assert.match(css, /min-height:\s*44px/);
@@ -122,8 +131,8 @@ test("featured posters preserve the mobile request budget and use a desktop allo
     },
   });
   const videos = [
+    makeVideo("./assets/images/featured-presenter-poster.jpg"),
     makeVideo("./assets/images/featured-creative-poster.jpg"),
-    makeVideo("./assets/images/featured-product-motion-poster.jpg"),
     makeVideo("https://example.invalid/untrusted.jpg"),
   ];
   const root = { querySelectorAll: () => videos };
@@ -134,8 +143,8 @@ test("featured posters preserve the mobile request budget and use a desktop allo
   assert.deepEqual(videos.map(({ poster }) => poster), [null, null, null]);
   assert.equal(attachDesktopPosters(root, desktopQuery), 2);
   assert.deepEqual(videos.map(({ poster }) => poster), [
+    "./assets/images/featured-presenter-poster.jpg",
     "./assets/images/featured-creative-poster.jpg",
-    "./assets/images/featured-product-motion-poster.jpg",
     null,
   ]);
 });

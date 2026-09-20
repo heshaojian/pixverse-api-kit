@@ -4,8 +4,8 @@ import { renderLedger } from "./render.js";
 const DATA_URL = "./data/cases.json";
 const FAILURE_MESSAGE = "完整评审暂不可用，请稍后重试。";
 const FEATURED_POSTER_PATHS = new Set([
+  "./assets/images/featured-presenter-poster.jpg",
   "./assets/images/featured-creative-poster.jpg",
-  "./assets/images/featured-product-motion-poster.jpg",
 ]);
 
 export async function loadPitchData(fetchImpl = fetch) {
