@@ -53,10 +53,10 @@ async function copyApprovedPluginSource(repoRoot, packageRoot, pluginRoot) {
 }
 
 async function copyRuntimeSources(repoRoot, runtimeRoot) {
-  for (const relativeDirectory of CUSTOMER_PLUGIN_ALLOWLIST.sourceDirectories) {
-    await copyTree(
-      path.join(repoRoot, relativeDirectory),
-      path.join(runtimeRoot, relativeDirectory),
+  for (const relativePath of CUSTOMER_PLUGIN_ALLOWLIST.runtimeFiles) {
+    await copyFile(
+      path.join(repoRoot, relativePath),
+      path.join(runtimeRoot, relativePath),
     );
   }
 }
@@ -178,6 +178,9 @@ async function copyTree(source, destination) {
 }
 
 async function copyFile(source, destination) {
+  const stats = await fs.lstat(source);
+  if (stats.isSymbolicLink()) throw new Error(`Symlink source is not allowed: ${source}`);
+  if (!stats.isFile()) throw new Error(`Expected source file: ${source}`);
   await fs.mkdir(path.dirname(destination), { recursive: true });
   await fs.copyFile(source, destination);
 }

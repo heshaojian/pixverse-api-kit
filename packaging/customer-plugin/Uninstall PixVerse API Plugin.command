@@ -21,6 +21,18 @@ fs.rmSync(target, { recursive: true, force: true });
   }
 }
 
+remove_registration_or_accept_absent() {
+  local output
+  if output="$("$@" 2>&1)"; then
+    return 0
+  fi
+  if [[ "$output" == *"not configured or installed"* || "$output" == *"not installed"* ]]; then
+    return 0
+  fi
+  echo "Codex could not remove the plugin registration. Local plugin files were preserved." >&2
+  return 1
+}
+
 NODE_BIN="$(command -v node || true)"
 CODEX_BIN="$(command -v codex || true)"
 if [[ -z "$NODE_BIN" || -z "$CODEX_BIN" ]]; then
@@ -59,8 +71,10 @@ if [[ "$MARKETPLACE_NAME" != "$EXPECTED_MARKETPLACE" || "$PLUGIN_NAME" != "$EXPE
   exit 1
 fi
 
-"$CODEX_BIN" plugin remove "$PLUGIN_NAME@$MARKETPLACE_NAME" --json >/dev/null
-"$CODEX_BIN" plugin marketplace remove "$MARKETPLACE_NAME" --json >/dev/null
+remove_registration_or_accept_absent \
+  "$CODEX_BIN" plugin remove "$PLUGIN_NAME@$MARKETPLACE_NAME" --json
+remove_registration_or_accept_absent \
+  "$CODEX_BIN" plugin marketplace remove "$MARKETPLACE_NAME" --json
 
 if [[ -d "$INSTALL_ROOT" ]]; then
   safe_remove_directory "$INSTALL_ROOT"

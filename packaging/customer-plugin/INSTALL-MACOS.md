@@ -22,7 +22,7 @@ Provide `PIXVERSE_PLATFORM_API_KEY` or `PIXVERSE_GROWTH_API_KEY` through the env
 
 ## Upgrade
 
-Run the installer from the newer verified package. It installs the new version without deleting an older version until Codex registration succeeds. After verification, use the older package's uninstaller if it remains registered.
+Run the installer from the newer verified package. It keeps the receipt-owned older version until Codex registration succeeds, then removes that older package directory. If registration fails, the installer restores the older marketplace and plugin registration.
 
 ## Remove
 
