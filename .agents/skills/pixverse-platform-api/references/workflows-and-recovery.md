@@ -20,6 +20,18 @@ For example, `npm run cli -- platform resource templates --payload ./template-qu
 
 A typical specialized preflight is `npm run cli -- platform video image --payload ./image-video.json --dry-run`. After exact spend authorization, submit that same validated input once with `npm run cli -- platform run-job --operation video.image --payload ./image-video.json --poll`.
 
+### Music MV
+
+1. Upload audio with `platform upload media` and retain the returned `media_id` string.
+2. Call `platform audio verify --payload ./audio-verification.json`; do not continue if review fails.
+3. Optionally upload one character image and/or one style image.
+4. Run `platform agent music-mv --payload ./music-mv.json --dry-run` and resolve local validation errors.
+5. Check balance and confirm the exact paid request.
+6. Submit once with `platform run-job --operation agent.music-mv --payload ./music-mv.json --poll`.
+7. Poll the returned video ID or use `resume`; never repeat generation to recover status.
+
+`image_references` is accepted as a documented input alias and normalized to `img_references`. Do not send both fields. Lip sync requires recognizable vocals; audio verification does not authorize an automatic paid submission.
+
 ### Durable artifact meanings
 
 - `request.json` is written before submission and records the provider, operation, redacted headers, original submission trace, and normalized input.

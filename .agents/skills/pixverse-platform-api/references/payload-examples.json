@@ -25,6 +25,12 @@
       "kind": "video"
     }
   },
+  "audio.verify": {
+    "description": "Verify an uploaded audio media ID before Music MV generation.",
+    "input": {
+      "audio_media_id": "405833376854443"
+    }
+  },
   "resource.templates": {
     "description": "List current video templates with pagination.",
     "input": {
@@ -301,6 +307,26 @@
         }
       }
     ]
+  },
+  "agent.music-mv": {
+    "description": "Create a 720p custom-style Music MV from verified audio and one synthetic image reference.",
+    "input": {
+      "mv_agent_type": "vibe_mv_v3_custom",
+      "audio_media_id": "405833376854443",
+      "img_references": [
+        {
+          "img_id": "164913710",
+          "ref_name": "Character Image"
+        }
+      ],
+      "music_style": "Pop",
+      "mv_style": "Custom",
+      "aspect_ratio": "16:9",
+      "quality": "720p",
+      "caption_switch": true,
+      "lip_sync_switch": false,
+      "seed": 42
+    }
   },
   "video.status": {
     "description": "Retrieve status for a known video generation ID.",

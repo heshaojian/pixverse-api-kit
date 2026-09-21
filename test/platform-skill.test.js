@@ -14,6 +14,8 @@ const REFERENCES = [
   "operation-catalog.md",
   "payload-examples.json",
 ];
+const MUSIC_MV_DOCUMENTATION_URL = "https://aisphere.feishu.cn/wiki/L8pgwGoSwiDbQ8ksGIHcppcvnrc";
+const MUSIC_MV_OPERATION_IDS = new Set(["audio.verify", "agent.music-mv"]);
 
 async function readSkill(relativePath) {
   return fs.readFile(path.join(SKILL_ROOT, relativePath), "utf8");
@@ -97,7 +99,11 @@ test("operation reference is traceable to every executable catalog row", async (
     assert.equal(row.resultIdPath, operation.resultIdPath ?? "none");
     assert.notEqual(row.prerequisite, "");
     assert.equal(row.documentationUrl, operation.documentationUrl);
-    assert.equal(new URL(row.documentationUrl).hostname, "docs.platform.pixverse.ai");
+    if (MUSIC_MV_OPERATION_IDS.has(operation.id)) {
+      assert.equal(row.documentationUrl, MUSIC_MV_DOCUMENTATION_URL);
+    } else {
+      assert.equal(new URL(row.documentationUrl).hostname, "docs.platform.pixverse.ai");
+    }
   }
 });
 
@@ -147,9 +153,13 @@ test("model, pricing, and limit guidance is dated and linked to primary sources"
     "https://docs.platform.pixverse.ai/upload-videoaudio-19094401e0",
   ];
   assert.match(skill, /references\/models-pricing-and-limits\.md/);
-  assert.match(reference, /Verified against official docs: 2026-09-19/);
+  assert.match(reference, /Verified against official docs: 2026-09-20/);
   assert.match(reference, /refresh|re-check|verify live/i);
   for (const page of officialPages) assert.ok(reference.includes(page), page);
+  assert.ok(reference.includes(MUSIC_MV_DOCUMENTATION_URL));
+  assert.match(reference, /15 credits.*second/i);
+  assert.match(reference, /22\.5 credits.*second/i);
+  assert.match(reference, /10.*360 seconds/i);
   assert.doesNotMatch(reference, /654[- ]template/i);
 });
 
@@ -181,4 +191,17 @@ test("workflow and troubleshooting guidance preserves paid-call and webhook inva
   assert.match(troubleshooting, /do not.*resubmit|never.*resubmit|must not.*retry/i);
   assert.match(troubleshooting, /moderation/i);
   assert.match(troubleshooting, /rate|concurren/i);
+  assert.match(workflow, /audio verify/i);
+  assert.match(workflow, /agent\.music-mv/);
+  assert.match(troubleshooting, /701020/);
+  assert.match(troubleshooting, /500044/);
+  assert.match(troubleshooting, /400080/);
+});
+
+test("capability routing exposes the complete Music MV prerequisite chain", async () => {
+  const capabilities = await readSkill("references/capabilities.md");
+  assert.match(capabilities, /audio\.verify/);
+  assert.match(capabilities, /agent\.music-mv/);
+  assert.match(capabilities, /upload\.media.*audio\.verify.*agent\.music-mv/is);
+  assert.match(capabilities, /video\.status|resume/);
 });

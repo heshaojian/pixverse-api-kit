@@ -67,6 +67,7 @@ The Platform provider covers every specialized endpoint currently documented by 
 |---|---|---|
 | Account | `account.balance`, `account.usage` | Current Platform credits and usage deductions or refunds |
 | Uploads | `upload.image`, `upload.media` | Images plus video or audio inputs for later operations |
+| Audio review | `audio.verify` | Synchronous review of uploaded audio before Music MV generation |
 | Live resources | `resource.templates`, `resource.tts-speakers`, `resource.restyle-effects` | Current effect templates, speech voices, and restyle presets |
 | Custom voices | `voice.create`, `voice.delete` | Create and remove custom TTS voices |
 | Images | `image.template`, `image.status` | Template-based image generation and result polling |
@@ -75,7 +76,7 @@ The Platform provider covers every specialized endpoint currently documented by 
 | Speech and sound | `video.lip-sync`, `video.avatar`, `video.sound-effect` | Lip sync, talking portraits, and synchronized generated audio |
 | Video editing | `video.restyle`, `video.swap-mask`, `video.swap`, `video.modify` | Style transfer, subject or region replacement, and prompt-directed edits |
 | Video finishing | `video.extend`, `video.upscale` | Clip continuation and resolution enhancement |
-| Specialized agents | `agent.viral-recreation`, `agent.real-estate` | Viral-video recreation and real-estate video workflows |
+| Specialized agents | `agent.viral-recreation`, `agent.real-estate`, `agent.music-mv` | Viral recreation, real-estate video, and one-click Music MV workflows |
 | Retrieval | `video.status` | Poll a known video generation without resubmitting it |
 
 Platform workflows keep credentials, credits, identifiers, validation, and durable job artifacts separate from Growth Studio. Query live resources before choosing templates, speakers, or restyle presets; do not treat saved catalog snapshots as permanent. See [`docs/api/platform-operations.md`](docs/api/platform-operations.md) for the complete operation inventory and [`docs/api/safety-and-recovery.md`](docs/api/safety-and-recovery.md) for billable-job recovery rules.

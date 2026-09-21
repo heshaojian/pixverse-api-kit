@@ -42,6 +42,7 @@ pixverse-api platform <resource> <operation> [--payload /absolute/path/input.jso
 |---|---|---|
 | Account | `account balance`, `account usage` | Read-only |
 | Upload | `upload image`, `upload media` | Non-billable |
+| Audio review | `audio verify` | Non-billable |
 | Resources | `resource templates`, `resource tts-speakers`, `resource restyle-effects` | Read-only |
 | Custom voices | `voice create`, `voice delete` | Non-billable |
 | Images | `image template`, `image status` | Generate is billable; status is read-only |
@@ -50,7 +51,7 @@ pixverse-api platform <resource> <operation> [--payload /absolute/path/input.jso
 | Speech and sound | `video lip-sync`, `video avatar`, `video sound-effect` | Billable |
 | Editing | `video restyle`, `video swap-mask`, `video swap`, `video modify` | Billable |
 | Finishing | `video extend`, `video upscale` | Billable |
-| Agents | `agent viral-recreation`, `agent real-estate` | Billable |
+| Agents | `agent viral-recreation`, `agent real-estate`, `agent music-mv` | Billable |
 | Retrieval | `video status` | Read-only |
 
 Most inputs are JSON payloads. These operations also accept one positional value instead of `--payload`: `upload image <path>`, `upload media <path>`, `voice delete <speaker_id>`, `image status <image_id>`, and `video status <video_id>`. Do not combine positional input with `--payload`.
@@ -61,6 +62,8 @@ Examples:
 pixverse-api platform account balance
 pixverse-api platform resource templates --payload /absolute/path/template-query.json
 pixverse-api platform upload image /absolute/path/reference.png
+pixverse-api platform audio verify --payload /absolute/path/audio-verification.json
+pixverse-api platform agent music-mv --payload /absolute/path/music-mv.json --dry-run
 pixverse-api platform video text --payload /absolute/path/text-video.json --dry-run
 pixverse-api platform video status 627410861853514292
 ```
@@ -71,8 +74,8 @@ See [Platform Operations](platform-operations.md) for endpoint-specific payload 
 
 ```bash
 pixverse-api platform run-job \
-  --operation video.image \
-  --payload /absolute/path/image-video.json \
+  --operation agent.music-mv \
+  --payload /absolute/path/music-mv.json \
   --poll \
   --interval-ms 5000 \
   --timeout-ms 600000

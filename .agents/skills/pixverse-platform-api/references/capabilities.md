@@ -10,6 +10,7 @@ Choose by desired outcome first. Then check the exact operation row and a valida
 | Audit deductions or refunds | `account.usage` | Use UTC range or cursor pagination. |
 | Upload a still image | `upload.image` | Produces an image ID string. |
 | Upload video or audio | `upload.media` | Produces a media ID string. |
+| Verify Music MV audio | `audio.verify` | Synchronously reviews an uploaded audio ID before Music MV generation. |
 | Find a current effect | `resource.templates` | Query live; do not use a stored template snapshot. |
 | Find a speech voice | `resource.tts-speakers` | Query live system/custom speakers. |
 | Find a restyle preset | `resource.restyle-effects` | Query live before `video.restyle`. |
@@ -46,6 +47,7 @@ Choose by desired outcome first. Then check the exact operation row and a valida
 
 - `agent.viral-recreation`: use reference images plus exactly one reference video for the viral-recreation workflow.
 - `agent.real-estate`: use a listing URL or supported image set for a property-tour/ad workflow.
+- `agent.music-mv`: turn verified music into a 720p or 1080p MV with optional character/style references, captions, lyrics, and lip sync.
 - `video.status` and `image.status`: poll a known ID; never repeat generation to check progress.
 
 ## Compound prerequisite chains
@@ -55,4 +57,5 @@ Choose by desired outcome first. Then check the exact operation row and a valida
 - Swap: source video -> `video.swap-mask` -> `upload.image` -> `video.swap` -> `video.status`.
 - TTS lip sync: `resource.tts-speakers` or `voice.create` -> `video.lip-sync` -> `video.status`.
 - Audio lip sync: `upload.media` -> `video.lip-sync` -> `video.status`.
+- Music MV: `upload.media` -> `audio.verify` -> optional `upload.image` -> `agent.music-mv` -> `video.status` or `resume`.
 - Fusion: upload/resolve references -> `video.fusion` -> `video.status`.

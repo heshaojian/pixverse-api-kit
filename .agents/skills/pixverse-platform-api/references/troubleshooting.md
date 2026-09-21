@@ -14,6 +14,11 @@ HTTP success is not Platform success. Require a valid response envelope and `Err
 | Terminal generation failure | Status 6, 7, or 8 | Preserve final status, trace, provider envelope, and failure details; do not automatically create a replacement job. |
 | Missing result ID | Successful-looking create envelope lacks the cataloged ID path | Preserve create response and trace; stop as a response-contract error and reconcile. |
 | Trace reuse | New request attempts caller-supplied/saved trace | Create a fresh request trace. Reuse saved trace only via the explicit recovery path. |
+| Music MV audio not verified (`701020`) | Generation rejects the audio ID before acceptance | Run `audio.verify`, correct any review issue, then obtain fresh authorization before a new paid submission. Never auto-submit after verification. |
+| Music MV moderation (`500063`) | Audio or lyrics violate provider policy | Stop and report the provider reason. Revise content only when requested; do not bypass moderation. |
+| Music MV concurrency (`500044`) | Provider reports the generation concurrency limit | Preserve the job evidence and wait for capacity. Do not retry when acceptance is ambiguous. |
+| Invalid Music MV lyrics (`400080`) | Lyrics contain no meaningful information | Correct the lyrics and rerun `--dry-run`; do not alter them silently. |
+| Instrumental lip-sync rejection (`400017`) | Lip sync is enabled but no recognizable vocals exist | Disable lip sync or provide vocal audio, then validate the changed payload before any paid submission. |
 
 Read-only retry safety does not authorize a billable retry. Never resubmit an ambiguous billable request merely because a read-only status or catalog call would be safe to retry.
 

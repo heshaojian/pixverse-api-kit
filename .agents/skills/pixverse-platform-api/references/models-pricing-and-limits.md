@@ -1,6 +1,6 @@
 # Models, Pricing, and Limits
 
-Verified against official docs: 2026-09-19.
+Verified against official docs: 2026-09-20.
 
 These provider facts can change independently of this CLI. Re-check the linked official pages before making a current compatibility, price, credit, duration, resolution, upload, QPS, or concurrency claim. For templates, TTS speakers, restyle effects, balance, and usage, prefer the read-only Platform operations at execution time.
 
@@ -22,11 +22,18 @@ Both current C1 and V6 pages describe up to 15 seconds and 1080p for their suppo
 - Pricing may be per second, per request, or feature/model-specific. Consult the live pricing page and, for templates, the live returned credit metadata before stating cost.
 - Platform API credits and membership are separate from PixVerse web-app credits.
 
+### Music MV snapshot
+
+- `agent.music-mv` charges 15 credits per generated second at 720p, with duration rounded up.
+- 1080p uses a 1.5x multiplier: 22.5 credits per generated second according to the reviewed interface document.
+- Treat those rates as a dated provider snapshot. Check balance and reconfirm the exact paid payload before submission; the CLI does not infer spending authorization from a local estimate.
+
 ## Limits and media boundaries
 
 - Image upload validation accepts JPG/JPEG/PNG/WebP, requires size below 20 MB, and enforces dimensions no larger than 10,000 px in this CLI version.
 - General media upload accepts MP4/MOV/WebM and MP3/WAV/M4A/AAC; video dimensions are capped at 1920 by the checked validator. Specialized endpoints can impose tighter size/duration/dimension rules.
 - Concurrency depends on the current Platform membership. Query or consult the live rate-limit page and respect `Retry-After` or provider errors; do not encode membership concurrency as timeless constants.
+- Music MV accepts 10 to 360 seconds of audio, up to 15 MB, with five aspect ratios and 720p or 1080p output. The reviewed interface reports a provider concurrency limit of 10 and fifteen built-in visual styles plus `Custom`.
 
 ## Dynamic catalogs
 
@@ -42,3 +49,4 @@ Use `resource.templates`, `resource.tts-speakers`, and `resource.restyle-effects
 - [Rate limits](https://docs.platform.pixverse.ai/rate-limit-796040m0)
 - [Image upload](https://docs.platform.pixverse.ai/upload-image-13016631e0)
 - [Video and audio upload](https://docs.platform.pixverse.ai/upload-videoaudio-19094401e0)
+- [One-Click Music MV interface](https://aisphere.feishu.cn/wiki/L8pgwGoSwiDbQ8ksGIHcppcvnrc)
