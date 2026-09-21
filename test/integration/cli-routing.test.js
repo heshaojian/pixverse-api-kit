@@ -57,6 +57,22 @@ test("main prints top-level help without loading either provider configuration",
   assert.equal(output.stderr(), "");
 });
 
+test("main prints the top-level version without loading either provider configuration", async () => {
+  const output = captureOutput();
+  let providerCalls = 0;
+  const exitCode = await main(["--version"], {
+    env: {},
+    ...output.context,
+    runGrowthStudioCommand: async () => { providerCalls += 1; },
+    runPlatformCommand: async () => { providerCalls += 1; },
+  });
+
+  assert.equal(exitCode, 0);
+  assert.equal(providerCalls, 0);
+  assert.equal(output.stdout(), "0.3.0-beta.1\n");
+  assert.equal(output.stderr(), "");
+});
+
 test("main injects the full context into canonical Growth Studio commands", async () => {
   const output = captureOutput();
   const env = Object.freeze({ TEST_ENVIRONMENT: "fixture" });

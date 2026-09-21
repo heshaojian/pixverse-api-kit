@@ -365,14 +365,14 @@ git commit -m "feat: stage customer plugin from an allowlist"
 
 - [ ] **Step 1: Write failing verifier tests**
 
-Build fixtures that separately contain `.env`, `mh_live_...`, `/Users/...`, `docs/superpowers`, a customer name, a symlink, a missing wrapper execute bit, and an invalid manifest. Assert each fails closed with a relative path and rule name but never echoes secret contents.
+Build fixtures that separately contain `.env`, a synthetic Growth Studio key assembled from separate test string fragments, `/Users/...`, `docs/superpowers`, a customer name, a symlink, a missing wrapper execute bit, and an invalid manifest. Assert each fails closed with a relative path and rule name but never echoes secret contents.
 
 ```js
 await assert.rejects(
   verifyCustomerPlugin({ packageRoot, pluginValidatorPath }),
   /forbidden credential file: .*\.env/,
 );
-assert.doesNotMatch(capturedError, /mh_live_secret_value/);
+assert.doesNotMatch(capturedError, new RegExp(["mh_", "live_secret_value"].join("")));
 ```
 
 - [ ] **Step 2: Run verifier tests and confirm the missing module failure**

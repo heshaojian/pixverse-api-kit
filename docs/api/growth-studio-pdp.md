@@ -68,7 +68,7 @@ pixverse-api growth-studio pdp create \
 }
 ```
 
-The public root contains only `product` and `video`.
+The public root contains `product` and may contain `video`. Omitting `video` or setting it to `null` selects the provider defaults; both forms are normalized by leaving `video` out of the outbound request. When `video` is an object, `video.mode` is required.
 
 | Field | Requirement |
 |---|---|
@@ -78,7 +78,8 @@ The public root contains only `product` and `video`.
 | `product.brand` | Optional string, at most 255 characters |
 | `product.price.amount` | Optional price object field; amount must remain a string |
 | `product.price.currency` | Optional price object field; uppercase three-letter code |
-| `video.mode` | Required: `standard` or `pro` |
+| `video` | Optional object or `null`; omitted and `null` use provider defaults |
+| `video.mode` | Required when `video` is an object: `standard` or `pro` |
 | `video.duration` | Optional integer from 5 through 10 |
 | `video.quality` | Optional: `normal` or `high` |
 | `video.aspect_ratio` | Optional: `16:9`, `9:16`, `1:1`, `4:3`, `3:4`, or `21:9` |

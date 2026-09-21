@@ -66,6 +66,32 @@ test("PDP normalization injects the private wire type without mutating caller in
   assert.deepEqual(payload, snapshot);
 });
 
+test("PDP accepts omitted and null video by omitting it from the wire body", () => {
+  for (const input of [
+    { product: minimalPayload().product },
+    { product: minimalPayload().product, video: null },
+  ]) {
+    const snapshot = structuredClone(input);
+    const normalized = normalizePdpPayload(input);
+
+    assert.equal("video" in normalized, false);
+    assert.deepEqual(input, snapshot);
+  }
+});
+
+test("PDP requires mode only when video is an object", () => {
+  assert.throws(
+    () => validatePdpPayload({ product: minimalPayload().product, video: {} }),
+    /video.mode must be one of: standard, pro/,
+  );
+  for (const video of [[], "video", 42]) {
+    assert.throws(
+      () => validatePdpPayload({ product: minimalPayload().product, video }),
+      /PDP video must be a plain object/,
+    );
+  }
+});
+
 test("PDP dry run describes the exact non-billable wire request", () => {
   const result = describePdpDryRun(validPayload());
 
@@ -102,24 +128,12 @@ test("PDP requires plain root, product, video, image, and price objects", () => 
     () => validatePdpPayload({ video: { mode: "standard" } }),
     /PDP payload requires product/,
   );
-  assert.throws(
-    () => validatePdpPayload({ product: minimalPayload().product }),
-    /PDP payload requires video/,
-  );
-
   for (const product of [null, [], "product"]) {
     assert.throws(
       () => validatePdpPayload({ product, video: { mode: "standard" } }),
       /PDP product must be a plain object/,
     );
   }
-  for (const video of [null, [], "video"]) {
-    assert.throws(
-      () => validatePdpPayload({ product: minimalPayload().product, video }),
-      /PDP video must be a plain object/,
-    );
-  }
-
   for (const image of [null, [], "image"]) {
     assert.throws(
       () => validatePdpPayload(validPayload({ product: { images: [image] } })),

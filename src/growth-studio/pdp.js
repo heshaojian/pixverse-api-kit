@@ -141,25 +141,30 @@ export function validatePdpPayload(payload) {
   if (payload.product === undefined) {
     throw new Error("PDP payload requires product.");
   }
-  if (payload.video === undefined) {
-    throw new Error("PDP payload requires video.");
-  }
   validateProduct(payload.product);
-  validateVideo(payload.video);
+  if (payload.video !== undefined && payload.video !== null) {
+    validateVideo(payload.video);
+  }
 }
 
 export function normalizePdpPayload(payload) {
   validatePdpPayload(payload);
   return {
     type: PDP_WIRE_TYPE,
-    product: {
-      title: payload.product.title,
-      ...(payload.product.description === undefined ? {} : { description: payload.product.description }),
-      images: payload.product.images.map(({ url }) => ({ url })),
-      ...(payload.product.brand === undefined ? {} : { brand: payload.product.brand }),
-      ...(payload.product.price === undefined ? {} : { price: { ...payload.product.price } }),
-    },
-    video: { ...payload.video },
+    product: normalizeProduct(payload.product),
+    ...(payload.video === undefined || payload.video === null
+      ? {}
+      : { video: { ...payload.video } }),
+  };
+}
+
+function normalizeProduct(product) {
+  return {
+    title: product.title,
+    ...(product.description === undefined ? {} : { description: product.description }),
+    images: product.images.map(({ url }) => ({ url })),
+    ...(product.brand === undefined ? {} : { brand: product.brand }),
+    ...(product.price === undefined ? {} : { price: { ...product.price } }),
   };
 }
 
