@@ -121,24 +121,35 @@ test("deployable review files expose no credentials or internal artifacts", asyn
   assert.doesNotMatch(raw, /job_dir|video_id|ledger_source|wallet|generation-command/i);
 });
 
-test("every product has a nonempty local poster", async () => {
+test("every source has a nonempty local poster and 0911 posters match V4", async () => {
   const catalog = await readJson(new URL("catalog.json", reviewRoot));
   for (const product of catalog.products) {
-    const poster = new URL(product.sources.pdpStandardHigh.poster.replace(/^\.\//, ""), reviewRoot);
-    const stat = await fs.stat(poster);
-    assert.ok(stat.isFile(), product.id);
-    assert.ok(stat.size > 10_000, `${product.id} poster is unexpectedly small`);
+    for (const [sourceKey, source] of Object.entries(product.sources)) {
+      const poster = new URL(source.poster.replace(/^\.\//, ""), reviewRoot);
+      const stat = await fs.stat(poster);
+      assert.ok(stat.isFile(), `${product.id} ${sourceKey}`);
+      assert.ok(stat.size > 10_000, `${product.id} ${sourceKey} poster is unexpectedly small`);
+    }
+    const originalPoster = new URL(product.sources.original0911.poster.replace(/^\.\//, ""), reviewRoot);
+    const v4Poster = new URL(`assets/posters/${product.id}.jpg`, v4Page);
+    assert.equal(
+      sha256(await fs.readFile(originalPoster)),
+      sha256(await fs.readFile(v4Poster)),
+      `${product.id} 0911 poster drifted from V4`,
+    );
   }
 });
 
-test("each Standard/high video appears once as a player and once as a direct link", async () => {
+test("each matched video appears once as a player and once as a direct link", async () => {
   const catalog = await readJson(new URL("catalog.json", reviewRoot));
   const rendered = renderComparisonRows(validateComparisonCatalog(catalog));
-  assert.equal(new Set(catalog.products.map(({ sources }) => sources.pdpStandardHigh.videoUrl)).size, 14);
+  const allVideos = catalog.products.flatMap(({ sources }) => Object.values(sources).map(({ videoUrl }) => videoUrl));
+  assert.equal(new Set(allVideos).size, 28);
   for (const { id, sources } of catalog.products) {
-    const videoUrl = sources.pdpStandardHigh.videoUrl;
-    const escaped = videoUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    assert.match(videoUrl, /^https:\/\/media\.pixverse\.ai\//);
-    assert.equal((rendered.match(new RegExp(escaped, "g")) ?? []).length, 2, id);
+    for (const { videoUrl } of Object.values(sources)) {
+      const escaped = videoUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      assert.match(videoUrl, /^https:\/\/media\.pixverse\.ai\//);
+      assert.equal((rendered.match(new RegExp(escaped, "g")) ?? []).length, 2, id);
+    }
   }
 });
