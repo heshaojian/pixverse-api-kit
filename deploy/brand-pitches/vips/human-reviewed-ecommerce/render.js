@@ -1,5 +1,6 @@
 import {
   flattenCases,
+  getProductLinkRecords,
   getVerdictMeta,
   isSafeMediaUrl,
   toAttemptDomId,
@@ -50,6 +51,13 @@ const renderExternalMediaLink = (media) => {
     "</a>",
   ].join("");
 };
+
+const renderProductLink = ({ url, caseTitle }, className = "case-product-link") => [
+  `<a class="${escapeHtml(className)}" href="${escapeHtml(safeUrl(url))}" target="_blank" rel="noreferrer"`,
+  ` aria-label="查看${escapeHtml(caseTitle)}的唯品会商品详情">`,
+  `查看唯品会商品详情 <span aria-hidden="true">↗</span>`,
+  `</a>`,
+].join("");
 
 const renderDimensions = (media) => {
   const { width, height } = media.dimensions;
@@ -124,6 +132,10 @@ const findRepresentativeAttempt = (record) => [...record.attempts]
 
 export function renderCase(record) {
   const representativeAttempt = findRepresentativeAttempt(record);
+  const productInput = record.inputs.find(({ type }) => type === "link");
+  const productLink = productInput
+    ? renderProductLink({ url: productInput.url, caseTitle: record.title })
+    : "";
   const representativeEvidence = representativeAttempt
     ? [
       `<div class="representative-evidence" id="${slug(record.id)}-representative-evidence">`,
@@ -140,6 +152,7 @@ export function renderCase(record) {
     `<div class="case-body">`,
     `<p class="case-request">${escapeHtml(record.request)}</p>`,
     `<p class="review-summary">${escapeHtml(record.review.summary)}</p>`,
+    productLink,
     renderList(record.review.observations, "review-observations"),
     representativeEvidence,
     `<details class="complete-review-record">`,
@@ -151,6 +164,45 @@ export function renderCase(record) {
     `</details>`,
     `</div>`,
     `</details>`,
+  ].join("");
+}
+
+export function renderProductDirectory(data) {
+  const records = getProductLinkRecords(data);
+  const groups = records.reduce((items, record) => {
+    const previous = items.at(-1);
+    if (previous?.chapterId === record.chapterId) {
+      return Object.freeze([
+        ...items.slice(0, -1),
+        Object.freeze({ ...previous, records: Object.freeze([...previous.records, record]) }),
+      ]);
+    }
+    return Object.freeze([
+      ...items,
+      Object.freeze({
+        chapterId: record.chapterId,
+        chapterTitle: record.chapterTitle,
+        records: Object.freeze([record]),
+      }),
+    ]);
+  }, Object.freeze([]));
+
+  return [
+    `<div class="product-directory" data-product-count="${records.length}">`,
+    groups.map((group) => [
+      `<section class="product-directory-group" aria-labelledby="product-group-${slug(group.chapterId)}">`,
+      `<h3 id="product-group-${slug(group.chapterId)}">${escapeHtml(group.chapterTitle)}</h3>`,
+      `<ul>`,
+      group.records.map((record) => [
+        `<li>`,
+        `<span>${escapeHtml(record.caseTitle)}</span>`,
+        renderProductLink(record, "product-directory-link"),
+        `</li>`,
+      ].join("")).join(""),
+      `</ul>`,
+      `</section>`,
+    ].join("")).join(""),
+    `</div>`,
   ].join("");
 }
 

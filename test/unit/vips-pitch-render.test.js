@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import {
   renderCase,
   renderLedger,
+  renderProductDirectory,
   safeUrl,
 } from "../../deploy/brand-pitches/vips/human-reviewed-ecommerce/render.js";
 
@@ -60,6 +61,33 @@ test("rendered external links are HTTPS and noreferrer", async () => {
     assert.match(tag, /href="https:\/\//);
     assert.match(tag, /rel="noreferrer"/);
   }
+});
+
+test("product directory renders ten reviewed mappings without source leakage", async () => {
+  const fixture = await readFixture();
+  const html = renderProductDirectory(fixture);
+  const urls = [...html.matchAll(/href="(https:\/\/detail\.vip\.com\/[^"]+)"/g)]
+    .map(([, url]) => url);
+
+  assert.equal((html.match(/class="product-directory-link"/g) ?? []).length, 10);
+  assert.equal(new Set(urls).size, 9);
+  assert.match(html, /target="_blank" rel="noreferrer"/);
+  assert.doesNotMatch(html, /L6sbdC5j3obuDoxrpcYcwGySn2e|feishu\.cn/);
+});
+
+test("linked cases surface the exact product before complete review details", async () => {
+  const fixture = await readFixture();
+  const linked = fixture.chapters.flatMap(({ cases }) => cases)
+    .find(({ id }) => id === "creative-skincare-ice");
+  const unlinked = fixture.chapters.flatMap(({ cases }) => cases)
+    .find(({ id }) => id === "presenter-mens-jeans");
+  const linkedHtml = renderCase(linked);
+  const unlinkedHtml = renderCase(unlinked);
+
+  assert.match(linkedHtml, /查看唯品会商品详情/);
+  assert.ok(linkedHtml.indexOf("查看唯品会商品详情") < linkedHtml.indexOf("完整评审记录"));
+  assert.match(linkedHtml, /href="https:\/\/detail\.vip\.com\/detail-1711533687-6922097426018636437\.html"/);
+  assert.doesNotMatch(unlinkedHtml, /case-product-link|查看唯品会商品详情/);
 });
 
 test("rendered media uses accessible lazy local evidence", async () => {
