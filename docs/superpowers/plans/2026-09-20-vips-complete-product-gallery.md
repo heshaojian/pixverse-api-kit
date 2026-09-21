@@ -31,7 +31,7 @@
 - Modify: `test/unit/vips-pitch-data-model.test.js`
 - Create: `test/fixtures/vips-product-catalog.json`
 
-- [ ] **Step 1: Create the reviewed product-order fixture**
+- [x] **Step 1: Create the reviewed product-order fixture**
 
 Add a compact fixture with the 28 expected case IDs in chapter order and the five expected no-video case IDs. This makes accidental corpus drift visible without duplicating customer-facing copy.
 
@@ -78,7 +78,7 @@ Add a compact fixture with the 28 expected case IDs in chapter order and the fiv
 }
 ```
 
-- [ ] **Step 2: Write the failing selector tests**
+- [x] **Step 2: Write the failing selector tests**
 
 Import `getProductCatalogRecords` and assert exact order, count, immutability, exclusion, evidence anchors, statuses, and verified-link preservation.
 
@@ -106,7 +106,7 @@ test("product catalog retains products whose videos are pending", async () => {
 });
 ```
 
-- [ ] **Step 3: Run the model test and confirm RED**
+- [x] **Step 3: Run the model test and confirm RED**
 
 Run:
 
@@ -116,7 +116,7 @@ node --test test/unit/vips-pitch-data-model.test.js
 
 Expected: FAIL because `getProductCatalogRecords` is not exported.
 
-- [ ] **Step 4: Implement deterministic catalog derivation**
+- [x] **Step 4: Implement deterministic catalog derivation**
 
 Add small pure helpers for representative media and media status. Prefer the first input image, then the first reviewed attempt image for `previewImage`; determine `hasVideo` from attempt media; derive the product URL only from an input of type `link`.
 
@@ -143,7 +143,7 @@ export function getProductCatalogRecords(data) {
 
 The returned array, each record, and any exposed preview object must be frozen or copied into a frozen object. Do not mutate validated source objects.
 
-- [ ] **Step 5: Run focused tests and confirm GREEN**
+- [x] **Step 5: Run focused tests and confirm GREEN**
 
 Run:
 
@@ -153,7 +153,7 @@ node --test test/unit/vips-pitch-data-model.test.js
 
 Expected: PASS, including the existing 29-record ledger and 10-link provenance tests.
 
-- [ ] **Step 6: Commit the model increment**
+- [x] **Step 6: Commit the model increment**
 
 ```bash
 git add deploy/brand-pitches/vips/human-reviewed-ecommerce/data-model.js test/unit/vips-pitch-data-model.test.js test/fixtures/vips-product-catalog.json

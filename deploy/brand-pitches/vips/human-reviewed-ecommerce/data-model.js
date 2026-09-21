@@ -36,6 +36,8 @@ const SOURCE_KINDS = new Set([
   "reviewed-output",
 ]);
 
+const PRODUCT_CATALOG_EXCLUSIONS = Object.freeze(["product-motion-prompt-baseline"]);
+
 const isObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
 
 const assertString = (value, label) => {
@@ -190,6 +192,45 @@ export function getProductLinkRecords(data) {
         url,
       }))),
   ));
+}
+
+const findCatalogPreviewImage = (record) => {
+  const media = record.inputs.find(({ type }) => type === "image")
+    ?? record.attempts.flatMap(({ media: items }) => items).find(({ type }) => type === "image")
+    ?? null;
+  if (!media) return null;
+  return Object.freeze({
+    url: media.url,
+    alt: media.alt,
+    width: media.dimensions.width,
+    height: media.dimensions.height,
+  });
+};
+
+const getCatalogMediaStatus = (record, previewImage) => {
+  const hasVideo = record.attempts.some(({ media }) => media.some(({ type }) => type === "video"));
+  if (hasVideo) return "已有视频";
+  return previewImage ? "已有图片，视频待补充" : "视频待补充";
+};
+
+export function getProductCatalogRecords(data) {
+  const validated = validatePitchData(data);
+  return Object.freeze(validated.chapters.flatMap((chapter) => chapter.cases
+    .filter(({ id }) => !PRODUCT_CATALOG_EXCLUSIONS.includes(id))
+    .map((record) => {
+      const previewImage = findCatalogPreviewImage(record);
+      return Object.freeze({
+        chapterId: chapter.id,
+        chapterTitle: chapter.title,
+        caseId: record.id,
+        caseTitle: record.title,
+        verdict: record.review.verdict,
+        mediaStatus: getCatalogMediaStatus(record, previewImage),
+        previewImage,
+        productUrl: record.inputs.find(({ type }) => type === "link")?.url ?? null,
+        evidenceHref: `#${record.id}`,
+      });
+    })));
 }
 
 export function getVerdictMeta(verdict) {

@@ -8,6 +8,7 @@ import {
   buildPilotSummary,
   flattenCases,
   getFeaturedCases,
+  getProductCatalogRecords,
   getProductLinkRecords,
   getVerdictMeta,
   isSafeMediaUrl,
@@ -23,6 +24,7 @@ const fixturePath = path.join(
   repoRoot,
   "deploy/brand-pitches/vips/human-reviewed-ecommerce/data/cases.json",
 );
+const catalogFixturePath = path.join(repoRoot, "test/fixtures/vips-product-catalog.json");
 
 const readFixture = async () => JSON.parse(await fs.readFile(fixturePath, "utf8"));
 
@@ -157,6 +159,47 @@ test("product-link records preserve reviewed order and immutable provenance", as
   const unsafe = structuredClone(fixture);
   unsafe.chapters[0].cases[0].inputs.find(({ type }) => type === "link").url += "?track=1";
   assert.throws(() => validatePitchData(unsafe), /VIPS product URL/i);
+});
+
+test("product catalog preserves all 28 reviewed products in source order", async () => {
+  const fixture = await readFixture();
+  const expected = JSON.parse(await fs.readFile(catalogFixturePath, "utf8"));
+  const records = getProductCatalogRecords(fixture);
+
+  assert.equal(records.length, 28);
+  assert.deepEqual(records.map(({ caseId }) => caseId), expected.caseIds);
+  assert.ok(!records.some(({ caseId }) => caseId === expected.excludedCaseId));
+  assert.ok(Object.isFrozen(records));
+  assert.ok(records.every(Object.isFrozen));
+  assert.equal(flattenCases(fixture).some(({ id }) => id === expected.excludedCaseId), true);
+});
+
+test("product catalog retains products whose videos are pending", async () => {
+  const expected = JSON.parse(await fs.readFile(catalogFixturePath, "utf8"));
+  const records = getProductCatalogRecords(await readFixture());
+  const pending = records.filter(({ mediaStatus }) => mediaStatus !== "已有视频");
+
+  assert.deepEqual(pending.map(({ caseId }) => caseId), expected.noVideoCaseIds);
+  assert.deepEqual(pending.map(({ mediaStatus }) => mediaStatus), [
+    "视频待补充",
+    "视频待补充",
+    "已有图片，视频待补充",
+    "已有图片，视频待补充",
+    "已有图片，视频待补充",
+  ]);
+  assert.ok(records.every(({ evidenceHref, caseId }) => evidenceHref === `#${caseId}`));
+});
+
+test("product catalog preserves verified links and freezes preview metadata", async () => {
+  const records = getProductCatalogRecords(await readFixture());
+  const linked = records.filter(({ productUrl }) => productUrl !== null);
+  const previews = records.flatMap(({ previewImage }) => previewImage ? [previewImage] : []);
+
+  assert.equal(linked.length, 10);
+  assert.equal(new Set(linked.map(({ productUrl }) => productUrl)).size, 9);
+  assert.ok(linked.every(({ productUrl }) => isVerifiedProductUrl(productUrl)));
+  assert.ok(previews.length > 0);
+  assert.ok(previews.every(Object.isFrozen));
 });
 
 test("pilot selection is immutable, reversible, and rejects a fourth workflow", async () => {
