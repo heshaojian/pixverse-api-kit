@@ -1,0 +1,23 @@
+{
+  "product": {
+    "title": "Example Linen Jacket",
+    "description": "A lightweight linen jacket with a relaxed shape.",
+    "images": [
+      {
+        "url": "https://media.pixverse.ai/example/linen-jacket-front.webp"
+      }
+    ],
+    "brand": "Example Brand",
+    "price": {
+      "amount": "89.00",
+      "currency": "USD"
+    }
+  },
+  "video": {
+    "mode": "standard",
+    "duration": 10,
+    "quality": "high",
+    "aspect_ratio": "9:16",
+    "additional_prompt": "Clean studio lighting with calm product-focused movement."
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "pixverse-api",
+  "version": "0.3.0-beta.1",
+  "description": "Operate PixVerse Platform API and Growth Studio API workflows through a safe embedded CLI.",
+  "author": {
+    "name": "PixVerse"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "keywords": [
+    "pixverse",
+    "platform-api",
+    "growth-studio",
+    "video-generation",
+    "codex-plugin"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "PixVerse API Plugin",
+    "shortDescription": "Use PixVerse Platform and Growth Studio APIs",
+    "longDescription": "Discover, validate, submit, monitor, and safely recover PixVerse Platform API and Growth Studio API workflows with separate credentials and billing boundaries.",
+    "developerName": "PixVerse",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Show the available PixVerse Platform API capabilities.",
+      "Prepare a PixVerse API video request as a dry run.",
+      "Check a known PixVerse API job without resubmitting it."
+    ]
+  }
+}

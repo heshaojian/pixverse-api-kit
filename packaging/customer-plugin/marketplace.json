@@ -1,0 +1,20 @@
+{
+  "name": "pixverse-private-beta",
+  "interface": {
+    "displayName": "PixVerse Private Beta"
+  },
+  "plugins": [
+    {
+      "name": "pixverse-api",
+      "source": {
+        "source": "local",
+        "path": "./plugins/pixverse-api"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}
