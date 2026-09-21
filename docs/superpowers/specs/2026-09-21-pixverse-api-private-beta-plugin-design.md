@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-21
 
-**Status:** Revised specification awaiting review before implementation
+**Status:** Approved for implementation
 
 ## Goal
 
@@ -26,32 +26,36 @@ The first private demo version is `0.3.0-beta.1`.
 
 ## Demo Package
 
-The release contains one ZIP archive for Codex on macOS:
+The release directory contains one ZIP archive for Codex on macOS plus its verification sidecars:
 
 ```text
-pixverse-api-plugin-codex-0.3.0-beta.1.zip
-└── pixverse-api-plugin-codex-0.3.0-beta.1/
-    ├── marketplace.json
-    ├── plugins/pixverse-api/
-    │   ├── .codex-plugin/plugin.json
-    │   ├── skills/
-    │   │   ├── start/
-    │   │   ├── platform/
-    │   │   └── growth-studio/
-    │   ├── scripts/pixverse-api
-    │   ├── runtime/
-    │   ├── examples/
-    │   ├── docs/api/
-    │   ├── README.md
-    │   ├── LICENSE
-    │   ├── NOTICE
-    │   ├── SECURITY.md
-    │   └── SUPPORT.md
-    ├── Install PixVerse API Plugin.command
-    ├── Uninstall PixVerse API Plugin.command
-    ├── INSTALL-MACOS.md
-    ├── MANIFEST.sha256
-    └── release-report.json
+dist/customer-plugin/0.3.0-beta.1/
+├── pixverse-api-plugin-codex-0.3.0-beta.1.zip
+├── pixverse-api-plugin-codex-0.3.0-beta.1.zip.sha256
+└── release-report.json
+
+ZIP contents:
+pixverse-api-plugin-codex-0.3.0-beta.1/
+├── marketplace.json
+├── plugins/pixverse-api/
+│   ├── .codex-plugin/plugin.json
+│   ├── skills/
+│   │   ├── start/
+│   │   ├── platform/
+│   │   └── growth-studio/
+│   ├── scripts/pixverse-api
+│   ├── runtime/
+│   ├── examples/
+│   ├── docs/api/
+│   ├── README.md
+│   ├── LICENSE
+│   ├── NOTICE
+│   ├── SECURITY.md
+│   └── SUPPORT.md
+├── Install PixVerse API Plugin.command
+├── Uninstall PixVerse API Plugin.command
+├── INSTALL-MACOS.md
+└── MANIFEST.sha256
 ```
 
 The archive contains no `.git` directory and no dependency on files outside its own root.
@@ -194,7 +198,7 @@ The builder:
 4. validates the three skills, marketplace, and Codex manifest;
 5. runs denylist and secret checks against the staged tree;
 6. creates a reproducible ZIP with stable paths and normalized timestamps;
-7. writes `MANIFEST.sha256` and `release-report.json` with version, inventory, checks, and archive checksum;
+7. writes the in-archive `MANIFEST.sha256`, then writes sidecar ZIP checksum and `release-report.json` with version, inventory, checks, and archive checksum;
 8. extracts the ZIP to a second temporary location and tests the installed artifact and macOS installer flow.
 
 The builder never reads `.env`, job directories, browser state, or live credentials.
