@@ -88,6 +88,13 @@ test("product catalog keeps pending products and strict product links", async ()
   assert.doesNotMatch(html, /L6sbdC5j3obuDoxrpcYcwGySn2e|feishu\.cn/);
 });
 
+test("catalog placeholders describe missing previews without contradicting video status", async () => {
+  const html = renderProductCatalog(await readFixture());
+
+  assert.match(html, /product-catalog-placeholder[^>]*>[\s\S]*?预览图待补充/);
+  assert.doesNotMatch(html, /product-catalog-placeholder[^>]*>[\s\S]*?<span>视频待补充<\/span>/);
+});
+
 test("product catalog escapes product metadata", async () => {
   const fixture = await readFixture();
   const unsafe = structuredClone(fixture);

@@ -416,7 +416,7 @@ git commit -m "feat: complete VIPS product gallery experience"
 - Modify only if a test gap is found: `test/vips-pitch-brand.test.js`
 - Modify only if a test gap is found: `test/vips-pitch-data.test.js`
 
-- [ ] **Step 1: Run all VIPS tests and required quality gates**
+- [x] **Step 1: Run all VIPS tests and required quality gates**
 
 ```bash
 node --test test/vips-*.test.js test/unit/vips-pitch-*.test.js
@@ -427,7 +427,7 @@ npm run security:scan
 
 Expected: PASS with 80%+ focused coverage and no secret findings.
 
-- [ ] **Step 2: Run the wider pitch suite and classify unrelated failures**
+- [x] **Step 2: Run the wider pitch suite and classify unrelated failures**
 
 ```bash
 npm run test:pitches
@@ -438,7 +438,7 @@ Expected: VIPS tests pass. If the already-known unrelated REVOLVE asset failures
 - `assets/revolve-pilot-controlled-images/LIOR-WD140/LIOR-WD140_V1.jpg`
 - `deploy/brand-pitches/revolve/v4/assets/posters/SDYS-WD257.jpg`
 
-- [ ] **Step 3: Serve and inspect the page at four viewports**
+- [x] **Step 3: Serve and inspect the page at four viewports**
 
 Open the local page and review:
 
@@ -458,7 +458,7 @@ At each size verify:
 - Every product can navigate to its exact full-evidence record.
 - No horizontal overflow, clipped text, broken poster, or keyboard focus loss.
 
-- [ ] **Step 4: Review the final diff for scope and security**
+- [x] **Step 4: Review the final diff for scope and security**
 
 ```bash
 git diff --check
@@ -469,7 +469,7 @@ git diff HEAD~4..HEAD -- deploy/brand-pitches/vips/human-reviewed-ecommerce test
 
 Confirm there are no credentials, invented claims, unverified product URLs, external scripts, unsafe URL handling regressions, or unrelated files.
 
-- [ ] **Step 5: Add only necessary regression coverage and commit verification**
+- [x] **Step 5: Add only necessary regression coverage and commit verification**
 
 If browser review reveals a gap, first add the smallest failing automated test, then fix and rerun the focused suite. Finish with:
 

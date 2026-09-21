@@ -193,7 +193,7 @@ const groupCatalogRecords = (records) => records.reduce((items, record) => {
 
 const renderCatalogPreview = (record) => {
   if (!record.previewImage) {
-    return `<div class="product-catalog-placeholder" role="img" aria-label="${escapeHtml(record.caseTitle)}暂无预览图"><span>视频待补充</span></div>`;
+    return `<div class="product-catalog-placeholder" role="img" aria-label="${escapeHtml(record.caseTitle)}暂无预览图"><span>预览图待补充</span></div>`;
   }
   const { url, alt, width, height } = record.previewImage;
   const dimensions = width === null || height === null ? "" : ` width="${width}" height="${height}"`;
