@@ -1,5 +1,6 @@
 import { ACCOUNT_OPERATIONS } from "./operations/account.js";
 import { AGENT_OPERATIONS } from "./operations/agents.js";
+import { AUDIO_OPERATIONS } from "./operations/audio.js";
 import { RESOURCE_OPERATIONS } from "./operations/resources.js";
 import { UPLOAD_OPERATIONS } from "./operations/uploads.js";
 import { VIDEO_EDITING_OPERATIONS } from "./operations/video-editing.js";
@@ -10,6 +11,7 @@ const DOCUMENTATION_URLS = Object.freeze({
   "account.usage": "https://docs.platform.pixverse.ai/usage-deduction-query-41209884e0",
   "upload.image": "https://docs.platform.pixverse.ai/upload-image-13016631e0",
   "upload.media": "https://docs.platform.pixverse.ai/upload-videoaudio-19094401e0",
+  "audio.verify": "https://aisphere.feishu.cn/wiki/L8pgwGoSwiDbQ8ksGIHcppcvnrc",
   "resource.templates": "https://docs.platform.pixverse.ai/get-template-list-38573064e0",
   "resource.tts-speakers": "https://docs.platform.pixverse.ai/get-speechlipsync-tts-list-19094355e0",
   "resource.restyle-effects": "https://docs.platform.pixverse.ai/restyle-effect-list-21992862e0",
@@ -35,12 +37,14 @@ const DOCUMENTATION_URLS = Object.freeze({
   "video.avatar": "https://docs.platform.pixverse.ai/avatar-generation-40528034e0",
   "agent.viral-recreation": "https://docs.platform.pixverse.ai/viral-recreation-agent-41205382e0",
   "agent.real-estate": "https://docs.platform.pixverse.ai/one-click-real-estate-video-42843647e0",
+  "agent.music-mv": "https://aisphere.feishu.cn/wiki/L8pgwGoSwiDbQ8ksGIHcppcvnrc",
   "video.status": "https://docs.platform.pixverse.ai/get-video-generation-status-13016632e0",
 });
 
 const operationDefinitions = [
   ...ACCOUNT_OPERATIONS,
   ...UPLOAD_OPERATIONS,
+  ...AUDIO_OPERATIONS,
   ...RESOURCE_OPERATIONS,
   ...VIDEO_GENERATION_OPERATIONS.filter(({ id }) => id !== "video.avatar"),
   ...VIDEO_EDITING_OPERATIONS.filter(({ id }) => id !== "video.status"),

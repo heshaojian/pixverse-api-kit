@@ -10,6 +10,7 @@ const invalidById = Object.freeze({
   "account.usage": { start_time: "2026-09-20 00:00:00", end_time: "2026-09-18 00:00:00" },
   "upload.image": {},
   "upload.media": { file: "a", file_url: "https://example.com/a.mp4" },
+  "audio.verify": {},
   "resource.templates": null,
   "resource.tts-speakers": null,
   "resource.restyle-effects": {},
@@ -35,6 +36,7 @@ const invalidById = Object.freeze({
   "video.avatar": {},
   "agent.viral-recreation": {},
   "agent.real-estate": {},
+  "agent.music-mv": {},
   "video.status": { video_id: Number.MAX_SAFE_INTEGER + 1 },
 });
 
@@ -202,6 +204,117 @@ test("transition, fusion, voice, swap, source-video, and agent inputs enforce th
   ];
   for (const [id, input, pattern] of cases) {
     await assert.rejects(normalizeAndValidatePlatformInput(getPlatformOperation(id), input), pattern);
+  }
+});
+
+test("audio verification requires a positive decimal media ID", async () => {
+  const operation = getPlatformOperation("audio.verify");
+  const accepted = await normalizeAndValidatePlatformInput(operation, { audio_media_id: 42 });
+  assert.deepEqual(accepted.payload, { audio_media_id: "42" });
+  for (const audio_media_id of ["0", "-1", "not-an-id"]) {
+    await assert.rejects(
+      normalizeAndValidatePlatformInput(operation, { audio_media_id }),
+      /audio_media_id.*positive decimal/i,
+    );
+  }
+});
+
+test("Music MV normalizes the documented image alias without mutating frozen input", async () => {
+  const operation = getPlatformOperation("agent.music-mv");
+  const reference = Object.freeze({ img_id: "164913710", ref_name: "Character Image" });
+  const input = Object.freeze({
+    mv_agent_type: "vibe_mv_v3_custom",
+    audio_media_id: "405833376854443",
+    image_references: Object.freeze([reference]),
+    music_style: "pOp",
+    mv_style: "cUsToM",
+    aspect_ratio: "16:9",
+    quality: "720p",
+    caption_switch: true,
+    lip_sync_switch: false,
+    instrumental_switch: false,
+    seed: 42,
+  });
+
+  const result = await normalizeAndValidatePlatformInput(operation, input);
+
+  assert.equal(Object.hasOwn(result.payload, "image_references"), false);
+  assert.deepEqual(result.payload.img_references, [{ img_id: "164913710", ref_name: "Character Image" }]);
+  assert.equal(result.payload.music_style, "pOp");
+  assert.equal(result.payload.mv_style, "cUsToM");
+  assert.equal(Object.hasOwn(input, "img_references"), false);
+  assert.equal(input.image_references[0], reference);
+});
+
+test("Music MV rejects ambiguous aliases, unsupported enums, invalid switches, seeds, and references", async () => {
+  const operation = getPlatformOperation("agent.music-mv");
+  const base = {
+    mv_agent_type: "vibe_mv_v3_custom",
+    audio_media_id: "405833376854443",
+    img_references: [{ img_id: "164913710" }],
+    mv_style: "Custom",
+    aspect_ratio: "16:9",
+    quality: "720p",
+  };
+  const cases = [
+    [{ ...base, image_references: [{ img_id: "2" }] }, /only one.*img_references.*image_references/i],
+    [{ ...base, mv_agent_type: "unknown" }, /mv_agent_type/i],
+    [{ ...base, audio_media_id: "0" }, /audio_media_id.*positive decimal/i],
+    [{ ...base, aspect_ratio: "21:9" }, /aspect_ratio/i],
+    [{ ...base, quality: "4k" }, /quality/i],
+    [{ ...base, music_style: "Opera" }, /music_style/i],
+    [{ ...base, mv_style: "Neon Noir" }, /mv_style/i],
+    [{ ...base, caption_switch: "true" }, /caption_switch.*boolean/i],
+    [{ ...base, lip_sync_switch: 1 }, /lip_sync_switch.*boolean/i],
+    [{ ...base, instrumental_switch: null }, /instrumental_switch.*boolean/i],
+    [{ ...base, seed: -1 }, /seed/i],
+    [{ ...base, img_references: [{ img_id: "1" }, { img_id: "2" }] }, /img_references.*no more than one/i],
+    [{ ...base, img_references: [{ img_id: "0" }] }, /img_id.*positive decimal/i],
+    [{ ...base, img_references: [{ img_id: "1", ref_name: 7 }] }, /ref_name.*string/i],
+    [{ ...base, img_references: [], style_img_references: [] }, /Custom.*reference/i],
+  ];
+  for (const [input, pattern] of cases) {
+    await assert.rejects(normalizeAndValidatePlatformInput(operation, input), pattern);
+  }
+
+  for (const mv_agent_type of ["vibe_mv", "vibe_mv_v3_custom"]) {
+    const result = await normalizeAndValidatePlatformInput(operation, { ...base, mv_agent_type });
+    assert.equal(result.payload.mv_agent_type, mv_agent_type);
+  }
+});
+
+test("Music MV validates plain and timestamped lyrics deterministically", async () => {
+  const operation = getPlatformOperation("agent.music-mv");
+  const base = {
+    mv_agent_type: "vibe_mv_v3_custom",
+    audio_media_id: "405833376854443",
+    aspect_ratio: "9:16",
+    quality: "1080p",
+  };
+  const accepted = await normalizeAndValidatePlatformInput(operation, {
+    ...base,
+    lyric_text: "Ignored when timestamps are present",
+    lyric_timestamp: {
+      words: [
+        { start: 0, end: 0.32, word: "Who" },
+        { start: 0.32, end: 0.64, word: "be" },
+      ],
+    },
+  });
+  assert.equal(accepted.payload.lyric_timestamp.words.length, 2);
+
+  const invalid = [
+    [{ ...base, lyric_text: "x".repeat(5000) }, /lyric_text.*5,?000/i],
+    [{ ...base, lyric_timestamp: null }, /lyric_timestamp.*object/i],
+    [{ ...base, lyric_timestamp: { words: [] } }, /words.*non-empty/i],
+    [{ ...base, lyric_timestamp: { words: [{ start: -1, end: 0, word: "bad" }] } }, /start/i],
+    [{ ...base, lyric_timestamp: { words: [{ start: 1, end: 0, word: "bad" }] } }, /end/i],
+    [{ ...base, lyric_timestamp: { words: [{ start: 0, end: 1, word: "one" }, { start: 0.5, end: 2, word: "two" }] } }, /overlap|monotonic/i],
+    [{ ...base, lyric_timestamp: { words: [{ start: 0, end: 1, word: "" }] } }, /word.*non-empty/i],
+    [{ ...base, lyric_timestamp: { words: [{ start: Number.NaN, end: 1, word: "bad" }] } }, /finite/i],
+  ];
+  for (const [input, pattern] of invalid) {
+    await assert.rejects(normalizeAndValidatePlatformInput(operation, input), pattern);
   }
 });
 

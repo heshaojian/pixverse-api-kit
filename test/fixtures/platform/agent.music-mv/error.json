@@ -1,0 +1,13 @@
+{
+  "httpStatus": 400,
+  "responseText": "{\"ErrCode\":701020,\"ErrMsg\":\"The audio content has not been verified. Please call the audio verification interface first.\",\"Resp\":null}",
+  "expected": {
+    "code": 701020,
+    "message": "The audio content has not been verified. Please call the audio verification interface first.",
+    "details": {
+      "ErrCode": 701020,
+      "ErrMsg": "The audio content has not been verified. Please call the audio verification interface first.",
+      "Resp": null
+    }
+  }
+}

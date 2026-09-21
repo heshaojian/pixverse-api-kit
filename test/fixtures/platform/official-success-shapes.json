@@ -3,6 +3,7 @@
   { "id": "account.usage", "Resp": { "items": [], "next_cursor": "", "has_more": false } },
   { "id": "upload.image", "Resp": { "img_id": "629000000000000001" } },
   { "id": "upload.media", "Resp": { "media_id": "629000000000000002" } },
+  { "id": "audio.verify", "Resp": {} },
   { "id": "resource.templates", "Resp": { "effect_items": [] } },
   { "id": "resource.tts-speakers", "Resp": { "total": 15, "data": [{ "speaker_id": "7", "name": "Harper" }] } },
   { "id": "resource.restyle-effects" },
@@ -28,5 +29,6 @@
   { "id": "video.avatar", "Resp": { "video_id": "629000000000000020" } },
   { "id": "agent.viral-recreation", "Resp": { "video_id": "629000000000000021" } },
   { "id": "agent.real-estate", "Resp": { "video_id": "629000000000000022" } },
+  { "id": "agent.music-mv", "Resp": { "video_id": "629000000000000023" } },
   { "id": "video.status", "Resp": { "id": "629000000000000005", "status": 1 } }
 ]

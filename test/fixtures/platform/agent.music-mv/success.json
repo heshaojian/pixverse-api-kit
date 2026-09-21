@@ -1,0 +1,15 @@
+{
+  "responseText": "{\"ErrCode\":0,\"ErrMsg\":\"Success\",\"Resp\":{\"video_id\":629000000000000023,\"credits\":1000}}",
+  "expectedEnvelope": {
+    "ErrCode": 0,
+    "ErrMsg": "Success",
+    "Resp": {
+      "video_id": "629000000000000023",
+      "credits": 1000
+    }
+  },
+  "expectedData": {
+    "video_id": "629000000000000023",
+    "credits": 1000
+  }
+}

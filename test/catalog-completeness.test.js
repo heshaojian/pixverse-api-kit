@@ -11,6 +11,8 @@ const ROOT = process.cwd();
 const PLATFORM_SKILL = path.join(ROOT, ".agents/skills/pixverse-platform-api/SKILL.md");
 const PLATFORM_OPERATION_REFERENCE = path.join(ROOT, ".agents/skills/pixverse-platform-api/references/operation-catalog.md");
 const ROUTER_SKILL = path.join(ROOT, ".agents/skills/pixverse-api/SKILL.md");
+const MUSIC_MV_DOCUMENTATION_URL = "https://aisphere.feishu.cn/wiki/L8pgwGoSwiDbQ8ksGIHcppcvnrc";
+const MUSIC_MV_OPERATION_IDS = new Set(["audio.verify", "agent.music-mv"]);
 
 test("Platform catalog, validators, fixtures, and help cover the independent inventory", async () => {
   const inventory = JSON.parse(await fs.readFile(
@@ -28,7 +30,11 @@ test("Platform catalog, validators, fixtures, and help cover the independent inv
     assert.equal(operation.validationPolicy, expected.id);
     assert.equal(matchPlatformCommand(operation.command), operation);
     assert.match(help, new RegExp(escapeRegExp(`pixverse-api platform ${operation.command.join(" ")}`)));
-    assert.equal(new URL(operation.documentationUrl).hostname, "docs.platform.pixverse.ai");
+    if (MUSIC_MV_OPERATION_IDS.has(operation.id)) {
+      assert.equal(operation.documentationUrl, MUSIC_MV_DOCUMENTATION_URL);
+    } else {
+      assert.equal(new URL(operation.documentationUrl).hostname, "docs.platform.pixverse.ai");
+    }
 
     for (const fileName of ["request.json", "success.json", "error.json"]) {
       const fixturePath = path.join(ROOT, "test/fixtures/platform", expected.id, fileName);

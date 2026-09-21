@@ -37,6 +37,7 @@ Use `platform raw` only for diagnosis or a newly documented endpoint absent from
 - operation:account.usage
 - operation:upload.image
 - operation:upload.media
+- operation:audio.verify
 - operation:resource.templates
 - operation:resource.tts-speakers
 - operation:resource.restyle-effects
@@ -62,4 +63,5 @@ Use `platform raw` only for diagnosis or a newly documented endpoint absent from
 - operation:video.avatar
 - operation:agent.viral-recreation
 - operation:agent.real-estate
+- operation:agent.music-mv
 - operation:video.status

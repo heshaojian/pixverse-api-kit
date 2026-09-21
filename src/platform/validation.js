@@ -41,7 +41,8 @@ export async function normalizeAndValidatePlatformInput(operation, input, contex
     || operation.validationPolicy === "video.status") {
     // Path extraction above is the complete validation for status/delete lookups.
   } else {
-    await validateSpecializedOperation(operation, payload, query, context);
+    const specializedPayload = await validateSpecializedOperation(operation, payload, query, context);
+    normalizedPayload = specializedPayload ?? payload;
   }
 
   return {

@@ -7,6 +7,7 @@ import {
   validationError,
 } from "./common.js";
 import { inspectLocalMedia as inspectMedia } from "../../core/media.js";
+import { normalizeAndValidateMusicMv, validatePositiveDecimalId } from "./music-mv.js";
 
 const VIDEO_SOURCES = ["source_video_id", "video_media_id"];
 
@@ -14,6 +15,10 @@ export async function validateSpecializedOperation(operation, payload, query = p
   switch (operation.id) {
     case "account.balance": return;
     case "account.usage": return validateUsage(operation, payload);
+    case "audio.verify":
+      requireFields(operation, payload, ["audio_media_id"]);
+      validatePositiveDecimalId(operation, "audio_media_id", payload.audio_media_id);
+      return;
     case "resource.templates": return validateTemplateQuery(operation, query);
     case "resource.tts-speakers": return validateTtsQuery(operation, query);
     case "resource.restyle-effects":
@@ -69,6 +74,7 @@ export async function validateSpecializedOperation(operation, payload, query = p
       return;
     case "agent.viral-recreation": return validateViralAgent(operation, payload, context);
     case "agent.real-estate": return validateRealEstateAgent(operation, payload);
+    case "agent.music-mv": return normalizeAndValidateMusicMv(operation, payload);
     default: throw validationError(operation, `No specialized validator exists for ${operation.id}.`);
   }
 }

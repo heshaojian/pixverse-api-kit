@@ -1,0 +1,38 @@
+{
+  "input": {
+    "mv_agent_type": "vibe_mv_v3_custom",
+    "audio_media_id": "405833376854443",
+    "img_references": [
+      {
+        "img_id": "164913710",
+        "ref_name": "Character Image"
+      }
+    ],
+    "music_style": "Pop",
+    "mv_style": "Custom",
+    "aspect_ratio": "16:9",
+    "quality": "720p",
+    "caption_switch": true,
+    "lip_sync_switch": false,
+    "seed": 42
+  },
+  "method": "POST",
+  "path": "/openapi/v2/video/music_mv_agent/generate",
+  "body": {
+    "mv_agent_type": "vibe_mv_v3_custom",
+    "audio_media_id": "405833376854443",
+    "img_references": [
+      {
+        "img_id": "164913710",
+        "ref_name": "Character Image"
+      }
+    ],
+    "music_style": "Pop",
+    "mv_style": "Custom",
+    "aspect_ratio": "16:9",
+    "quality": "720p",
+    "caption_switch": true,
+    "lip_sync_switch": false,
+    "seed": 42
+  }
+}

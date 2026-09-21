@@ -17,8 +17,11 @@ const successShapes = JSON.parse(fs.readFileSync(
   "utf8",
 ));
 
+const MUSIC_MV_DOCUMENTATION_URL = "https://aisphere.feishu.cn/wiki/L8pgwGoSwiDbQ8ksGIHcppcvnrc";
+const MUSIC_MV_OPERATION_IDS = new Set(["audio.verify", "agent.music-mv"]);
+
 test("Platform catalog matches every independently recorded official operation", () => {
-  assert.equal(PLATFORM_OPERATIONS.length, 30);
+  assert.equal(PLATFORM_OPERATIONS.length, 32);
   assert.deepEqual(
     PLATFORM_OPERATIONS.map((operation) => ({ ...operation, command: [...operation.command] })),
     inventory,
@@ -38,16 +41,27 @@ test("every operation and command is immutable", () => {
   for (const operation of PLATFORM_OPERATIONS) {
     assert.equal(Object.isFrozen(operation), true);
     assert.equal(Object.isFrozen(operation.command), true);
-    assert.match(operation.documentationUrl, /^https:\/\/docs\.platform\.pixverse\.ai\//);
+    assert.equal(
+      ["docs.platform.pixverse.ai", "aisphere.feishu.cn"].includes(new URL(operation.documentationUrl).hostname),
+      true,
+    );
     assert.equal(typeof operation.billing, "string");
     assert.equal(typeof operation.asynchronous, "boolean");
   }
 });
 
 test("every operation links to its exact official documentation page", () => {
-  const urls = PLATFORM_OPERATIONS.map(({ documentationUrl }) => documentationUrl);
-  assert.equal(new Set(urls).size, PLATFORM_OPERATIONS.length);
-  assert.equal(urls.includes("https://docs.platform.pixverse.ai/pixverse-api-llm-txt-2109771m0"), false);
+  const publicUrls = [];
+  for (const operation of PLATFORM_OPERATIONS) {
+    if (MUSIC_MV_OPERATION_IDS.has(operation.id)) {
+      assert.equal(operation.documentationUrl, MUSIC_MV_DOCUMENTATION_URL);
+    } else {
+      assert.equal(new URL(operation.documentationUrl).hostname, "docs.platform.pixverse.ai");
+      publicUrls.push(operation.documentationUrl);
+    }
+  }
+  assert.equal(new Set(publicUrls).size, publicUrls.length);
+  assert.equal(publicUrls.includes("https://docs.platform.pixverse.ai/pixverse-api-llm-txt-2109771m0"), false);
 });
 
 test("catalog lookup resolves IDs and exact CLI segments", () => {

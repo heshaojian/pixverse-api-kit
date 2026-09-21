@@ -1,0 +1,13 @@
+{
+  "httpStatus": 400,
+  "responseText": "{\"ErrCode\":500063,\"ErrMsg\":\"The input content does not comply with platform specifications, please re-enter\",\"Resp\":null}",
+  "expected": {
+    "code": 500063,
+    "message": "The input content does not comply with platform specifications, please re-enter",
+    "details": {
+      "ErrCode": 500063,
+      "ErrMsg": "The input content does not comply with platform specifications, please re-enter",
+      "Resp": null
+    }
+  }
+}
