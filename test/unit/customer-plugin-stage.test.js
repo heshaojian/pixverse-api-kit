@@ -36,6 +36,13 @@ test("staging creates the self-contained marketplace from approved sources", asy
   assert.equal(await exists(path.join(result.packageRoot, "docs/superpowers")), false);
   assert.deepEqual(result.files, [...result.files].sort());
 
+  const stagedOperations = await fs.readFile(
+    path.join(result.pluginRoot, "runtime/src/platform/operations.js"),
+    "utf8",
+  );
+  assert.doesNotMatch(stagedOperations, /feishu\.cn/);
+  assert.match(stagedOperations, /https:\/\/docs\.platform\.pixverse\.ai\//);
+
   const wrapperMode = (await fs.stat(path.join(result.pluginRoot, "scripts/pixverse-api"))).mode;
   assert.notEqual(wrapperMode & 0o100, 0);
 });

@@ -24,6 +24,7 @@ export async function stageCustomerPlugin({
   await fs.mkdir(pluginRoot, { recursive: true });
   await copyApprovedPluginSource(resolvedRepoRoot, packageRoot, pluginRoot);
   await copyRuntimeSources(resolvedRepoRoot, runtimeRoot);
+  await sanitizeRuntimeSources(runtimeRoot);
   await writeRuntimeMetadata(resolvedRepoRoot, runtimeRoot);
   await writeWrapper(pluginRoot);
 
@@ -57,6 +58,16 @@ async function copyRuntimeSources(repoRoot, runtimeRoot) {
       path.join(runtimeRoot, relativeDirectory),
     );
   }
+}
+
+async function sanitizeRuntimeSources(runtimeRoot) {
+  const operationsPath = path.join(runtimeRoot, "src", "platform", "operations.js");
+  const source = await fs.readFile(operationsPath, "utf8");
+  const sanitized = source.replaceAll(
+    "https://aisphere.feishu.cn/wiki/L8pgwGoSwiDbQ8ksGIHcppcvnrc",
+    "https://docs.platform.pixverse.ai/",
+  );
+  await fs.writeFile(operationsPath, sanitized);
 }
 
 async function writeRuntimeMetadata(repoRoot, runtimeRoot) {
