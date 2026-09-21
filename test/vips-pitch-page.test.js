@@ -33,13 +33,25 @@ const visibleText = (html) => html
 test("VIPS page follows the approved Chinese proof-first story", async () => {
   const html = await readPage();
   assert.match(html, /<html lang="zh-CN">/);
-  assert.match(html, /从真实商品样例中，选择三条最值得试点的电商视频工作流/);
+  assert.match(html, /为唯品会真实商品，选择三条最值得试点的视频工作流/);
   assert.match(html, /class="hero-proof"/);
   assert.ok(position(html, 'id="featured"') < position(html, 'id="capabilities"'));
   assert.ok(position(html, 'id="capabilities"') < position(html, 'id="pilot"'));
   assert.ok(position(html, 'id="pilot"') < position(html, 'id="ledger"'));
   assert.match(html, /name="robots" content="noindex, nofollow"/);
   assert.match(html, /1214/);
+});
+
+test("VIPS page uses a restrained co-brand identity and saved-page icon", async () => {
+  const html = await readPage();
+
+  assert.match(html, /class="co-brand-lockup"/);
+  assert.match(html, /class="customer-brand"/);
+  assert.match(html, /assets\/brand\/vips-icon\.ico/);
+  assert.match(html, /aria-hidden="true">×</);
+  assert.match(html, /class="pixverse-brand"/);
+  assert.match(html, /assets\/brand\/pixverse-logo\.svg/);
+  assert.match(html, /rel="apple-touch-icon"[^>]+pixverse-touch-icon\.png/);
 });
 
 test("VIPS page exposes one decision and one primary action", async () => {
@@ -56,6 +68,7 @@ test("VIPS page exposes one decision and one primary action", async () => {
 
 test("three featured cases remain usable without JavaScript", async () => {
   const html = await readPage();
+  const featuredHtml = html.slice(position(html, '<section class="hero"'), position(html, 'id="capabilities"'));
   assert.equal((html.match(/class="[^"]*featured-case/g) ?? []).length, 2);
   assert.equal((html.match(/class="hero-proof"/g) ?? []).length, 1);
   assert.equal((html.match(/preload="metadata"/g) ?? []).length, 1);
@@ -69,6 +82,28 @@ test("three featured cases remain usable without JavaScript", async () => {
   assert.match(html, /男式牛仔裤/);
   assert.match(html, /冰晶护肤/);
   assert.match(html, /商品动效/);
+  assert.doesNotMatch(featuredHtml, /Agent|模型|prompt|重试|job/i);
+  assert.match(
+    featuredHtml,
+    /href="https:\/\/detail\.vip\.com\/detail-1711533687-6922097426018636437\.html" target="_blank" rel="noreferrer"/,
+  );
+  assert.equal((featuredHtml.match(/https:\/\/detail\.vip\.com\//g) ?? []).length, 1);
+});
+
+test("VIPS page exposes the reviewed product directory and shared pilot measures", async () => {
+  const html = await readPage();
+
+  assert.match(html, /id="product-directory"/);
+  assert.match(html, /id="product-directory-mount"/);
+  assert.match(html, /建议共同确认的衡量标准/);
+  for (const metric of [
+    "商品一致性通过率",
+    "从已批准素材到可评审成片的时间",
+    "可进入渠道测试的成片数量",
+    "可复用的创意模式",
+  ]) {
+    assert.match(html, new RegExp(metric));
+  }
 });
 
 test("VIPS page has private provenance and semantic navigation", async () => {
@@ -95,6 +130,9 @@ test("VIPS styles follow PixVerse tokens and product-media constraints", async (
   assert.match(css, /color-scheme:\s*dark/);
   assert.match(css, /\.hero-layout/);
   assert.match(css, /\.workflow-grid[\s\S]*grid-template-columns:\s*repeat\(5/);
+  assert.match(css, /\.product-directory[\s\S]*grid-template-columns:\s*repeat\(3/);
+  assert.match(css, /\.case-product-link/);
+  assert.match(css, /\.pilot-metrics/);
   assert.match(css, /\.evidence-media video[\s\S]*object-fit:\s*contain/);
   assert.match(css, /video:-webkit-full-screen[\s\S]*object-fit:\s*contain/);
   assert.match(css, /min-height:\s*44px/);
