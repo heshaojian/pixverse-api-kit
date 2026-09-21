@@ -49,6 +49,7 @@ Operation record:
 - Billing: non-billable
 - Asynchronous: no
 - Result ID: none
+- Documentation: `https://aisphere.feishu.cn/wiki/L8pgwGoSwiDbQ8ksGIHcppcvnrc`
 
 Required payload:
 
@@ -77,6 +78,7 @@ Operation record:
 - Asynchronous: yes
 - Result ID: `Resp.video_id`
 - Polling: existing `video.status` operation
+- Documentation: `https://aisphere.feishu.cn/wiki/L8pgwGoSwiDbQ8ksGIHcppcvnrc`
 
 The durable job layer submits exactly once, records the trace and returned video ID, and uses the existing resume command after interruption or ambiguous state.
 
@@ -162,6 +164,8 @@ Pricing and concurrency are documentation snapshots, not hardcoded billing calcu
 - `docs/api/`: command and operation documentation updates.
 
 No unrelated refactor is included.
+
+The catalog's documentation URL invariant is widened only enough to allow the reviewed Feishu source for these two operations. Existing entries continue to require `docs.platform.pixverse.ai`; no public documentation URL is invented for an interface that has not yet been published there.
 
 ## Error Handling and Safety
 
