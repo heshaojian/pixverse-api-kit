@@ -119,7 +119,16 @@ async function runDefaultGrowthStudioCommand(args, context) {
 }
 
 function isExecutedDirectly() {
-  return process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+  if (!process.argv[1]) return false;
+  return canonicalPath(process.argv[1]) === canonicalPath(fileURLToPath(import.meta.url));
+}
+
+function canonicalPath(filePath) {
+  try {
+    return fs.realpathSync(filePath);
+  } catch {
+    return path.resolve(filePath);
+  }
 }
 
 if (isExecutedDirectly()) {

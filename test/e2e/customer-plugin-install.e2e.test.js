@@ -10,6 +10,7 @@ import { archiveCustomerPlugin } from "../../scripts/customer-plugin/archive.js"
 import { stageCustomerPlugin } from "../../scripts/customer-plugin/stage.js";
 
 const execFileAsync = promisify(execFile);
+const macTest = process.platform === "darwin" ? test : test.skip;
 
 async function createExtractedPackage(t) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-installer-e2e-"));
@@ -64,7 +65,7 @@ async function readCalls(logPath) {
   return text.trim().split("\n").filter(Boolean).map((line) => JSON.parse(line));
 }
 
-test("macOS helpers install and remove only receipt-owned plugin state", async (t) => {
+macTest("macOS helpers install and remove only receipt-owned plugin state", async (t) => {
   const { root, packageRoot } = await createExtractedPackage(t);
   const home = path.join(root, "home");
   const { binRoot, logPath } = await createFakeCodex(root);
@@ -100,7 +101,7 @@ test("macOS helpers install and remove only receipt-owned plugin state", async (
   assert.equal(await fs.readFile(unrelatedPath, "utf8"), "unrelated\n");
 });
 
-test("failed Codex registration restores the previously installed version", async (t) => {
+macTest("failed Codex registration restores the previously installed version", async (t) => {
   const { root, packageRoot } = await createExtractedPackage(t);
   const home = path.join(root, "home");
   const { binRoot, logPath } = await createFakeCodex(root);

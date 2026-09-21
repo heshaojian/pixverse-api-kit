@@ -21,6 +21,8 @@ test("syntax walker covers nested source and test JavaScript", async () => {
   const files = await collectJavaScriptFiles(process.cwd());
   assert.ok(files.some((file) => file.endsWith("src/platform/webhooks.js")));
   assert.ok(files.some((file) => file.endsWith("test/e2e/platform-webhook.e2e.test.js")));
+  assert.ok(files.some((file) => file.endsWith("scripts/customer-plugin/archive.js")));
+  assert.ok(files.some((file) => file.endsWith("scripts/package-customer-plugin.js")));
   assert.ok(files.every((file) => file.endsWith(".js")));
 });
 

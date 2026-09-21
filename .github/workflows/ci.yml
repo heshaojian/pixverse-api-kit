@@ -34,8 +34,32 @@ jobs:
       - name: Run API tests with coverage
         run: npm run test:coverage
 
+      - name: Verify customer plugin package
+        run: npm run test:customer-plugin
+
       - name: Scan tracked text for secrets
         run: npm run security:scan
 
       - name: Audit high-severity vulnerabilities
         run: npm audit --audit-level=high
+
+  macos-installer:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Verify macOS installer and uninstaller
+        run: node --import ./scripts/no-paid-network.js --test test/e2e/customer-plugin-install.e2e.test.js
