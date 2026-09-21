@@ -20,10 +20,10 @@
   "path": "/openapi/v2/video/music_mv_agent/generate",
   "body": {
     "mv_agent_type": "vibe_mv_v3_custom",
-    "audio_media_id": "405833376854443",
+    "audio_media_id": 405833376854443,
     "img_references": [
       {
-        "img_id": "164913710",
+        "img_id": 164913710,
         "ref_name": "Character Image"
       }
     ],

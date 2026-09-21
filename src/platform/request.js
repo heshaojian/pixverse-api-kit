@@ -1,9 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
+import JSONBigFactory from "json-bigint";
 
 import { PixverseCliError } from "../core/errors.js";
 
 const PATH_PARAMETER = /\{([^}]+)\}/g;
+const JSON_BIG = JSONBigFactory({
+  useNativeBigInt: true,
+  protoAction: "error",
+  constructorAction: "error",
+});
 
 export async function buildPlatformRequest(operation, normalizedInput) {
   assertRequestInputs(operation, normalizedInput);
@@ -17,7 +23,7 @@ export async function buildPlatformRequest(operation, normalizedInput) {
 
   if (operation.bodyMode === "json") {
     headers.set("Content-Type", "application/json");
-    body = JSON.stringify(normalizedInput.payload);
+    body = serializeJsonBody(operation, normalizedInput.payload);
   } else if (operation.bodyMode === "multipart") {
     body = await buildMultipartBody(normalizedInput);
   } else if (operation.bodyMode !== "none") {
@@ -30,6 +36,28 @@ export async function buildPlatformRequest(operation, normalizedInput) {
     headers,
     body,
   };
+}
+
+function serializeJsonBody(operation, payload) {
+  if (!new Set(["audio.verify", "agent.music-mv"]).has(operation.id)) {
+    return JSON.stringify(payload);
+  }
+  const wirePayload = { ...payload };
+  if (wirePayload.audio_media_id !== undefined) {
+    wirePayload.audio_media_id = decimalStringToBigInt(wirePayload.audio_media_id);
+  }
+  for (const field of ["img_references", "style_img_references"]) {
+    if (!Array.isArray(wirePayload[field])) continue;
+    wirePayload[field] = wirePayload[field].map((reference) => ({
+      ...reference,
+      img_id: decimalStringToBigInt(reference.img_id),
+    }));
+  }
+  return JSON_BIG.stringify(wirePayload);
+}
+
+function decimalStringToBigInt(value) {
+  return typeof value === "string" && /^[1-9]\d*$/.test(value) ? BigInt(value) : value;
 }
 
 function interpolatePath(operation, pathParams) {

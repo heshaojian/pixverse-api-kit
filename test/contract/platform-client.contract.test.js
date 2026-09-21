@@ -212,6 +212,47 @@ test("request building preserves repeated query values and serializes local mult
   });
 });
 
+test("Music MV uint64 identifiers stay strings internally but serialize as lossless JSON numbers", async () => {
+  const audioInput = deepFreeze({
+    payload: { audio_media_id: "18446744073709551615" },
+    query: {},
+    pathParams: {},
+    files: {},
+  });
+  const audioRequest = await buildPlatformRequest({
+    id: "audio.verify", method: "POST", path: "/audio", bodyMode: "json",
+  }, audioInput);
+  assert.equal(audioRequest.body, '{"audio_media_id":18446744073709551615}');
+  assert.equal(audioInput.payload.audio_media_id, "18446744073709551615");
+
+  const mvInput = deepFreeze({
+    payload: {
+      audio_media_id: "425662507205761",
+      img_references: [{ img_id: "164913710", ref_name: "Character" }],
+      style_img_references: [{ img_id: "164913711", ref_name: "Style" }],
+      seed: 42,
+    },
+    query: {},
+    pathParams: {},
+    files: {},
+  });
+  const mvRequest = await buildPlatformRequest({
+    id: "agent.music-mv", method: "POST", path: "/mv", bodyMode: "json",
+  }, mvInput);
+  assert.equal(mvRequest.body, '{"audio_media_id":425662507205761,"img_references":[{"img_id":164913710,"ref_name":"Character"}],"style_img_references":[{"img_id":164913711,"ref_name":"Style"}],"seed":42}');
+  assert.equal(mvInput.payload.img_references[0].img_id, "164913710");
+
+  const unrelatedRequest = await buildPlatformRequest({
+    id: "video.avatar", method: "POST", path: "/avatar", bodyMode: "json",
+  }, {
+    payload: { audio_media_id: "18446744073709551615" },
+    query: {},
+    pathParams: {},
+    files: {},
+  });
+  assert.equal(unrelatedRequest.body, '{"audio_media_id":"18446744073709551615"}');
+});
+
 test("client and request boundaries reject malformed construction inputs", async () => {
   for (const options of [
     { apiKey: "", baseUrl: BASE_URL, fetchImpl: () => {} },

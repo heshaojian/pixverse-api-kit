@@ -14,6 +14,7 @@ const MV_STYLES = new Set([
 ]);
 const BOOLEAN_FIELDS = ["caption_switch", "lip_sync_switch", "instrumental_switch"];
 const TEXT_LIMIT = 5_000;
+const UINT64_MAX = 18_446_744_073_709_551_615n;
 
 export function normalizeAndValidateMusicMv(operation, payload) {
   const normalized = normalizeImageReferenceAlias(operation, payload);
@@ -34,6 +35,9 @@ export function normalizeAndValidateMusicMv(operation, payload) {
 export function validatePositiveDecimalId(operation, field, value) {
   if (typeof value !== "string" || !/^[1-9]\d*$/.test(value)) {
     throw validationError(operation, `${field} must be a positive decimal string identifier.`);
+  }
+  if (BigInt(value) > UINT64_MAX) {
+    throw validationError(operation, `${field} must fit within the uint64 range.`);
   }
 }
 

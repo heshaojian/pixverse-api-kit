@@ -32,6 +32,8 @@ A typical specialized preflight is `npm run cli -- platform video image --payloa
 
 `image_references` is accepted as a documented input alias and normalized to `img_references`. Do not send both fields. Lip sync requires recognizable vocals; audio verification does not authorize an automatic paid submission.
 
+Keep Music MV identifiers as decimal strings in payload files and artifacts. The request layer losslessly serializes the documented `uint64` fields (`audio_media_id` and reference `img_id` values) as JSON number tokens because the live verification and generation endpoints reject quoted identifiers.
+
 ### Durable artifact meanings
 
 - `request.json` is written before submission and records the provider, operation, redacted headers, original submission trace, and normalized input.

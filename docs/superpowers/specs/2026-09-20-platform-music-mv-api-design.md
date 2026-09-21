@@ -59,7 +59,7 @@ Required payload:
 }
 ```
 
-The media ID must be retained as a decimal string locally to avoid JavaScript precision loss. The Platform client continues to own `API-KEY`, `Ai-trace-id`, and `Content-Type` headers.
+The media ID must be retained as a decimal string locally to avoid JavaScript precision loss. At the HTTP boundary, the request serializer emits this documented `uint64` as an unquoted JSON number token using a lossless BigInt serializer; the live endpoint rejects a quoted identifier. The Platform client continues to own `API-KEY`, `Ai-trace-id`, and `Content-Type` headers.
 
 ### Music MV generation
 

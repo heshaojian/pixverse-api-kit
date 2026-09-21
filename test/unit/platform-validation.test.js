@@ -217,6 +217,10 @@ test("audio verification requires a positive decimal media ID", async () => {
       /audio_media_id.*positive decimal/i,
     );
   }
+  await assert.rejects(
+    normalizeAndValidatePlatformInput(operation, { audio_media_id: "18446744073709551616" }),
+    /audio_media_id.*uint64/i,
+  );
 });
 
 test("Music MV normalizes the documented image alias without mutating frozen input", async () => {
@@ -260,6 +264,7 @@ test("Music MV rejects ambiguous aliases, unsupported enums, invalid switches, s
     [{ ...base, image_references: [{ img_id: "2" }] }, /only one.*img_references.*image_references/i],
     [{ ...base, mv_agent_type: "unknown" }, /mv_agent_type/i],
     [{ ...base, audio_media_id: "0" }, /audio_media_id.*positive decimal/i],
+    [{ ...base, audio_media_id: "18446744073709551616" }, /audio_media_id.*uint64/i],
     [{ ...base, aspect_ratio: "21:9" }, /aspect_ratio/i],
     [{ ...base, quality: "4k" }, /quality/i],
     [{ ...base, music_style: "Opera" }, /music_style/i],
@@ -270,6 +275,7 @@ test("Music MV rejects ambiguous aliases, unsupported enums, invalid switches, s
     [{ ...base, seed: -1 }, /seed/i],
     [{ ...base, img_references: [{ img_id: "1" }, { img_id: "2" }] }, /img_references.*no more than one/i],
     [{ ...base, img_references: [{ img_id: "0" }] }, /img_id.*positive decimal/i],
+    [{ ...base, img_references: [{ img_id: "18446744073709551616" }] }, /img_id.*uint64/i],
     [{ ...base, img_references: [{ img_id: "1", ref_name: 7 }] }, /ref_name.*string/i],
     [{ ...base, img_references: [], style_img_references: [] }, /Custom.*reference/i],
   ];

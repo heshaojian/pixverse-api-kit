@@ -53,7 +53,7 @@ test("audio verification posts one synchronous request without creating a job", 
   const server = await createMockApiServer((request, response) => {
     assert.equal(request.method, "POST");
     assert.equal(request.url, "/openapi/v2/audio/verification");
-    assert.deepEqual(JSON.parse(request.body), { audio_media_id: "405833376854443" });
+    assert.equal(request.body.toString("utf8"), '{"audio_media_id":405833376854443}');
     sendJson(response, { ErrCode: 0, ErrMsg: "Success", Resp: {} });
   });
   t.after(() => server.close());

@@ -5,6 +5,6 @@
   "method": "POST",
   "path": "/openapi/v2/audio/verification",
   "body": {
-    "audio_media_id": "405833376854443"
+    "audio_media_id": 405833376854443
   }
 }
