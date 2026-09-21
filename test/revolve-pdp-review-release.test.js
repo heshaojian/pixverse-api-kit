@@ -3,6 +3,9 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import test from "node:test";
 
+import { validateComparisonCatalog } from "../deploy/brand-pitches/revolve/pdp-review/data-model.js";
+import { renderComparisonRows } from "../deploy/brand-pitches/revolve/pdp-review/render.js";
+
 const reviewRoot = new URL("../deploy/brand-pitches/revolve/pdp-review/", import.meta.url);
 const v4Page = new URL("../deploy/brand-pitches/revolve/v4/index.html", import.meta.url);
 const campaignRoot = new URL("../pixverse-api-jobs/revolve-pdp/", import.meta.url);
@@ -60,7 +63,7 @@ test("review catalog is presentation-only and contains no private operations dat
   assert.doesNotMatch(raw, /\/Users\/|job_dir|video_id|ledger|price|wallet|prompt|created_at/i);
 });
 
-test("review page is isolated, no-index, and renders fourteen product proofs", async () => {
+test("review page is isolated, no-index, and renders fourteen matched comparisons", async () => {
   const [catalog, html, css, app, headers, robots] = await Promise.all([
     readJson(new URL("catalog.json", reviewRoot)),
     fs.readFile(new URL("index.html", reviewRoot), "utf8"),
@@ -69,27 +72,48 @@ test("review page is isolated, no-index, and renders fourteen product proofs", a
     fs.readFile(new URL("_headers", reviewRoot), "utf8"),
     fs.readFile(new URL("robots.txt", reviewRoot), "utf8"),
   ]);
+  const rendered = renderComparisonRows(validateComparisonCatalog(catalog));
 
   assert.match(html, /<meta name="robots" content="noindex, nofollow, noarchive">/);
-  assert.match(html, /<title>REVOLVE × PixVerse \| PDP Video Review<\/title>/);
-  assert.equal((html.match(/<video\b/g) ?? []).length, 14);
-  assert.equal((html.match(/aria-describedby="motion-/g) ?? []).length, 14);
-  assert.equal((html.match(/preload="metadata"/g) ?? []).length, 1);
-  assert.equal((html.match(/preload="none"/g) ?? []).length, 13);
+  assert.match(html, /<title>REVOLVE × PixVerse \| 0911 vs PDP Review<\/title>/);
+  assert.match(html, /id="review-progress" aria-live="polite"/);
+  assert.match(html, /id="product-jump"/);
+  assert.match(html, /<script type="module" src="\.\/app\.js"><\/script>/);
+  assert.equal((rendered.match(/class="comparison-row"/g) ?? []).length, 14);
+  assert.equal((rendered.match(/<video\b/g) ?? []).length, 28);
+  assert.equal((rendered.match(/<fieldset class="review-group"/g) ?? []).length, 14);
+  assert.equal((rendered.match(/name="review-[^"]+"/g) ?? []).length, 56);
+  assert.equal((rendered.match(/aria-describedby="motion-/g) ?? []).length, 28);
+  assert.equal((rendered.match(/preload="none"/g) ?? []).length, 28);
   assert.ok(catalog.products.every(({ sources, productUrl }) =>
-    html.includes(sources.pdpStandardHigh.videoUrl) && html.includes(productUrl)
+    rendered.includes(sources.original0911.videoUrl)
+      && rendered.includes(sources.pdpStandardHigh.videoUrl)
+      && rendered.includes(productUrl)
   ));
   assert.match(html, />Internal Review</);
   assert.doesNotMatch(html, /Pilot|Schedule|mailto:|revolve-pdp\.pages\.dev/);
-  assert.match(css, /\.demo-media video[^}]*object-fit:\s*contain/s);
+  assert.match(css, /\.media-frame video[^}]*object-fit:\s*contain/s);
+  assert.match(css, /grid-template-columns:\s*minmax\(0, 1fr\) minmax\(0, 1fr\)/);
   assert.doesNotMatch(css, /object-fit:\s*cover/);
+  assert.doesNotMatch(css, /box-shadow/);
   assert.match(app, /IntersectionObserver/);
   assert.match(headers, /X-Robots-Tag:\s*noindex, nofollow, noarchive/i);
   assert.match(robots, /Disallow:\s*\//);
 });
 
 test("deployable review files expose no credentials or internal artifacts", async () => {
-  const names = ["index.html", "styles.css", "app.js", "catalog.json", "_headers", "robots.txt"];
+  const names = [
+    "index.html",
+    "styles.css",
+    "app.js",
+    "catalog.json",
+    "data-model.js",
+    "pair-controller.js",
+    "render.js",
+    "review-store.js",
+    "_headers",
+    "robots.txt",
+  ];
   const raw = (await Promise.all(names.map((name) =>
     fs.readFile(new URL(name, reviewRoot), "utf8")
   ))).join("\n");
@@ -108,15 +132,13 @@ test("every product has a nonempty local poster", async () => {
 });
 
 test("each Standard/high video appears once as a player and once as a direct link", async () => {
-  const [catalog, html] = await Promise.all([
-    readJson(new URL("catalog.json", reviewRoot)),
-    fs.readFile(new URL("index.html", reviewRoot), "utf8"),
-  ]);
+  const catalog = await readJson(new URL("catalog.json", reviewRoot));
+  const rendered = renderComparisonRows(validateComparisonCatalog(catalog));
   assert.equal(new Set(catalog.products.map(({ sources }) => sources.pdpStandardHigh.videoUrl)).size, 14);
   for (const { id, sources } of catalog.products) {
     const videoUrl = sources.pdpStandardHigh.videoUrl;
     const escaped = videoUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     assert.match(videoUrl, /^https:\/\/media\.pixverse\.ai\//);
-    assert.equal((html.match(new RegExp(escaped, "g")) ?? []).length, 2, id);
+    assert.equal((rendered.match(new RegExp(escaped, "g")) ?? []).length, 2, id);
   }
 });
