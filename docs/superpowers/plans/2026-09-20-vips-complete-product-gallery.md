@@ -257,7 +257,7 @@ git commit -m "feat: render complete VIPS product catalog"
 - Modify: `deploy/brand-pitches/vips/human-reviewed-ecommerce/index.html`
 - Modify: `test/vips-pitch-page.test.js`
 
-- [ ] **Step 1: Rewrite the static page assertions first**
+- [x] **Step 1: Rewrite the static page assertions first**
 
 Replace the old “two featured cards plus one hero proof” assertions with structural checks for three self-contained cards.
 
@@ -271,7 +271,7 @@ assert.match(html, /先看三条最能代表业务价值的商品视频/);
 
 Add targeted assertions that every featured article contains exactly one video before its closing tag, that the creative card retains the exact verified VIPS URL, and that only that card exposes a product link.
 
-- [ ] **Step 2: Run the page test and confirm RED**
+- [x] **Step 2: Run the page test and confirm RED**
 
 Run:
 
@@ -281,7 +281,7 @@ node --test test/vips-pitch-page.test.js
 
 Expected: FAIL on the old `hero-proof` and two-card structure.
 
-- [ ] **Step 3: Simplify the hero and construct three featured articles**
+- [x] **Step 3: Simplify the hero and construct three featured articles**
 
 Move the product-motion figure out of `.hero-layout` and make it the first featured article. Keep the hero’s customer proposition and CTA, but remove the visual proof that made the three-item claim misleading.
 
@@ -307,7 +307,7 @@ Use a shared internal structure:
 
 Give the creative card `featured-media-landscape`. Keep `controls`, `playsinline`, accessible labels, and the current poster/preload policy. The featured section now truthfully contains all three items named by its heading.
 
-- [ ] **Step 4: Run the static page test and confirm GREEN**
+- [x] **Step 4: Run the static page test and confirm GREEN**
 
 Run:
 
@@ -317,7 +317,7 @@ node --test test/vips-pitch-page.test.js
 
 Expected: PASS with exactly three featured cards and the existing catalog shell still intact.
 
-- [ ] **Step 5: Commit the semantic page structure**
+- [x] **Step 5: Commit the semantic page structure**
 
 ```bash
 git add deploy/brand-pitches/vips/human-reviewed-ecommerce/index.html test/vips-pitch-page.test.js

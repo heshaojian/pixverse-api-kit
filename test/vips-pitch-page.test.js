@@ -34,7 +34,7 @@ test("VIPS page follows the approved Chinese proof-first story", async () => {
   const html = await readPage();
   assert.match(html, /<html lang="zh-CN">/);
   assert.match(html, /为唯品会真实商品，选择三条最值得试点的视频工作流/);
-  assert.match(html, /class="hero-proof"/);
+  assert.doesNotMatch(html, /class="hero-proof"/);
   assert.ok(position(html, 'id="featured"') < position(html, 'id="capabilities"'));
   assert.ok(position(html, 'id="capabilities"') < position(html, 'id="pilot"'));
   assert.ok(position(html, 'id="pilot"') < position(html, 'id="ledger"'));
@@ -68,9 +68,15 @@ test("VIPS page exposes one decision and one primary action", async () => {
 
 test("three featured cases remain usable without JavaScript", async () => {
   const html = await readPage();
-  const featuredHtml = html.slice(position(html, '<section class="hero"'), position(html, 'id="capabilities"'));
-  assert.equal((html.match(/class="[^"]*featured-case/g) ?? []).length, 2);
-  assert.equal((html.match(/class="hero-proof"/g) ?? []).length, 1);
+  const featuredHtml = html.slice(position(html, 'id="featured"'), position(html, 'id="product-directory"'));
+  const featuredCases = featuredHtml.match(/<article class="featured-case[^"]*"[\s\S]*?<\/article>/g) ?? [];
+
+  assert.match(html, /先看三条最能代表业务价值的商品视频/);
+  assert.equal(featuredCases.length, 3);
+  assert.doesNotMatch(html, /class="hero-proof"/);
+  assert.equal((featuredHtml.match(/class="featured-product-info"/g) ?? []).length, 3);
+  assert.ok(featuredCases.every((record) => (record.match(/<video\b/g) ?? []).length === 1));
+  assert.ok(featuredCases.every((record) => (record.match(/class="featured-product-info"/g) ?? []).length === 1));
   assert.equal((html.match(/preload="metadata"/g) ?? []).length, 1);
   assert.equal((html.match(/preload="none"/g) ?? []).length, 2);
   assert.match(
@@ -88,6 +94,7 @@ test("three featured cases remain usable without JavaScript", async () => {
     /href="https:\/\/detail\.vip\.com\/detail-1711533687-6922097426018636437\.html" target="_blank" rel="noreferrer"/,
   );
   assert.equal((featuredHtml.match(/https:\/\/detail\.vip\.com\//g) ?? []).length, 1);
+  assert.equal((featuredHtml.match(/class="featured-product-link"/g) ?? []).length, 1);
 });
 
 test("VIPS page exposes the reviewed product directory and shared pilot measures", async () => {
