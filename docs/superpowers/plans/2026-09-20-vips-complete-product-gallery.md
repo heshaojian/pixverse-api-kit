@@ -166,7 +166,7 @@ git commit -m "feat: model complete VIPS product catalog"
 - Modify: `deploy/brand-pitches/vips/human-reviewed-ecommerce/render.js`
 - Modify: `test/unit/vips-pitch-render.test.js`
 
-- [ ] **Step 1: Replace the ten-link renderer test with failing complete-gallery tests**
+- [x] **Step 1: Replace the ten-link renderer test with failing complete-gallery tests**
 
 Import and exercise `renderProductCatalog`.
 
@@ -194,7 +194,7 @@ test("product catalog keeps pending products and strict product links", async ()
 
 Also retain the existing escaping and `noreferrer` assertions so catalog metadata is treated as untrusted input.
 
-- [ ] **Step 2: Run the renderer test and confirm RED**
+- [x] **Step 2: Run the renderer test and confirm RED**
 
 Run:
 
@@ -204,7 +204,7 @@ node --test test/unit/vips-pitch-render.test.js
 
 Expected: FAIL because `renderProductCatalog` does not exist.
 
-- [ ] **Step 3: Implement grouped catalog markup**
+- [x] **Step 3: Implement grouped catalog markup**
 
 Replace `getProductLinkRecords` with `getProductCatalogRecords` in the catalog path. Keep the reusable strict `renderProductLink` helper. Render one semantic section per chapter and one article per product.
 
@@ -233,7 +233,7 @@ Keep `renderProductDirectory` as a temporary one-line compatibility wrapper retu
 `renderProductCatalog(data)` so this intermediate commit does not break `app.js`. Remove
 the wrapper when the app import and mount are changed atomically in Task 4.
 
-- [ ] **Step 4: Run renderer and coverage tests**
+- [x] **Step 4: Run renderer and coverage tests**
 
 Run:
 
@@ -244,7 +244,7 @@ npm run test:vips-pitch:coverage
 
 Expected: PASS with at least 80% lines, branches, functions, and statements for `data-model.js` and `render.js`.
 
-- [ ] **Step 5: Commit the renderer increment**
+- [x] **Step 5: Commit the renderer increment**
 
 ```bash
 git add deploy/brand-pitches/vips/human-reviewed-ecommerce/render.js test/unit/vips-pitch-render.test.js

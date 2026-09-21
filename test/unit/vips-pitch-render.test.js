@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import {
   renderCase,
   renderLedger,
+  renderProductCatalog,
   renderProductDirectory,
   safeUrl,
 } from "../../deploy/brand-pitches/vips/human-reviewed-ecommerce/render.js";
@@ -63,16 +64,41 @@ test("rendered external links are HTTPS and noreferrer", async () => {
   }
 });
 
-test("product directory renders ten reviewed mappings without source leakage", async () => {
+test("product catalog renders all 28 reviewed products in five source groups", async () => {
   const fixture = await readFixture();
-  const html = renderProductDirectory(fixture);
+  const html = renderProductCatalog(fixture);
+
+  assert.equal((html.match(/class="product-catalog-card"/g) ?? []).length, 28);
+  assert.equal((html.match(/class="product-catalog-group"/g) ?? []).length, 5);
+  assert.doesNotMatch(html, /product-motion-prompt-baseline/);
+  assert.doesNotMatch(html, /<video\b/);
+});
+
+test("product catalog keeps pending products and strict product links", async () => {
+  const fixture = await readFixture();
+  const html = renderProductCatalog(fixture);
   const urls = [...html.matchAll(/href="(https:\/\/detail\.vip\.com\/[^"]+)"/g)]
     .map(([, url]) => url);
 
-  assert.equal((html.match(/class="product-directory-link"/g) ?? []).length, 10);
+  assert.equal((html.match(/class="product-catalog-link"/g) ?? []).length, 10);
   assert.equal(new Set(urls).size, 9);
+  assert.equal((html.match(/class="product-evidence-link"/g) ?? []).length, 28);
+  assert.match(html, /已有图片，视频待补充/);
+  assert.match(html, /视频待补充/);
   assert.match(html, /target="_blank" rel="noreferrer"/);
   assert.doesNotMatch(html, /L6sbdC5j3obuDoxrpcYcwGySn2e|feishu\.cn/);
+});
+
+test("product catalog escapes product metadata and keeps a temporary app wrapper", async () => {
+  const fixture = await readFixture();
+  const unsafe = structuredClone(fixture);
+  unsafe.chapters[0].cases[0].title = "<script>alert('catalog')</script>";
+
+  const html = renderProductCatalog(unsafe);
+
+  assert.doesNotMatch(html, /<script>/);
+  assert.match(html, /&lt;script&gt;alert\(&#39;catalog&#39;\)&lt;\/script&gt;/);
+  assert.equal(renderProductDirectory(fixture), renderProductCatalog(fixture));
 });
 
 test("linked cases surface the exact product before complete review details", async () => {

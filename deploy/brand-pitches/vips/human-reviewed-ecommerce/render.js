@@ -1,6 +1,6 @@
 import {
   flattenCases,
-  getProductLinkRecords,
+  getProductCatalogRecords,
   getVerdictMeta,
   isSafeMediaUrl,
   isVerifiedProductUrl,
@@ -174,38 +174,73 @@ export function renderCase(record) {
 }
 
 export function renderProductDirectory(data) {
-  const records = getProductLinkRecords(data);
-  const groups = records.reduce((items, record) => {
-    const previous = items.at(-1);
-    if (previous?.chapterId === record.chapterId) {
-      return Object.freeze([
-        ...items.slice(0, -1),
-        Object.freeze({ ...previous, records: Object.freeze([...previous.records, record]) }),
-      ]);
-    }
+  return renderProductCatalog(data);
+}
+
+const groupCatalogRecords = (records) => records.reduce((items, record) => {
+  const previous = items.at(-1);
+  if (previous?.chapterId === record.chapterId) {
     return Object.freeze([
-      ...items,
-      Object.freeze({
-        chapterId: record.chapterId,
-        chapterTitle: record.chapterTitle,
-        records: Object.freeze([record]),
-      }),
+      ...items.slice(0, -1),
+      Object.freeze({ ...previous, records: Object.freeze([...previous.records, record]) }),
     ]);
-  }, Object.freeze([]));
+  }
+  return Object.freeze([
+    ...items,
+    Object.freeze({
+      chapterId: record.chapterId,
+      chapterTitle: record.chapterTitle,
+      records: Object.freeze([record]),
+    }),
+  ]);
+}, Object.freeze([]));
+
+const renderCatalogPreview = (record) => {
+  if (!record.previewImage) {
+    return `<div class="product-catalog-placeholder" role="img" aria-label="${escapeHtml(record.caseTitle)}暂无预览图"><span>视频待补充</span></div>`;
+  }
+  const { url, alt, width, height } = record.previewImage;
+  const dimensions = width === null || height === null ? "" : ` width="${width}" height="${height}"`;
+  return [
+    `<div class="product-catalog-preview">`,
+    `<img src="${escapeHtml(safeUrl(url))}" loading="lazy" decoding="async"${dimensions} alt="${escapeHtml(alt)}">`,
+    `</div>`,
+  ].join("");
+};
+
+const renderCatalogCard = (record) => {
+  const evidenceHref = `#${slug(record.caseId)}`;
+  const productLink = record.productUrl
+    ? renderProductLink({ url: record.productUrl, caseTitle: record.caseTitle }, "product-catalog-link")
+    : "";
+  return [
+    `<article class="product-catalog-card" data-media-status="${escapeHtml(record.mediaStatus)}">`,
+    renderCatalogPreview(record),
+    `<div class="product-catalog-card-body">`,
+    `<p class="product-catalog-workflow">${escapeHtml(record.chapterTitle)}</p>`,
+    `<h4>${escapeHtml(record.caseTitle)}</h4>`,
+    `<div class="product-catalog-meta">${renderVerdict(record.verdict)}<span class="product-media-status">${escapeHtml(record.mediaStatus)}</span></div>`,
+    `<div class="product-catalog-actions">`,
+    `<a class="product-evidence-link" href="${evidenceHref}">查看完整评审</a>`,
+    productLink,
+    `</div>`,
+    `</div>`,
+    `</article>`,
+  ].join("");
+};
+
+export function renderProductCatalog(data) {
+  const records = getProductCatalogRecords(data);
+  const groups = groupCatalogRecords(records);
 
   return [
-    `<div class="product-directory" data-product-count="${records.length}">`,
+    `<div class="product-catalog" data-product-count="${records.length}">`,
     groups.map((group) => [
-      `<section class="product-directory-group" aria-labelledby="product-group-${slug(group.chapterId)}">`,
+      `<section class="product-catalog-group" aria-labelledby="product-group-${slug(group.chapterId)}">`,
       `<h3 id="product-group-${slug(group.chapterId)}">${escapeHtml(group.chapterTitle)}</h3>`,
-      `<ul>`,
-      group.records.map((record) => [
-        `<li>`,
-        `<span>${escapeHtml(record.caseTitle)}</span>`,
-        renderProductLink(record, "product-directory-link"),
-        `</li>`,
-      ].join("")).join(""),
-      `</ul>`,
+      `<div class="product-catalog-grid">`,
+      group.records.map(renderCatalogCard).join(""),
+      `</div>`,
       `</section>`,
     ].join("")).join(""),
     `</div>`,
