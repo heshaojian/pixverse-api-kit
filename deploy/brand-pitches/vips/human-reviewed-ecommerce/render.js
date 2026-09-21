@@ -173,10 +173,6 @@ export function renderCase(record) {
   ].join("");
 }
 
-export function renderProductDirectory(data) {
-  return renderProductCatalog(data);
-}
-
 const groupCatalogRecords = (records) => records.reduce((items, record) => {
   const previous = items.at(-1);
   if (previous?.chapterId === record.chapterId) {

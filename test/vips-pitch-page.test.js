@@ -101,7 +101,9 @@ test("VIPS page exposes the reviewed product directory and shared pilot measures
   const html = await readPage();
 
   assert.match(html, /id="product-directory"/);
-  assert.match(html, /id="product-directory-mount"/);
+  assert.match(html, /id="product-catalog-mount"/);
+  assert.match(html, /全部评审商品/);
+  assert.match(html, /二十八条商品案例/);
   assert.match(html, /建议共同确认的衡量标准/);
   for (const metric of [
     "商品一致性通过率",
@@ -137,7 +139,11 @@ test("VIPS styles follow PixVerse tokens and product-media constraints", async (
   assert.match(css, /color-scheme:\s*dark/);
   assert.match(css, /\.hero-layout/);
   assert.match(css, /\.workflow-grid[\s\S]*grid-template-columns:\s*repeat\(5/);
-  assert.match(css, /\.product-directory[\s\S]*grid-template-columns:\s*repeat\(3/);
+  assert.match(css, /\.product-catalog-grid[\s\S]*grid-template-columns:\s*repeat\(4/);
+  assert.match(css, /\.featured-media-product\s*\{[^}]*aspect-ratio:\s*9\s*\/\s*16/);
+  assert.match(css, /\.featured-media-presenter\s*\{[^}]*aspect-ratio:\s*4\s*\/\s*7/);
+  assert.match(css, /\.featured-media-landscape\s*\{[^}]*aspect-ratio:\s*16\s*\/\s*9/);
+  assert.match(css, /\.featured-media \.evidence-media\s*\{[^}]*object-fit:\s*contain/);
   assert.match(css, /\.case-product-link/);
   assert.match(css, /\.pilot-metrics/);
   assert.match(css, /\.evidence-media video[\s\S]*object-fit:\s*contain/);

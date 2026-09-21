@@ -333,8 +333,9 @@ git commit -m "feat: group three VIPS product video proofs"
 - Modify: `deploy/brand-pitches/vips/human-reviewed-ecommerce/styles.css`
 - Modify: `test/vips-pitch-e2e.test.js`
 - Modify: `test/vips-pitch-page.test.js`
+- Modify: `test/unit/vips-pitch-render.test.js`
 
-- [ ] **Step 1: Add failing integration assertions**
+- [x] **Step 1: Add failing integration assertions**
 
 Update the app/server test to require a rendered 28-product catalog rather than ten links.
 
@@ -348,7 +349,7 @@ assert.doesNotMatch(catalog, /<video\b/);
 
 Add CSS source assertions for a 16:9 landscape frame, portrait frames, `object-fit: contain`, and responsive catalog columns.
 
-- [ ] **Step 2: Run page and E2E tests and confirm RED**
+- [x] **Step 2: Run page and E2E tests and confirm RED**
 
 Run:
 
@@ -358,7 +359,7 @@ node --test test/vips-pitch-page.test.js test/vips-pitch-e2e.test.js
 
 Expected: FAIL because the app still imports `renderProductDirectory` and targets the old mount.
 
-- [ ] **Step 3: Wire the new renderer without changing evidence-ledger behavior**
+- [x] **Step 3: Wire the new renderer without changing evidence-ledger behavior**
 
 Keep the stable `#product-directory` navigation anchor, but change the visible title in
 `index.html` to `全部评审商品`, explain that all 28 products are included, and rename the
@@ -368,7 +369,7 @@ loads. Remove the temporary `renderProductDirectory` wrapper from `render.js` in
 same step. Keep the existing error message, deferred evidence loading, deep-link opening,
 and pilot selector unchanged.
 
-- [ ] **Step 4: Implement restrained, responsive featured and catalog styles**
+- [x] **Step 4: Implement restrained, responsive featured and catalog styles**
 
 Use the existing design tokens. Required behavior:
 
@@ -390,7 +391,7 @@ Example ratio rules:
 .featured-media .evidence-media { width: 100%; height: 100%; object-fit: contain; }
 ```
 
-- [ ] **Step 5: Run focused integration and coverage tests**
+- [x] **Step 5: Run focused integration and coverage tests**
 
 Run:
 
@@ -401,10 +402,10 @@ npm run test:vips-pitch:coverage
 
 Expected: PASS. The fetched catalog contains 28 products; the full evidence ledger still contains 29 reviewed records.
 
-- [ ] **Step 6: Commit the wired responsive experience**
+- [x] **Step 6: Commit the wired responsive experience**
 
 ```bash
-git add deploy/brand-pitches/vips/human-reviewed-ecommerce/index.html deploy/brand-pitches/vips/human-reviewed-ecommerce/app.js deploy/brand-pitches/vips/human-reviewed-ecommerce/render.js deploy/brand-pitches/vips/human-reviewed-ecommerce/styles.css test/vips-pitch-page.test.js test/vips-pitch-e2e.test.js
+git add deploy/brand-pitches/vips/human-reviewed-ecommerce/index.html deploy/brand-pitches/vips/human-reviewed-ecommerce/app.js deploy/brand-pitches/vips/human-reviewed-ecommerce/render.js deploy/brand-pitches/vips/human-reviewed-ecommerce/styles.css test/vips-pitch-page.test.js test/vips-pitch-e2e.test.js test/unit/vips-pitch-render.test.js
 git commit -m "feat: complete VIPS product gallery experience"
 ```
 

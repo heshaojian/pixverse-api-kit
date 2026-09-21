@@ -4,7 +4,7 @@ import {
   toggleWorkflowSelection,
   validatePitchData,
 } from "./data-model.js";
-import { renderLedger, renderProductDirectory } from "./render.js";
+import { renderLedger, renderProductCatalog } from "./render.js";
 
 const DATA_URL = "./data/cases.json";
 const FAILURE_MESSAGE = "完整评审暂不可用，请稍后重试。";
@@ -209,9 +209,9 @@ export function renderLedgerInto({ mount, fallback, data, hash = globalThis.loca
   openEvidenceTarget({ root: mount, data: validated, hash });
 }
 
-export function renderProductDirectoryInto({ mount, data }) {
+export function renderProductCatalogInto({ mount, data }) {
   if (!mount) return false;
-  const markup = renderProductDirectory(validatePitchData(data));
+  const markup = renderProductCatalog(validatePitchData(data));
   const fragment = mount.ownerDocument.createRange().createContextualFragment(markup);
   mount.replaceChildren(fragment);
   return true;
@@ -233,7 +233,7 @@ export async function initPitchPage({
 } = {}) {
   attachDesktopPosters(documentRef);
   const mount = documentRef.querySelector("#ledger-mount");
-  const productDirectoryMount = documentRef.querySelector("#product-directory-mount");
+  const productCatalogMount = documentRef.querySelector("#product-catalog-mount");
   const fallback = documentRef.querySelector(".ledger-fallback");
   const retry = documentRef.getElementById("ledger-retry");
   if (!mount) return;
@@ -248,7 +248,7 @@ export async function initPitchPage({
     if (retry) retry.disabled = true;
     try {
       pitchData = await loadPitchData(fetchImpl);
-      renderProductDirectoryInto({ mount: productDirectoryMount, data: pitchData });
+      renderProductCatalogInto({ mount: productCatalogMount, data: pitchData });
       renderLedgerInto({ mount, fallback, data: pitchData, hash: windowRef.location.hash });
       if (!pilotCleanup) pilotCleanup = attachPilotSelector({ documentRef, data: pitchData, clipboard });
       if (retry) {

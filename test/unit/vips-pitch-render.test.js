@@ -8,7 +8,6 @@ import {
   renderCase,
   renderLedger,
   renderProductCatalog,
-  renderProductDirectory,
   safeUrl,
 } from "../../deploy/brand-pitches/vips/human-reviewed-ecommerce/render.js";
 
@@ -89,7 +88,7 @@ test("product catalog keeps pending products and strict product links", async ()
   assert.doesNotMatch(html, /L6sbdC5j3obuDoxrpcYcwGySn2e|feishu\.cn/);
 });
 
-test("product catalog escapes product metadata and keeps a temporary app wrapper", async () => {
+test("product catalog escapes product metadata", async () => {
   const fixture = await readFixture();
   const unsafe = structuredClone(fixture);
   unsafe.chapters[0].cases[0].title = "<script>alert('catalog')</script>";
@@ -98,7 +97,6 @@ test("product catalog escapes product metadata and keeps a temporary app wrapper
 
   assert.doesNotMatch(html, /<script>/);
   assert.match(html, /&lt;script&gt;alert\(&#39;catalog&#39;\)&lt;\/script&gt;/);
-  assert.equal(renderProductDirectory(fixture), renderProductCatalog(fixture));
 });
 
 test("linked cases surface the exact product before complete review details", async () => {
