@@ -9,15 +9,16 @@ const campaignRoot = new URL("../pixverse-api-jobs/revolve-pdp/", import.meta.ur
 const readJson = async (url) => JSON.parse(await fs.readFile(url, "utf8"));
 const sha256 = (value) => crypto.createHash("sha256").update(value).digest("hex");
 
-test("review catalog contains the fourteen Standard/high PDP outputs in campaign order", async () => {
-  const [catalog, campaign, batch, comparison] = await Promise.all([
+test("review catalog contains matched 0911 and Standard/high outputs in campaign order", async () => {
+  const [catalog, campaign, batch, comparison, v4Html] = await Promise.all([
     readJson(new URL("catalog.json", reviewRoot)),
     readJson(new URL("campaign.json", campaignRoot)),
     readJson(new URL("standard-high-batch-results.json", campaignRoot)),
     readJson(new URL("comparisons/lior-wd140-standard-high/qa.json", campaignRoot)),
+    fs.readFile(v4Page, "utf8"),
   ]);
 
-  assert.equal(catalog.schemaVersion, "revolve-pdp-review.v1");
+  assert.equal(catalog.schemaVersion, "revolve-pdp-review.v2");
   assert.equal(catalog.products.length, 14);
   assert.equal(new Set(catalog.products.map(({ id }) => id)).size, 14);
   assert.deepEqual(
@@ -29,10 +30,19 @@ test("review catalog contains the fourteen Standard/high PDP outputs in campaign
 
   const expectedVideos = new Map(batch.results.map((result) => [result.product_id, result.video_url]));
   expectedVideos.set("LIOR-WD140", comparison.standard_high.video_url);
+  const originalUrls = [...v4Html.matchAll(/<video src="([^"]+)"/g)].map((match) => match[1]);
+  assert.equal(originalUrls.length, 14);
+  assert.deepEqual(
+    catalog.products.map(({ sources }) => sources.original0911.videoUrl),
+    originalUrls,
+  );
   for (const product of catalog.products) {
-    assert.equal(product.videoUrl, expectedVideos.get(product.id), product.id);
+    assert.equal(product.sources.pdpStandardHigh.videoUrl, expectedVideos.get(product.id), product.id);
+    assert.equal(product.sources.original0911.label, "A — 0911 Original");
+    assert.equal(product.sources.pdpStandardHigh.label, "B — PDP Standard/high");
     assert.match(product.productUrl, /^https:\/\/www\.revolve\.com\//);
-    assert.match(product.poster, /^\.\/assets\/posters\/[A-Z0-9-]+\.jpg$/);
+    assert.match(product.sources.original0911.poster, /^\.\/assets\/posters\/0911\/[A-Z0-9-]+\.jpg$/);
+    assert.match(product.sources.pdpStandardHigh.poster, /^\.\/assets\/posters\/[A-Z0-9-]+\.jpg$/);
     assert.ok(product.motionDescription.trim(), product.id);
   }
 });
@@ -66,8 +76,8 @@ test("review page is isolated, no-index, and renders fourteen product proofs", a
   assert.equal((html.match(/aria-describedby="motion-/g) ?? []).length, 14);
   assert.equal((html.match(/preload="metadata"/g) ?? []).length, 1);
   assert.equal((html.match(/preload="none"/g) ?? []).length, 13);
-  assert.ok(catalog.products.every(({ videoUrl, productUrl }) =>
-    html.includes(videoUrl) && html.includes(productUrl)
+  assert.ok(catalog.products.every(({ sources, productUrl }) =>
+    html.includes(sources.pdpStandardHigh.videoUrl) && html.includes(productUrl)
   ));
   assert.match(html, />Internal Review</);
   assert.doesNotMatch(html, /Pilot|Schedule|mailto:|revolve-pdp\.pages\.dev/);
@@ -90,7 +100,7 @@ test("deployable review files expose no credentials or internal artifacts", asyn
 test("every product has a nonempty local poster", async () => {
   const catalog = await readJson(new URL("catalog.json", reviewRoot));
   for (const product of catalog.products) {
-    const poster = new URL(product.poster.replace(/^\.\//, ""), reviewRoot);
+    const poster = new URL(product.sources.pdpStandardHigh.poster.replace(/^\.\//, ""), reviewRoot);
     const stat = await fs.stat(poster);
     assert.ok(stat.isFile(), product.id);
     assert.ok(stat.size > 10_000, `${product.id} poster is unexpectedly small`);
@@ -102,8 +112,9 @@ test("each Standard/high video appears once as a player and once as a direct lin
     readJson(new URL("catalog.json", reviewRoot)),
     fs.readFile(new URL("index.html", reviewRoot), "utf8"),
   ]);
-  assert.equal(new Set(catalog.products.map(({ videoUrl }) => videoUrl)).size, 14);
-  for (const { id, videoUrl } of catalog.products) {
+  assert.equal(new Set(catalog.products.map(({ sources }) => sources.pdpStandardHigh.videoUrl)).size, 14);
+  for (const { id, sources } of catalog.products) {
+    const videoUrl = sources.pdpStandardHigh.videoUrl;
     const escaped = videoUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     assert.match(videoUrl, /^https:\/\/media\.pixverse\.ai\//);
     assert.equal((html.match(new RegExp(escaped, "g")) ?? []).length, 2, id);
