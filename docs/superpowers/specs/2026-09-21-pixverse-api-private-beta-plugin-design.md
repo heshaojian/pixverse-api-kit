@@ -1,4 +1,4 @@
-# PixVerse API Agent Kit Private Beta Plugin Design
+# PixVerse API Plugin Private Beta Design
 
 **Date:** 2026-09-21
 
@@ -6,13 +6,13 @@
 
 ## Goal
 
-Create a private-beta Codex plugin that selected recipients can install as one package and use to operate the PixVerse Platform API and Growth Studio API through the existing agent-safe CLI and skills.
+Create private-beta PixVerse API Plugin packages that selected recipients can install in either Codex or Claude Code and use to operate the PixVerse Platform API and Growth Studio API through the existing agent-safe CLI and skills.
 
-The deliverable is a sanitized, self-contained archive. It is not a copy of the internal repository, does not contain Git history, and does not require recipients to clone this repository or install an npm package globally.
+The deliverable is one sanitized release bundle containing separately validated Codex and Claude Code plugin archives. It is not a copy of the internal repository, does not contain Git history, and does not require recipients to clone this repository or install an npm package globally.
 
 ## Product Boundary
 
-The plugin is named `pixverse-api-agent-kit`. It preserves the current product architecture:
+The product is named **PixVerse API Plugin**. The distribution repository is named `pixverse-api-plugin`, and the plugin identifier on both hosts is `pixverse-api`. It preserves the current product architecture:
 
 ```text
 pixverse-api
@@ -24,40 +24,44 @@ The general PixVerse web-product CLI remains the separate `pixverse` executable.
 
 The first private beta version is `0.3.0-beta.1`.
 
-## Selected Distribution Model
+## Cross-Agent Architecture
 
-The private beta is distributed as a local Codex marketplace archive:
+The implementation has one canonical source for the runtime, API references, neutral examples, and skill content. A build adapter produces host-specific manifests, marketplace metadata, skill frontmatter, command paths, validation, and installation instructions.
+
+The generated host packages never reference a shared directory outside their own plugin root. Each archive is self-contained because both Codex and Claude Code may copy or cache installed plugins independently.
+
+The private beta release bundle contains:
 
 ```text
-pixverse-api-private-beta-0.3.0-beta.1/
-├── marketplace.json
-├── plugins/
-│   └── pixverse-api-agent-kit/
-│       ├── .codex-plugin/plugin.json
-│       ├── skills/
-│       │   ├── pixverse-api/
-│       │   ├── pixverse-platform-api/
-│       │   └── pixverse-growth-studio-api/
-│       ├── scripts/
-│       │   └── pixverse-api
-│       ├── runtime/
-│       │   ├── src/
-│       │   ├── node_modules/
-│       │   ├── package.json
-│       │   └── package-lock.json
-│       ├── examples/
-│       ├── docs/api/
-│       ├── README.md
-│       ├── LICENSE
-│       ├── NOTICE
-│       ├── SECURITY.md
-│       └── SUPPORT.md
-├── INSTALL.md
+pixverse-api-plugin-0.3.0-beta.1/
+├── pixverse-api-plugin-codex-0.3.0-beta.1.zip
+├── pixverse-api-plugin-claude-0.3.0-beta.1.zip
+├── INSTALL-CODEX.md
+├── INSTALL-CLAUDE.md
 ├── MANIFEST.sha256
 └── release-report.json
 ```
 
-The archive contains no `.git` directory. A recipient extracts it, registers the extracted root as a local marketplace, installs `pixverse-api-agent-kit@pixverse-private-beta`, and starts a new Codex task so the skills are loaded.
+Each host archive contains one local marketplace and one self-contained plugin:
+
+```text
+Codex archive                          Claude Code archive
+marketplace.json                       .claude-plugin/marketplace.json
+plugins/pixverse-api/                  plugins/pixverse-api/
+  .codex-plugin/plugin.json              .claude-plugin/plugin.json
+  skills/                                 skills/
+  scripts/pixverse-api                    scripts/pixverse-api
+  runtime/                                runtime/
+  examples/                               examples/
+  docs/api/                               docs/api/
+  README.md                               README.md
+  LICENSE                                 LICENSE
+  NOTICE                                  NOTICE
+  SECURITY.md                             SECURITY.md
+  SUPPORT.md                              SUPPORT.md
+```
+
+Neither archive contains a `.git` directory. Recipients extract only the archive for their host, register its root as a local marketplace, install `pixverse-api`, and start a new task or session so the skills are loaded.
 
 ## Why the Runtime Is Embedded
 
@@ -67,34 +71,44 @@ This design provides one version boundary for agent instructions and executable 
 
 Recipients must provide Node.js 20 or newer. The private beta targets macOS and Linux. Windows support is not claimed until the wrapper and release artifact pass a native Windows smoke test.
 
-## Marketplace and Plugin Manifests
+## Host-Specific Manifests
 
-The marketplace identifier is `pixverse-private-beta`. Its entry uses:
+### Codex
 
-- source path `./plugins/pixverse-api-agent-kit`;
+The Codex marketplace identifier is `pixverse-private-beta`. Its entry uses:
+
+- source path `./plugins/pixverse-api`;
 - installation policy `AVAILABLE`;
 - authentication policy `ON_INSTALL`;
 - category `Developer Tools`.
 
-The plugin manifest uses:
+The Codex plugin manifest at `.codex-plugin/plugin.json` uses:
 
-- name `pixverse-api-agent-kit`;
+- name `pixverse-api`;
 - version `0.3.0-beta.1`;
 - author name `PixVerse`;
 - skill path `./skills/`;
-- display name `PixVerse API Agent Kit`;
+- display name `PixVerse API Plugin`;
 - descriptions that distinguish Platform API, Growth Studio API, and the separate web CLI;
 - no MCP, app, or hook fields because the package provides none.
 
-The manifest omits unverified website, privacy-policy, terms, email, and repository URLs. It does not claim public availability.
+### Claude Code
+
+The Claude marketplace identifier is also `pixverse-private-beta`. Its manifest lives at `.claude-plugin/marketplace.json`, identifies PixVerse as the owner, and points to `./plugins/pixverse-api`.
+
+The Claude plugin manifest at `.claude-plugin/plugin.json` uses the same plugin name, version, description, and author identity. Skills live at the plugin root under `skills/`. Executables remain under `scripts/`, not `bin/`, so the package remains compatible with Claude organization distribution rules. Claude skills invoke the wrapper through `${CLAUDE_PLUGIN_ROOT}/scripts/pixverse-api`.
+
+Both manifests omit unverified website, privacy-policy, terms, email, and repository URLs. Neither claims public availability.
 
 ## Skills
 
-The package contains three customer-safe skills:
+Each package contains three customer-safe skills generated from the same canonical sources:
 
-1. `pixverse-api` routes requests to the correct provider and explains setup and shared safety rules.
-2. `pixverse-platform-api` covers Platform discovery, upload, generation, editing, specialized agents, polling, balance, usage, and recovery.
-3. `pixverse-growth-studio-api` covers Growth Studio uploads, wallet reads, product-page video workflows, PDP creation, polling, and recovery.
+1. `start` routes requests to the correct provider and explains setup and shared safety rules.
+2. `platform` covers Platform discovery, upload, generation, editing, specialized agents, polling, balance, usage, and recovery.
+3. `growth-studio` covers Growth Studio uploads, wallet reads, product-page video workflows, PDP creation, polling, and recovery.
+
+Claude exposes these as `/pixverse-api:start`, `/pixverse-api:platform`, and `/pixverse-api:growth-studio`. Codex retains normal automatic discovery and its native explicit-skill syntax. Host adapters may change only invocation metadata and wrapper paths; API semantics and safety rules remain identical.
 
 The exported skills remove:
 
@@ -104,7 +118,7 @@ The exported skills remove:
 - private Feishu links and internal planning documents;
 - live job IDs, balances, media URLs, credentials, and account details.
 
-Every command in the skills invokes the bundled wrapper through a plugin-relative path. Detailed endpoint catalogs and payload schemas remain in focused references so the entrypoint skills stay concise.
+Every command in the skills invokes the bundled wrapper through a host-supported plugin-relative path. Detailed endpoint catalogs and payload schemas remain in focused references so the entrypoint skills stay concise.
 
 ## Latest PDP Contract Prerequisite
 
@@ -187,7 +201,7 @@ The plugin includes third-party notices for every embedded dependency. The priva
 
 ## Deterministic Build
 
-An internal build command creates the release candidate:
+An internal build command creates both host candidates and the containing release bundle:
 
 ```text
 npm run package:customer-plugin
@@ -199,12 +213,13 @@ The builder:
 2. creates an isolated temporary staging directory;
 3. copies and transforms only approved files;
 4. installs production dependencies from the lockfile into the staged runtime;
-5. validates all skills and the plugin manifest;
+5. validates the shared skills and both host manifest sets;
 6. runs denylist and secret checks against the staged tree;
-7. creates a reproducible ZIP with stable paths and normalized timestamps;
-8. writes `MANIFEST.sha256` for every packaged file;
-9. writes `release-report.json` with version, file count, checks performed, and archive checksum;
-10. extracts the archive into a second temporary directory and runs installed-artifact smoke tests.
+7. renders independent Codex and Claude Code marketplace trees from the canonical sources;
+8. creates two reproducible ZIPs with stable paths and normalized timestamps;
+9. writes `MANIFEST.sha256` for every packaged file and both archives;
+10. writes one `release-report.json` with version, per-host file counts, checks performed, and archive checksums;
+11. extracts each archive into a separate temporary directory and runs host-specific installed-artifact smoke tests.
 
 The builder never reads `.env`, job directories, browser state, or live credentials.
 
@@ -218,39 +233,40 @@ The exact staged and extracted artifacts must pass:
 - CLI syntax checks;
 - tracked-source and staged-artifact secret scans;
 - dependency audit with no unresolved high-severity vulnerability;
-- skill validation for all three skills;
-- plugin manifest validation;
-- marketplace path and policy validation;
+- shared semantic checks for all three canonical skills;
+- Codex skill and plugin-manifest validation;
+- Claude Code skill, plugin, and marketplace validation with `claude plugin validate`;
+- per-host marketplace path and policy validation;
 - archive inventory and denylist checks;
 - checksum verification;
 - Node.js 20+ runtime check;
-- extracted `pixverse-api --version` and top-level/provider help checks;
+- extracted `pixverse-api --version` and top-level/provider help checks from both wrappers;
 - representative credential-free Platform and PDP dry runs;
 - mocked Growth Studio create, single-submit, poll, and resume checks;
 - verification that no paid or authenticated network request occurs during testing.
 
-An independent security review and code review inspect the final staged diff and release report before the candidate is considered shareable.
+An independent security review and code review inspect both staged trees, both archives, and the release report before either candidate is considered shareable. Missing host tooling blocks claiming support for that host; it is not silently skipped.
 
 ## Installation Experience
 
-`INSTALL.md` gives the recipient this flow:
+`INSTALL-CODEX.md` and `INSTALL-CLAUDE.md` give recipients the host-specific commands for this shared flow:
 
 1. Verify the archive checksum.
 2. Extract the archive to a stable local directory.
-3. Register that directory as a local Codex marketplace.
-4. Install `pixverse-api-agent-kit@pixverse-private-beta`.
+3. Register that directory as the selected host's local marketplace.
+4. Install `pixverse-api@pixverse-private-beta`.
 5. Configure the applicable provider credential in the server environment.
-6. Start a new Codex task.
+6. Start a new Codex task or Claude Code session.
 7. Run a read-only status/help command and a credential-free dry run before any billable operation.
 
-The document also explains removal, upgrading to a later private-beta archive, and how to collect redacted diagnostics for support.
+Each document also explains removal, upgrading to a later private-beta archive, reloading skills, and collecting redacted diagnostics for support. Claude documentation includes `claude --plugin-dir` ZIP testing and namespaced skill invocation; Codex documentation uses its marketplace and plugin commands.
 
 ## Release and Sharing Boundary
 
 Implementation produces a local release candidate only. It does not:
 
 - push changes or create a public repository;
-- upload the archive to GitHub, npm, cloud storage, email, or chat;
+- upload either archive to GitHub, npm, cloud storage, email, or chat;
 - install the plugin into another person's environment;
 - invite or notify a recipient;
 - submit any billable PixVerse request.
@@ -262,18 +278,18 @@ Sharing the candidate requires a later explicit recipient-specific approval afte
 The work is complete when:
 
 1. the latest PDP interface is implemented and tested;
-2. one deterministic command builds the private-beta marketplace archive;
-3. the archive contains only the documented allowlist;
-4. manifest, skills, CLI, dry-run, recovery, coverage, security, dependency, and checksum gates pass against the extracted artifact;
+2. one deterministic command builds the Codex archive, Claude Code archive, and containing release bundle;
+3. both archives contain only the documented allowlist;
+4. each host's manifest, marketplace, skills, CLI, dry-run, recovery, security, and checksum gates pass against its extracted artifact, while shared runtime coverage remains at least 80%;
 5. installation and support documentation are understandable without access to the internal repository;
-6. the archive contains no secrets, customer material, internal paths, private source links, or Git history;
-7. the artifact remains local until separate sharing approval is given.
+6. neither archive contains secrets, customer material, internal paths, private source links, or Git history;
+7. both artifacts remain local until separate sharing approval is given.
 
 ## Deferred Work
 
 The following are outside this private-beta design:
 
-- public GitHub or npm publication;
+- public GitHub, npm, Codex marketplace, or Claude marketplace publication;
 - automatic update delivery;
 - Windows support claims;
 - public privacy-policy or terms URLs;
