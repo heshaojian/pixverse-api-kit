@@ -111,15 +111,15 @@ The implementation must remain safe to forward within the intended customer grou
 
 ## Data And Rendering
 
-Extend the existing `source` record with a typed `productLinkSource` object:
+Keep the Feishu document ID out of the deploy artifact. Add the source mapping to a repository-only test fixture and expose only the safe revision number in the deploy data:
 
 ```json
 {
-  "documentId": "L6sbdC5j3obuDoxrpcYcwGySn2e",
-  "revisionId": 5,
-  "verifiedAt": "2026-09-20"
+  "productLinkRevisionId": 5
 }
 ```
+
+The repository-only fixture records the case IDs, exact product URLs, revision `5`, and verification date. It may name the source document for maintainers because it is not served with the pitch. Customer-visible markup and deploy JSON must not contain the Feishu document ID or URL.
 
 Add immutable selectors that:
 
@@ -158,7 +158,7 @@ The icon is an identity marker, not a claim that the page is an official VIPS pu
 
 Automated tests must prove:
 
-- The product-link provenance matches document revision 5.
+- The repository-only product-link fixture matches document revision 5 and the deploy artifact exposes no Feishu token.
 - Exactly ten cases map to nine unique approved VIPS product-detail URLs.
 - Only matching featured cases receive a visible product link.
 - Every rendered product link is HTTPS, on `detail.vip.com`, query-free, fragment-free, and `noreferrer`.
