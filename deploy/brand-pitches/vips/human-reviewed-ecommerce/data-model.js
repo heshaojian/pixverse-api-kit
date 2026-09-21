@@ -74,6 +74,19 @@ export function isSafeMediaUrl(value) {
   return /^assets\/(?:images|videos)\/[a-z0-9][a-z0-9.-]*$/.test(value);
 }
 
+export function isVerifiedProductUrl(value) {
+  if (!isSafeMediaUrl(value) || !/^https:/i.test(value)) return false;
+  try {
+    const parsed = new URL(value);
+    return parsed.hostname === "detail.vip.com"
+      && /^\/detail-[0-9]+-[0-9]+\.html$/.test(parsed.pathname)
+      && !parsed.search
+      && !parsed.hash;
+  } catch {
+    return false;
+  }
+}
+
 const assertDimensions = (dimensions, label) => {
   if (!isObject(dimensions)) throw new Error(`${label}.dimensions must be an object`);
   const { width, height, aspectRatio } = dimensions;
@@ -94,6 +107,9 @@ const assertMedia = (media, label) => {
   if (!["image", "video", "link"].includes(media.type)) throw new Error(`${label}.type is unsupported`);
   assertString(media.label, `${label}.label`);
   assertString(media.url, `${label}.url`);
+  if (media.type === "link" && !isVerifiedProductUrl(media.url)) {
+    throw new Error(`Invalid VIPS product URL: ${media.url}`);
+  }
   if (!isSafeMediaUrl(media.url)) throw new Error(`Unsafe media URL: ${media.url}`);
   if (!SOURCE_KINDS.has(media.sourceKind)) throw new Error(`${label}.sourceKind is unsupported`);
   assertString(media.alt, `${label}.alt`);
@@ -159,6 +175,21 @@ const assertChapter = (chapter, label) => {
 export function flattenCases(data) {
   validatePitchData(data);
   return Object.freeze(data.chapters.flatMap(({ cases }) => cases));
+}
+
+export function getProductLinkRecords(data) {
+  const validated = validatePitchData(data);
+  return Object.freeze(validated.chapters.flatMap((chapter) =>
+    chapter.cases.flatMap((record) => record.inputs
+      .filter(({ type }) => type === "link")
+      .map(({ url }) => Object.freeze({
+        chapterId: chapter.id,
+        chapterTitle: chapter.title,
+        caseId: record.id,
+        caseTitle: record.title,
+        url,
+      }))),
+  ));
 }
 
 export function getVerdictMeta(verdict) {
@@ -257,6 +288,7 @@ export function validatePitchData(data) {
   if (!isObject(data)) throw new Error("Pitch data must be an object");
   if (data.schemaVersion !== "vips-pitch.v1") throw new Error("Unsupported schemaVersion");
   if (data.source?.revisionId !== 1214) throw new Error("Expected revision 1214");
+  if (data.source.productLinkRevisionId !== 5) throw new Error("Expected product-link revision 5");
   assertArray(data.featuredCaseIds, "featuredCaseIds");
   assertUnique(data.featuredCaseIds, "featured case id");
   assertArray(data.chapters, "chapters");

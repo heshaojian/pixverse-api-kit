@@ -8,8 +8,10 @@ import {
   buildPilotSummary,
   flattenCases,
   getFeaturedCases,
+  getProductLinkRecords,
   getVerdictMeta,
   isSafeMediaUrl,
+  isVerifiedProductUrl,
   resolveEvidenceTarget,
   toAttemptDomId,
   toggleWorkflowSelection,
@@ -115,6 +117,46 @@ test("isSafeMediaUrl rejects malformed and ambiguous paths", () => {
   assert.equal(isSafeMediaUrl("https://example.com/video.mp4?download=1"), false);
   assert.equal(isSafeMediaUrl("https://example.com/video.mp4#preview"), false);
   assert.equal(isSafeMediaUrl("https://example.com/video.mp4"), true);
+});
+
+test("verified VIPS product URLs use the exact HTTPS detail route", () => {
+  assert.equal(
+    isVerifiedProductUrl("https://detail.vip.com/detail-0-6921774026741411905.html"),
+    true,
+  );
+  assert.equal(
+    isVerifiedProductUrl("https://detail.vip.com/detail-0-6921774026741411905.html?track=1"),
+    false,
+  );
+  assert.equal(
+    isVerifiedProductUrl("https://example.com/detail-0-6921774026741411905.html"),
+    false,
+  );
+  assert.equal(
+    isVerifiedProductUrl("https://detail.vip.com/detail-x-6921774026741411905.html"),
+    false,
+  );
+});
+
+test("product-link records preserve reviewed order and immutable provenance", async () => {
+  const fixture = await readFixture();
+  const mappingPath = path.join(repoRoot, "test/fixtures/vips-product-links.json");
+  const mapping = JSON.parse(await fs.readFile(mappingPath, "utf8"));
+  const records = getProductLinkRecords(fixture);
+
+  assert.equal(fixture.source.productLinkRevisionId, 5);
+  assert.equal(records.length, 10);
+  assert.equal(new Set(records.map(({ url }) => url)).size, 9);
+  assert.ok(Object.isFrozen(records));
+  assert.ok(records.every(Object.isFrozen));
+  assert.deepEqual(
+    records.map(({ caseId, url }) => ({ caseId, url })),
+    mapping.records,
+  );
+
+  const unsafe = structuredClone(fixture);
+  unsafe.chapters[0].cases[0].inputs.find(({ type }) => type === "link").url += "?track=1";
+  assert.throws(() => validatePitchData(unsafe), /VIPS product URL/i);
 });
 
 test("pilot selection is immutable, reversible, and rejects a fourth workflow", async () => {
