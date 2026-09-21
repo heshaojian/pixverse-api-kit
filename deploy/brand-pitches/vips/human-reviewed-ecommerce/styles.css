@@ -529,8 +529,9 @@ video:fullscreen { object-fit: contain; background: var(--background-primary); }
   :root { --page-gutter: 16px; }
   .site-header { grid-template-columns: 1fr; padding: 8px var(--page-gutter); }
   .co-brand-lockup { justify-self: start; }
-  .customer-title { font-size: 14px; line-height: 19px; }
-  .site-nav { grid-column: 1; width: 100%; }
+  .customer-title { font-size: 14px; line-height: 19px; text-align: left; }
+  .site-nav { display: grid; grid-column: 1; grid-template-columns: repeat(4, minmax(0, 1fr)); width: 100%; overflow: visible; }
+  .site-nav a { min-width: 0; padding: 0 4px; text-align: center; }
   .hero, .featured, .products, .capabilities, .ledger, .pilot, .site-footer { width: min(100% - 32px, 1180px); padding: 48px 0; }
   .hero { padding-top: 32px; }
   h1 { font-size: 36px; line-height: 44px; }

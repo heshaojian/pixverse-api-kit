@@ -42,5 +42,10 @@ test("VIPS co-brand assets retain verified local provenance", async () => {
     assert.equal(bytes.length, asset.bytes, asset.id);
     assert.equal(createHash("sha256").update(bytes).digest("hex"), asset.sha256, asset.id);
     assert.equal(mimeResult.stdout.trim(), asset.mimeType, asset.id);
+    const relativePath = path.relative(repoRoot, absolutePath);
+    await assert.doesNotReject(
+      execFile("git", ["ls-files", "--error-unmatch", relativePath], { cwd: repoRoot }),
+      `${asset.id} must be tracked`,
+    );
   }
 });

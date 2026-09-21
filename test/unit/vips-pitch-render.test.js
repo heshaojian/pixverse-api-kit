@@ -90,6 +90,14 @@ test("linked cases surface the exact product before complete review details", as
   assert.doesNotMatch(unlinkedHtml, /case-product-link|查看唯品会商品详情/);
 });
 
+test("renderCase refuses a product link outside the verified VIPS detail route", async () => {
+  const fixture = await readFixture();
+  const record = structuredClone(fixture.chapters[0].cases[0]);
+  record.inputs.find(({ type }) => type === "link").url = "https://example.com/detail-0-6921774026741411905.html";
+
+  assert.throws(() => renderCase(record), /VIPS product URL/i);
+});
+
 test("rendered media uses accessible lazy local evidence", async () => {
   const fixture = await readFixture();
   const localCase = fixture.chapters.flatMap(({ cases }) => cases)

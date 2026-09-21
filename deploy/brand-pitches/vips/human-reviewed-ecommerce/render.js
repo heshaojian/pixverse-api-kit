@@ -3,6 +3,7 @@ import {
   getProductLinkRecords,
   getVerdictMeta,
   isSafeMediaUrl,
+  isVerifiedProductUrl,
   toAttemptDomId,
   validatePitchData,
 } from "./data-model.js";
@@ -52,8 +53,13 @@ const renderExternalMediaLink = (media) => {
   ].join("");
 };
 
+const safeProductUrl = (value) => {
+  if (!isVerifiedProductUrl(value)) throw new Error(`Invalid VIPS product URL: ${value}`);
+  return value;
+};
+
 const renderProductLink = ({ url, caseTitle }, className = "case-product-link") => [
-  `<a class="${escapeHtml(className)}" href="${escapeHtml(safeUrl(url))}" target="_blank" rel="noreferrer"`,
+  `<a class="${escapeHtml(className)}" href="${escapeHtml(safeProductUrl(url))}" target="_blank" rel="noreferrer"`,
   ` aria-label="查看${escapeHtml(caseTitle)}的唯品会商品详情">`,
   `查看唯品会商品详情 <span aria-hidden="true">↗</span>`,
   `</a>`,
