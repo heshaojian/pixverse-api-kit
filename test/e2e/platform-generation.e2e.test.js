@@ -37,6 +37,61 @@ test("offline upload feeds image generation and reaches success", async (t) => {
   assert.equal((await fs.stat(path.join(result.job_dir, "request.json"))).isFile(), true);
 });
 
+test("offline audio upload, verification, and Music MV generation reach success", async (t) => {
+  const root = await createTempJobRoot(t);
+  const audio = fileURLToPath(new URL("../fixtures/media/tiny.wav", import.meta.url));
+  let statusReads = 0;
+  const server = await createMockApiServer((request, response) => {
+    if (request.url === "/openapi/v2/media/upload") {
+      return sendJson(response, { ErrCode: 0, Resp: { media_id: "405833376854443" } });
+    }
+    if (request.url === "/openapi/v2/audio/verification") {
+      return sendJson(response, { ErrCode: 0, Resp: {} });
+    }
+    if (request.url === "/openapi/v2/video/music_mv_agent/generate") {
+      return sendJson(response, { ErrCode: 0, Resp: { video_id: "629000000000000023" } });
+    }
+    if (request.url === "/openapi/v2/video/result/629000000000000023") {
+      statusReads += 1;
+      return sendJson(response, {
+        ErrCode: 0,
+        Resp: {
+          id: "629000000000000023",
+          status: statusReads === 1 ? 5 : 1,
+          url: "https://example.test/music-mv.mp4",
+        },
+      });
+    }
+    throw new Error(`Unexpected request ${request.url}`);
+  });
+  t.after(() => server.close());
+  const client = new PlatformClient({
+    apiKey: "test-key",
+    baseUrl: server.baseUrl,
+    fetchImpl: globalThis.fetch,
+    inspectLocalMedia: async () => ({ size_bytes: 256, duration_seconds: 12, streams: [{ codec_type: "audio" }] }),
+  });
+
+  const upload = await client.execute("upload.media", { file: audio });
+  await client.execute("audio.verify", { audio_media_id: upload.data.media_id });
+  const result = await submitPlatformJob(client, "agent.music-mv", {
+    mv_agent_type: "vibe_mv_v3_custom",
+    audio_media_id: upload.data.media_id,
+    aspect_ratio: "16:9",
+    quality: "720p",
+  }, { jobRoot: root, poll: true, sleep: async () => {} });
+
+  assert.equal(result.status, "succeeded");
+  assert.deepEqual(server.requests.map(({ method, url }) => [method, url]), [
+    ["POST", "/openapi/v2/media/upload"],
+    ["POST", "/openapi/v2/audio/verification"],
+    ["POST", "/openapi/v2/video/music_mv_agent/generate"],
+    ["GET", "/openapi/v2/video/result/629000000000000023"],
+    ["GET", "/openapi/v2/video/result/629000000000000023"],
+  ]);
+  assert.equal((await readJobArtifacts(result.job_dir))["final.json"].data.url, "https://example.test/music-mv.mp4");
+});
+
 for (const [rawStatus, expected] of [[6, "deleted"], [7, "moderation_failed"], [8, "failed"]]) {
   test(`terminal ${expected} writes final and safe error artifacts`, async (t) => {
     const root = await createTempJobRoot(t);

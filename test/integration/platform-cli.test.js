@@ -49,6 +49,58 @@ test("catalog commands read --payload and produce a stable JSON-safe result over
   assert.equal(server.requests.length, 1);
 });
 
+test("audio verification posts one synchronous request without creating a job", async (t) => {
+  const server = await createMockApiServer((request, response) => {
+    assert.equal(request.method, "POST");
+    assert.equal(request.url, "/openapi/v2/audio/verification");
+    assert.deepEqual(JSON.parse(request.body), { audio_media_id: "405833376854443" });
+    sendJson(response, { ErrCode: 0, ErrMsg: "Success", Resp: {} });
+  });
+  t.after(() => server.close());
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "platform-audio-verify-"));
+  const payloadPath = path.join(directory, "payload.json");
+  await fs.writeFile(payloadPath, JSON.stringify({ audio_media_id: "405833376854443" }));
+
+  const result = await runPlatformCommand(["audio", "verify", "--payload", payloadPath], {
+    env: { PIXVERSE_PLATFORM_API_KEY: TEST_KEY, PIXVERSE_PLATFORM_BASE_URL: server.baseUrl },
+    fetchImpl: globalThis.fetch,
+    cwd: directory,
+  });
+
+  assert.equal(result.operation, "audio.verify");
+  assert.deepEqual({ ...result.data }, {});
+  assert.equal(server.requests.length, 1);
+  assert.deepEqual(await fs.readdir(directory), ["payload.json"]);
+});
+
+test("Music MV dry-run normalizes the documented image alias without network or job artifacts", async () => {
+  let requests = 0;
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "platform-music-mv-dry-run-"));
+  const payloadPath = path.join(directory, "payload.json");
+  await fs.writeFile(payloadPath, JSON.stringify({
+    mv_agent_type: "vibe_mv_v3_custom",
+    audio_media_id: "405833376854443",
+    image_references: [{ img_id: "164913710", ref_name: "Character Image" }],
+    mv_style: "Custom",
+    aspect_ratio: "16:9",
+    quality: "720p",
+  }));
+
+  const result = await runPlatformCommand([
+    "agent", "music-mv", "--payload", payloadPath, "--dry-run",
+  ], { env: {}, cwd: directory, fetchImpl: async () => { requests += 1; } });
+
+  assert.equal(result.dry_run, true);
+  assert.equal(result.operation, "agent.music-mv");
+  assert.equal(result.request.path, "/openapi/v2/video/music_mv_agent/generate");
+  assert.equal(Object.hasOwn(result.request.normalized.payload, "image_references"), false);
+  assert.deepEqual(result.request.normalized.payload.img_references, [
+    { img_id: "164913710", ref_name: "Character Image" },
+  ]);
+  assert.equal(requests, 0);
+  assert.deepEqual(await fs.readdir(directory), ["payload.json"]);
+});
+
 test("concise positional forms cover uploads, status lookups, and voice deletion", async (t) => {
   const tinyImage = fileURLToPath(new URL("../fixtures/media/tiny.png", import.meta.url));
   const seen = [];

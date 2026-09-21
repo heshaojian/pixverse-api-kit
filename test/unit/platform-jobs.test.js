@@ -21,6 +21,17 @@ const AGENT_INPUT = Object.freeze({
   img_references: Object.freeze([{ img_url: "https://cdn.example.test/a.png" }]),
   video_references: Object.freeze([{ video_url: "https://cdn.example.test/a.mp4" }]),
 });
+const MUSIC_MV_INPUT = Object.freeze({
+  mv_agent_type: "vibe_mv_v3_custom",
+  audio_media_id: "405833376854443",
+  image_references: Object.freeze([Object.freeze({
+    img_id: "164913710",
+    ref_name: "Character Image",
+  })]),
+  mv_style: "Custom",
+  aspect_ratio: "16:9",
+  quality: "720p",
+});
 
 test("submit follows validate, durable request, one submit, ID, snapshots, final order", async (t) => {
   const root = await createTempJobRoot(t);
@@ -78,6 +89,50 @@ test("ambiguous submit is attempted once and writes a safe recoverable error", a
   assert.equal(artifacts["request.json"].trace_id, TRACE);
   assert.equal(artifacts["error.json"].category, "transport");
   assert.doesNotMatch(JSON.stringify(artifacts), /secret-value/);
+});
+
+test("Music MV uses the durable video job lifecycle and persists canonical input", async (t) => {
+  const root = await createTempJobRoot(t);
+  const calls = [];
+  let statusReads = 0;
+  const result = await submitPlatformJob({ execute: async (id, input) => {
+    calls.push([id, input]);
+    if (id === "agent.music-mv") {
+      return {
+        operation: id,
+        traceId: TRACE,
+        envelope: { ErrCode: 0, Resp: { video_id: "629000000000000023" } },
+        data: { video_id: "629000000000000023" },
+      };
+    }
+    statusReads += 1;
+    const status = statusReads === 1 ? 5 : 1;
+    return {
+      operation: id,
+      traceId: `${TRACE}-status`,
+      envelope: { ErrCode: 0, Resp: { id: "629000000000000023", status } },
+      data: { id: "629000000000000023", status },
+    };
+  } }, "agent.music-mv", MUSIC_MV_INPUT, {
+    jobRoot: root,
+    traceIdFactory: () => TRACE,
+    poll: true,
+    sleep: async () => {},
+  });
+
+  assert.equal(result.status, "succeeded");
+  assert.deepEqual(calls.map(([id]) => id), ["agent.music-mv", "video.status", "video.status"]);
+  assert.deepEqual(calls[1][1], { video_id: "629000000000000023" });
+  const artifacts = await readJobArtifacts(result.job_dir);
+  assert.deepEqual(artifacts["video-id.json"], { video_id: "629000000000000023" });
+  assert.equal(Object.hasOwn(artifacts["request.json"].input.payload, "image_references"), false);
+  assert.deepEqual(artifacts["request.json"].input.payload.img_references, [
+    { img_id: "164913710", ref_name: "Character Image" },
+  ]);
+  assert.deepEqual(artifacts["request.json"].headers, {
+    "API-KEY": "[REDACTED]",
+    "Ai-trace-id": TRACE,
+  });
 });
 
 test("resume reads artifacts first, polls known IDs, and never submits a generation", async (t) => {

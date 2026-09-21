@@ -34,6 +34,31 @@ test("ambiguous agent acceptance is resumable without a second billable POST", a
   assert.equal(result.status, "reconciliation_required");
 });
 
+test("ambiguous Music MV acceptance stops for reconciliation without a second POST", async (t) => {
+  const root = await createTempJobRoot(t);
+  let accepted = 0;
+  const server = await createMockApiServer((request, response) => {
+    assert.equal(request.method, "POST");
+    assert.equal(request.url, "/openapi/v2/video/music_mv_agent/generate");
+    accepted += 1;
+    response.destroy();
+  });
+  t.after(() => server.close());
+  const client = new PlatformClient({ apiKey: "test-key", baseUrl: server.baseUrl, fetchImpl: globalThis.fetch });
+  await assert.rejects(submitPlatformJob(client, "agent.music-mv", {
+    mv_agent_type: "vibe_mv_v3_custom",
+    audio_media_id: "405833376854443",
+    aspect_ratio: "16:9",
+    quality: "720p",
+  }, { jobRoot: root, traceIdFactory: () => "11111111-1111-4111-8111-111111111111" }),
+  (error) => error.category === "transport");
+  const [jobName] = await fs.readdir(root);
+  const result = await resumePlatformJob(client, path.join(root, jobName));
+  assert.equal(accepted, 1);
+  assert.equal(server.requests.length, 1);
+  assert.equal(result.status, "reconciliation_required");
+});
+
 test("unknown status is preserved until timeout with final and error artifacts", async (t) => {
   const root = await createTempJobRoot(t);
   let clock = 0;
