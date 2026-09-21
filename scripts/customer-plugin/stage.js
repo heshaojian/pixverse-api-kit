@@ -42,8 +42,9 @@ export async function stageCustomerPlugin({
 async function copyApprovedPluginSource(repoRoot, packageRoot, pluginRoot) {
   const sourceRoot = path.join(repoRoot, CUSTOMER_PLUGIN_ALLOWLIST.pluginSource);
   await copyTree(path.join(sourceRoot, "plugin"), pluginRoot);
-  await copyFile(path.join(sourceRoot, "marketplace.json"), path.join(packageRoot, "marketplace.json"));
-  await copyFile(path.join(sourceRoot, "INSTALL-MACOS.md"), path.join(packageRoot, "INSTALL-MACOS.md"));
+  for (const fileName of CUSTOMER_PLUGIN_ALLOWLIST.packageRootFiles) {
+    await copyFile(path.join(sourceRoot, fileName), path.join(packageRoot, fileName));
+  }
 
   for (const relativePath of CUSTOMER_PLUGIN_ALLOWLIST.apiDocuments) {
     const destination = path.join(pluginRoot, relativePath.replace(/^docs\//, "docs/"));
