@@ -122,6 +122,10 @@ test("Music MV uses the durable video job lifecycle and persists canonical input
 
   assert.equal(result.status, "succeeded");
   assert.deepEqual(calls.map(([id]) => id), ["agent.music-mv", "video.status", "video.status"]);
+  assert.equal(Object.hasOwn(calls[0][1].payload, "image_references"), false);
+  assert.deepEqual(calls[0][1].payload.img_references, [
+    { img_id: "164913710", ref_name: "Character Image" },
+  ]);
   assert.deepEqual(calls[1][1], { video_id: "629000000000000023" });
   const artifacts = await readJobArtifacts(result.job_dir);
   assert.deepEqual(artifacts["video-id.json"], { video_id: "629000000000000023" });

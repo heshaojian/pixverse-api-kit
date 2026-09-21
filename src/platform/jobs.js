@@ -41,7 +41,13 @@ export async function submitPlatformJob(client, operationId, input, options = {}
   }));
 
   try {
-    const created = await client.execute(operation.id, input, {
+    const executionInput = {
+      payload: normalized.payload,
+      query: normalized.query,
+      pathParams: normalized.pathParams,
+      files: normalized.files,
+    };
+    const created = await client.execute(operation.id, executionInput, {
       recovery: true,
       traceId,
       inspectLocalMedia: options.inspectLocalMedia,
