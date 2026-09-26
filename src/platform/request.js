@@ -43,10 +43,14 @@ function serializeJsonBody(operation, payload) {
     return JSON.stringify(payload);
   }
   const wirePayload = { ...payload };
+  if (operation.id === "agent.music-mv" && wirePayload.img_references !== undefined) {
+    wirePayload.image_references = wirePayload.img_references;
+    delete wirePayload.img_references;
+  }
   if (wirePayload.audio_media_id !== undefined) {
     wirePayload.audio_media_id = decimalStringToBigInt(wirePayload.audio_media_id);
   }
-  for (const field of ["img_references", "style_img_references"]) {
+  for (const field of ["img_references", "image_references", "style_img_references"]) {
     if (!Array.isArray(wirePayload[field])) continue;
     wirePayload[field] = wirePayload[field].map((reference) => ({
       ...reference,

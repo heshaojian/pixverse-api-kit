@@ -21,7 +21,7 @@
   "body": {
     "mv_agent_type": "vibe_mv_v3_custom",
     "audio_media_id": 405833376854443,
-    "img_references": [
+    "image_references": [
       {
         "img_id": 164913710,
         "ref_name": "Character Image"

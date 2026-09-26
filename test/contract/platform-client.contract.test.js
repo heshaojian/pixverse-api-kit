@@ -239,7 +239,7 @@ test("Music MV uint64 identifiers stay strings internally but serialize as lossl
   const mvRequest = await buildPlatformRequest({
     id: "agent.music-mv", method: "POST", path: "/mv", bodyMode: "json",
   }, mvInput);
-  assert.equal(mvRequest.body, '{"audio_media_id":425662507205761,"img_references":[{"img_id":164913710,"ref_name":"Character"}],"style_img_references":[{"img_id":164913711,"ref_name":"Style"}],"seed":42}');
+  assert.equal(mvRequest.body, '{"audio_media_id":425662507205761,"style_img_references":[{"img_id":164913711,"ref_name":"Style"}],"seed":42,"image_references":[{"img_id":164913710,"ref_name":"Character"}]}');
   assert.equal(mvInput.payload.img_references[0].img_id, "164913710");
 
   const unrelatedRequest = await buildPlatformRequest({
