@@ -26,6 +26,7 @@ export async function stageCustomerPlugin({
   await copyRuntimeSources(resolvedRepoRoot, runtimeRoot);
   await sanitizeRuntimeSources(runtimeRoot);
   await writeRuntimeMetadata(resolvedRepoRoot, runtimeRoot);
+  await writePackageEntrypoint(packageRoot);
   await writeWrapper(pluginRoot);
 
   if (installDependencies) {
@@ -116,6 +117,41 @@ async function writeRuntimeMetadata(repoRoot, runtimeRoot) {
     path.join(runtimeRoot, "package-lock.json"),
     `${JSON.stringify(runtimeLock, null, 2)}\n`,
   );
+}
+
+async function writePackageEntrypoint(packageRoot) {
+  const packageJson = {
+    name: "pixverse-api",
+    version: CUSTOMER_PLUGIN_RELEASE.version,
+    private: true,
+    type: "module",
+    description: "PixVerse API CLI and Codex plugin for Platform API and Growth Studio API workflows.",
+    bin: { "pixverse-api": "./dist/index.js" },
+    engines: { node: ">=20" },
+  };
+  const entrypoint = `#!/usr/bin/env node
+import { spawnSync } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const wrapper = path.join(packageRoot, "plugins", "pixverse-api", "scripts", "pixverse-api");
+const result = spawnSync(wrapper, process.argv.slice(2), { stdio: "inherit" });
+
+if (result.error) {
+  console.error(result.error.message);
+  process.exit(1);
+}
+process.exit(result.status ?? 1);
+`;
+
+  await fs.mkdir(path.join(packageRoot, "dist"), { recursive: true });
+  await fs.writeFile(
+    path.join(packageRoot, "package.json"),
+    `${JSON.stringify(packageJson, null, 2)}\n`,
+  );
+  await fs.writeFile(path.join(packageRoot, "dist", "index.js"), entrypoint, { mode: 0o755 });
+  await fs.chmod(path.join(packageRoot, "dist", "index.js"), 0o755);
 }
 
 async function writeWrapper(pluginRoot) {

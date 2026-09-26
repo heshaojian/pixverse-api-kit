@@ -16,7 +16,14 @@ The local artifacts are written to `dist/customer-plugin/0.3.0-beta.2/`:
 - `pixverse-api-plugin-0.3.0-beta.2.zip.sha256`
 - `release-report.json`
 
-The build requires Node.js 20+, `zip`, and `unzip`. It stages only approved CLI, API documentation, plugin, and production dependency files; validates the extracted archive; and never reads API credentials or sends paid PixVerse requests. The archive includes double-click macOS install and uninstall helpers plus command-line fallback instructions.
+The build requires Node.js 20+, npm, `zip`, and `unzip`. It stages only approved CLI, API documentation, plugin, and production dependency files; validates the extracted archive; and never reads API credentials or sends paid PixVerse requests. The archive includes double-click macOS install and uninstall helpers plus command-line fallback instructions.
+
+The packaged installer follows the same global Node layout as the PixVerse CLI. It prefers the existing `pixverse` CLI prefix when one is available, then falls back to `npm prefix -g`:
+
+```text
+<selected npm prefix>/lib/node_modules/pixverse-api
+<selected npm prefix>/bin/pixverse-api -> ../lib/node_modules/pixverse-api/dist/index.js
+```
 
 The included private evaluation license is a legal draft. The generated archive must remain local and must not be published, uploaded, or shared externally until legal and release approval are recorded.
 

@@ -3,34 +3,46 @@ set -euo pipefail
 
 PLUGIN_NAME="pixverse-api"
 MARKETPLACE_NAME="pixverse-private-beta"
+CLI_PACKAGE_NAME="pixverse-api"
 VERSION="0.3.0-beta.2"
 SCRIPT_PATH="${0:A}"
 SOURCE_ROOT="${SCRIPT_PATH:h}"
 SUPPORT_ROOT="$HOME/Library/Application Support/PixVerse/api-plugin"
 LEGACY_SUPPORT_ROOT="$HOME/Library/Application Support/PixVerse/API Plugin"
-INSTALL_ROOT="$SUPPORT_ROOT/$VERSION"
 RECEIPT_PATH="$SUPPORT_ROOT/install-receipt.json"
 LEGACY_RECEIPT_PATH="$LEGACY_SUPPORT_ROOT/install-receipt.json"
 TEMP_ROOT=""
-BACKUP_ROOT="$SUPPORT_ROOT/.backup-$VERSION-$$"
+NPM_PREFIX=""
+INSTALL_PARENT=""
+INSTALL_ROOT=""
+BIN_ROOT=""
+BIN_PATH=""
+BIN_TARGET="../lib/node_modules/$CLI_PACKAGE_NAME/dist/index.js"
+BACKUP_ROOT=""
+BACKUP_BIN_PATH=""
 INSTALLED_NEW=0
+BIN_INSTALLED=0
 MARKETPLACE_ADDED=0
 PLUGIN_ADDED=0
 SUCCEEDED=0
 PRIOR_INSTALL_ROOT=""
 PRIOR_VERSION=""
+PRIOR_BIN_PATH=""
+PRIOR_BIN_TARGET=""
 
 safe_remove_directory() {
   local target="$1"
-  SUPPORT_ROOT_VALUE="$SUPPORT_ROOT" LEGACY_SUPPORT_ROOT_VALUE="$LEGACY_SUPPORT_ROOT" TARGET_VALUE="$target" "$NODE_BIN" -e '
+  SUPPORT_ROOT_VALUE="$SUPPORT_ROOT" LEGACY_SUPPORT_ROOT_VALUE="$LEGACY_SUPPORT_ROOT" INSTALL_PARENT_VALUE="$INSTALL_PARENT" PRIOR_INSTALL_ROOT_VALUE="$PRIOR_INSTALL_ROOT" TARGET_VALUE="$target" "$NODE_BIN" -e '
 const fs = require("node:fs");
 const path = require("node:path");
 const roots = [
   path.resolve(process.env.SUPPORT_ROOT_VALUE),
   path.resolve(process.env.LEGACY_SUPPORT_ROOT_VALUE),
+  path.resolve(process.env.INSTALL_PARENT_VALUE),
 ];
+const priorInstallRoot = path.resolve(process.env.PRIOR_INSTALL_ROOT_VALUE || "");
 const target = path.resolve(process.env.TARGET_VALUE);
-if (!roots.some((root) => target.startsWith(root + path.sep))) process.exit(2);
+if (!(roots.some((root) => root && target.startsWith(root + path.sep)) || (priorInstallRoot && target === priorInstallRoot))) process.exit(2);
 fs.rmSync(target, { recursive: true, force: true });
 ' || {
     echo "Refusing to remove a path outside PixVerse API Plugin support storage." >&2
@@ -59,6 +71,10 @@ restore_previous_install() {
   else
     return 0
   fi
+  if [[ -n "$BIN_PATH" && -n "$PRIOR_BIN_TARGET" && ! -e "$BIN_PATH" ]]; then
+    /bin/mkdir -p -- "${BIN_PATH:h}"
+    /bin/ln -s -- "$PRIOR_BIN_TARGET" "$BIN_PATH"
+  fi
   if ! "$CODEX_BIN" plugin marketplace add "$restore_root" --json >/dev/null; then
     echo "The previous plugin files were restored, but Codex could not restore their marketplace registration." >&2
     return 1
@@ -81,11 +97,21 @@ cleanup() {
     if [[ "$INSTALLED_NEW" -eq 1 && -d "$INSTALL_ROOT" ]]; then
       safe_remove_directory "$INSTALL_ROOT" || true
     fi
+    if [[ "$BIN_INSTALLED" -eq 1 && -L "$BIN_PATH" ]]; then
+      /bin/rm -f -- "$BIN_PATH" || true
+    fi
     if [[ -d "$BACKUP_ROOT" ]]; then
       /bin/mv -- "$BACKUP_ROOT" "$INSTALL_ROOT"
     fi
+    if [[ -n "$BACKUP_BIN_PATH" && -L "$BACKUP_BIN_PATH" ]]; then
+      /bin/mv -f -- "$BACKUP_BIN_PATH" "$BIN_PATH" || true
+    elif [[ -n "$PRIOR_BIN_TARGET" && -n "$BIN_PATH" ]]; then
+      /bin/ln -s -- "$PRIOR_BIN_TARGET" "$BIN_PATH" || true
+    fi
   elif [[ -d "$BACKUP_ROOT" ]]; then
     safe_remove_directory "$BACKUP_ROOT"
+  elif [[ -n "$BACKUP_BIN_PATH" && -L "$BACKUP_BIN_PATH" ]]; then
+    /bin/rm -f -- "$BACKUP_BIN_PATH" || true
   fi
   if [[ -n "$TEMP_ROOT" && -d "$TEMP_ROOT" ]]; then
     safe_remove_directory "$TEMP_ROOT" || true
@@ -116,6 +142,50 @@ if [[ -z "$CODEX_BIN" ]]; then
   exit 1
 fi
 
+NPM_BIN="$(command -v npm || true)"
+if [[ -z "$NPM_BIN" ]]; then
+  echo "Install npm with Node.js, then run this installer again." >&2
+  exit 1
+fi
+NPM_PREFIX="$("$NPM_BIN" prefix -g)"
+if [[ -z "$NPM_PREFIX" || "$NPM_PREFIX" == "/" ]]; then
+  echo "Unable to resolve a safe global npm prefix." >&2
+  exit 1
+fi
+PIXVERSE_BIN=""
+if [[ "${PIXVERSE_API_SKIP_PIXVERSE_PREFIX:-0}" != "1" ]]; then
+  PIXVERSE_BIN="$(command -v pixverse || true)"
+fi
+if [[ -n "$PIXVERSE_BIN" ]]; then
+  PIXVERSE_PREFIX="$(
+    PIXVERSE_BIN_VALUE="$PIXVERSE_BIN" "$NODE_BIN" -e '
+const fs = require("node:fs");
+const path = require("node:path");
+const bin = path.resolve(process.env.PIXVERSE_BIN_VALUE);
+try {
+  const stats = fs.lstatSync(bin);
+  if (!stats.isSymbolicLink()) process.exit(0);
+  const target = fs.readlinkSync(bin);
+  if (!target.includes("lib/node_modules/pixverse/")) process.exit(0);
+  const binDirectory = path.dirname(bin);
+  if (path.basename(binDirectory) !== "bin") process.exit(0);
+  process.stdout.write(path.dirname(binDirectory));
+} catch {
+  process.exit(0);
+}
+'
+  )"
+  if [[ -n "$PIXVERSE_PREFIX" ]]; then
+    NPM_PREFIX="$PIXVERSE_PREFIX"
+  fi
+fi
+INSTALL_PARENT="$NPM_PREFIX/lib/node_modules"
+INSTALL_ROOT="$INSTALL_PARENT/$CLI_PACKAGE_NAME"
+BIN_ROOT="$NPM_PREFIX/bin"
+BIN_PATH="$BIN_ROOT/$CLI_PACKAGE_NAME"
+BACKUP_ROOT="$INSTALL_PARENT/.pixverse-api-backup-$VERSION-$$"
+BACKUP_BIN_PATH="$BIN_ROOT/.pixverse-api-bin-backup-$VERSION-$$"
+
 if [[ -f "$RECEIPT_PATH" || -f "$LEGACY_RECEIPT_PATH" ]]; then
   RECEIPT_TO_READ="$RECEIPT_PATH"
   RECEIPT_SUPPORT_ROOT="$SUPPORT_ROOT"
@@ -124,7 +194,7 @@ if [[ -f "$RECEIPT_PATH" || -f "$LEGACY_RECEIPT_PATH" ]]; then
     RECEIPT_SUPPORT_ROOT="$LEGACY_SUPPORT_ROOT"
   fi
   PRIOR_RECEIPT="$({
-    SUPPORT_ROOT_VALUE="$RECEIPT_SUPPORT_ROOT" "$NODE_BIN" -e '
+    SUPPORT_ROOT_VALUE="$RECEIPT_SUPPORT_ROOT" INSTALL_ROOT_VALUE="$INSTALL_ROOT" BIN_PATH_VALUE="$BIN_PATH" "$NODE_BIN" -e '
 const fs = require("node:fs");
 const path = require("node:path");
 const receipt = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
@@ -133,23 +203,35 @@ for (const key of ["install_root", "marketplace", "plugin", "version"]) {
 }
 if (receipt.marketplace !== "pixverse-private-beta" || receipt.plugin !== "pixverse-api") process.exit(1);
 if (!/^[0-9A-Za-z][0-9A-Za-z._-]*$/.test(receipt.version)) process.exit(1);
-const expectedRoot = path.join(path.resolve(process.env.SUPPORT_ROOT_VALUE), receipt.version);
-if (path.resolve(receipt.install_root) !== expectedRoot) process.exit(1);
-const stats = fs.lstatSync(expectedRoot);
+const installRoot = path.resolve(receipt.install_root);
+const acceptedRoots = [
+  path.resolve(process.env.INSTALL_ROOT_VALUE),
+  path.join(path.resolve(process.env.SUPPORT_ROOT_VALUE), receipt.version),
+];
+if (!acceptedRoots.includes(installRoot) && !installRoot.endsWith("/lib/node_modules/pixverse-api")) process.exit(1);
+const stats = fs.lstatSync(installRoot);
 if (!stats.isDirectory() || stats.isSymbolicLink()) process.exit(1);
-process.stdout.write(`${expectedRoot}\n${receipt.version}`);
+const binPath = typeof receipt.bin_path === "string" && receipt.bin_path && !/[\r\n]/.test(receipt.bin_path)
+  ? receipt.bin_path
+  : process.env.BIN_PATH_VALUE;
+const binTarget = typeof receipt.bin_target === "string" && receipt.bin_target && !/[\r\n]/.test(receipt.bin_target)
+  ? receipt.bin_target
+  : "";
+process.stdout.write(`${installRoot}\n${receipt.version}\n${binPath}\n${binTarget}`);
 ' "$RECEIPT_TO_READ"
   } 2>/dev/null)" || {
     echo "The existing PixVerse API Plugin installation receipt is invalid. No changes were made." >&2
     exit 1
   }
   PRIOR_RECEIPT_LINES=("${(@f)PRIOR_RECEIPT}")
-  if [[ "${#PRIOR_RECEIPT_LINES[@]}" -ne 2 ]]; then
+  if [[ "${#PRIOR_RECEIPT_LINES[@]}" -lt 3 || "${#PRIOR_RECEIPT_LINES[@]}" -gt 4 ]]; then
     echo "The existing PixVerse API Plugin installation receipt is invalid. No changes were made." >&2
     exit 1
   fi
   PRIOR_INSTALL_ROOT="${PRIOR_RECEIPT_LINES[1]}"
   PRIOR_VERSION="${PRIOR_RECEIPT_LINES[2]}"
+  PRIOR_BIN_PATH="${PRIOR_RECEIPT_LINES[3]}"
+  PRIOR_BIN_TARGET="${PRIOR_RECEIPT_LINES[4]:-}"
 fi
 
 for required_file in .agents/plugins/marketplace.json MANIFEST.sha256 plugins/pixverse-api/.codex-plugin/plugin.json; do
@@ -211,20 +293,33 @@ if (manifest.name !== "pixverse-api" || manifest.version !== "0.3.0-beta.2") pro
   exit 1
 }
 
-/bin/mkdir -p -- "$SUPPORT_ROOT"
+/bin/mkdir -p -- "$SUPPORT_ROOT" "$INSTALL_PARENT" "$BIN_ROOT"
 if [[ ! -f "$SUPPORT_ROOT/credentials.env" && -f "$LEGACY_SUPPORT_ROOT/credentials.env" ]]; then
   /bin/cp -p -- "$LEGACY_SUPPORT_ROOT/credentials.env" "$SUPPORT_ROOT/credentials.env"
   /bin/chmod 600 "$SUPPORT_ROOT/credentials.env"
 fi
-TEMP_ROOT="$(/usr/bin/mktemp -d "$SUPPORT_ROOT/.install-$VERSION-XXXXXX")"
+TEMP_ROOT="$(/usr/bin/mktemp -d "$INSTALL_PARENT/.pixverse-api-install-$VERSION-XXXXXX")"
 /usr/bin/ditto "$SOURCE_ROOT" "$TEMP_ROOT"
 
 if [[ -d "$INSTALL_ROOT" ]]; then
   /bin/mv -- "$INSTALL_ROOT" "$BACKUP_ROOT"
 fi
+if [[ -e "$BIN_PATH" || -L "$BIN_PATH" ]]; then
+  if [[ ! -L "$BIN_PATH" ]]; then
+    echo "Refusing to replace an existing non-symlink command: $BIN_PATH" >&2
+    exit 1
+  fi
+  EXISTING_BIN_TARGET="$(/bin/ls -l "$BIN_PATH" | /usr/bin/sed 's/^.* -> //')"
+  case "$EXISTING_BIN_TARGET" in
+    *"pixverse-api"*) /bin/mv -- "$BIN_PATH" "$BACKUP_BIN_PATH" ;;
+    *) echo "Refusing to replace an unrelated pixverse-api symlink: $BIN_PATH" >&2; exit 1 ;;
+  esac
+fi
 /bin/mv -- "$TEMP_ROOT" "$INSTALL_ROOT"
 TEMP_ROOT=""
 INSTALLED_NEW=1
+/bin/ln -s -- "$BIN_TARGET" "$BIN_PATH"
+BIN_INSTALLED=1
 
 if [[ -n "$PRIOR_INSTALL_ROOT" && "$PRIOR_INSTALL_ROOT" != "$INSTALL_ROOT" ]]; then
   remove_registration_or_accept_absent \
@@ -264,7 +359,7 @@ fi
 PLUGIN_ADDED=1
 
 RECEIPT_TEMP="$SUPPORT_ROOT/.install-receipt-$$.json"
-INSTALL_ROOT_VALUE="$INSTALL_ROOT" MARKETPLACE_VALUE="$MARKETPLACE_NAME" VERSION_VALUE="$VERSION" \
+INSTALL_ROOT_VALUE="$INSTALL_ROOT" MARKETPLACE_VALUE="$MARKETPLACE_NAME" VERSION_VALUE="$VERSION" BIN_PATH_VALUE="$BIN_PATH" BIN_TARGET_VALUE="$BIN_TARGET" \
   "$NODE_BIN" -e '
 const fs = require("node:fs");
 const receipt = {
@@ -272,6 +367,8 @@ const receipt = {
   marketplace: process.env.MARKETPLACE_VALUE,
   plugin: "pixverse-api",
   version: process.env.VERSION_VALUE,
+  bin_path: process.env.BIN_PATH_VALUE,
+  bin_target: process.env.BIN_TARGET_VALUE,
 };
 fs.writeFileSync(process.argv[1], JSON.stringify(receipt, null, 2) + "\n", { mode: 0o600 });
 ' "$RECEIPT_TEMP"
@@ -279,6 +376,13 @@ fs.writeFileSync(process.argv[1], JSON.stringify(receipt, null, 2) + "\n", { mod
 /bin/mv -f -- "$RECEIPT_TEMP" "$RECEIPT_PATH"
 
 SUCCEEDED=1
+if [[ -n "$PRIOR_BIN_PATH" && "$PRIOR_BIN_PATH" != "$BIN_PATH" && -L "$PRIOR_BIN_PATH" ]]; then
+  CURRENT_PRIOR_BIN_TARGET="$(/bin/ls -l "$PRIOR_BIN_PATH" | /usr/bin/sed 's/^.* -> //')"
+  if [[ -z "$PRIOR_BIN_TARGET" || "$CURRENT_PRIOR_BIN_TARGET" == "$PRIOR_BIN_TARGET" || "$CURRENT_PRIOR_BIN_TARGET" == *"pixverse-api"* ]]; then
+    /bin/rm -f -- "$PRIOR_BIN_PATH" || \
+      echo "The new plugin is installed, but the older pixverse-api shortcut could not be removed." >&2
+  fi
+fi
 if [[ -n "$PRIOR_INSTALL_ROOT" && "$PRIOR_INSTALL_ROOT" != "$INSTALL_ROOT" && -d "$PRIOR_INSTALL_ROOT" ]]; then
   safe_remove_directory "$PRIOR_INSTALL_ROOT" || \
     echo "The new plugin is installed, but the older package directory could not be removed." >&2

@@ -106,7 +106,9 @@ function isAllowedTopLevelPath(relativePath) {
   return topLevel === ".agents"
     || topLevel === "INSTALL-MACOS.md"
     || topLevel === "auth.command"
+    || topLevel === "dist"
     || topLevel === "install.command"
+    || topLevel === "package.json"
     || topLevel === "uninstall.command"
     || topLevel === "MANIFEST.sha256"
     || topLevel === "plugins";
@@ -131,6 +133,18 @@ async function validateTextContent(packageRoot, entries) {
 }
 
 async function validateManifests(packageRoot) {
+  const packageJson = await readJson(path.join(packageRoot, "package.json"), "package manifest");
+  if (packageJson.name !== "pixverse-api"
+      || packageJson.version !== CUSTOMER_PLUGIN_RELEASE.version
+      || packageJson.bin?.["pixverse-api"] !== "./dist/index.js") {
+    throw new Error("Node package manifest is invalid.");
+  }
+  const entrypoint = path.join(packageRoot, "dist", "index.js");
+  const entrypointStats = await fs.stat(entrypoint);
+  if ((entrypointStats.mode & 0o100) === 0) {
+    throw new Error("PixVerse API package entrypoint must be executable.");
+  }
+
   const marketplace = await readJson(
     path.join(packageRoot, ".agents", "plugins", "marketplace.json"),
     "marketplace manifest",

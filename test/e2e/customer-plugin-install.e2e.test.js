@@ -35,8 +35,10 @@ async function createExtractedPackage(t) {
 
 async function createFakeCodex(root) {
   const binRoot = path.join(root, "bin");
+  const npmPrefix = path.join(root, "npm-prefix");
   const logPath = path.join(root, "codex-calls.jsonl");
   await fs.mkdir(binRoot, { recursive: true });
+  await fs.mkdir(path.join(npmPrefix, "bin"), { recursive: true });
   const executable = `#!/usr/bin/env node
 import fs from "node:fs";
 const args = process.argv.slice(2);
@@ -58,7 +60,19 @@ process.stdout.write(JSON.stringify({ ok: true }) + "\\n");
   const codexPath = path.join(binRoot, "codex");
   await fs.writeFile(codexPath, executable, { mode: 0o755 });
   await fs.chmod(codexPath, 0o755);
-  return { binRoot, logPath };
+  const npmExecutable = `#!/usr/bin/env node
+const args = process.argv.slice(2);
+if (args[0] === "prefix" && args[1] === "-g") {
+  process.stdout.write(${JSON.stringify(npmPrefix)} + "\\n");
+  process.exit(0);
+}
+process.stderr.write("fake npm only supports: npm prefix -g\\n");
+process.exit(1);
+`;
+  const npmPath = path.join(binRoot, "npm");
+  await fs.writeFile(npmPath, npmExecutable, { mode: 0o755 });
+  await fs.chmod(npmPath, 0o755);
+  return { binRoot, logPath, npmPrefix };
 }
 
 function cleanEnvironment({ home, binRoot, logPath, extra = {} }) {
@@ -67,6 +81,7 @@ function cleanEnvironment({ home, binRoot, logPath, extra = {} }) {
     HOME: home,
     PATH: `${binRoot}:${process.env.PATH}`,
     CODEX_CALL_LOG: logPath,
+    PIXVERSE_API_SKIP_PIXVERSE_PREFIX: "1",
     ...extra,
   };
 }
@@ -76,10 +91,20 @@ async function readCalls(logPath) {
   return text.trim().split("\n").filter(Boolean).map((line) => JSON.parse(line));
 }
 
+async function createPixverseCliFixture(root, binRoot) {
+  const pixversePrefix = path.dirname(binRoot);
+  const pixversePackage = path.join(pixversePrefix, "lib/node_modules/pixverse");
+  await fs.mkdir(path.join(pixversePackage, "dist"), { recursive: true });
+  await fs.mkdir(path.join(pixversePrefix, "bin"), { recursive: true });
+  await fs.writeFile(path.join(pixversePackage, "dist/index.js"), "#!/usr/bin/env node\n", { mode: 0o755 });
+  await fs.symlink("../lib/node_modules/pixverse/dist/index.js", path.join(binRoot, "pixverse"));
+  return pixversePrefix;
+}
+
 macTest("macOS helpers install and remove only receipt-owned plugin state", async (t) => {
   const { root, packageRoot } = await createExtractedPackage(t);
   const home = path.join(root, "home");
-  const { binRoot, logPath } = await createFakeCodex(root);
+  const { binRoot, logPath, npmPrefix } = await createFakeCodex(root);
   await fs.mkdir(home);
   const env = cleanEnvironment({ home, binRoot, logPath });
   const installer = path.join(packageRoot, "install.command");
@@ -88,9 +113,12 @@ macTest("macOS helpers install and remove only receipt-owned plugin state", asyn
   await execFileAsync("zsh", [installer], { env, encoding: "utf8" });
 
   const supportRoot = path.join(home, "Library/Application Support/PixVerse/api-plugin");
-  const installRoot = path.join(supportRoot, "0.3.0-beta.2");
+  const installRoot = path.join(npmPrefix, "lib/node_modules/pixverse-api");
+  const binPath = path.join(npmPrefix, "bin/pixverse-api");
   const receiptPath = path.join(supportRoot, "install-receipt.json");
   assert.equal((await fs.stat(path.join(installRoot, ".agents/plugins/marketplace.json"))).isFile(), true);
+  assert.equal((await fs.stat(path.join(installRoot, "dist/index.js"))).isFile(), true);
+  assert.equal(await fs.readlink(binPath), "../lib/node_modules/pixverse-api/dist/index.js");
   assert.equal((await fs.stat(receiptPath)).mode & 0o077, 0);
   assert.deepEqual(await readCalls(logPath), [
     ["plugin", "marketplace", "add", installRoot, "--json"],
@@ -108,23 +136,49 @@ macTest("macOS helpers install and remove only receipt-owned plugin state", asyn
     ["plugin", "marketplace", "remove", "pixverse-private-beta", "--json"],
   ]);
   await assert.rejects(fs.access(installRoot), { code: "ENOENT" });
+  await assert.rejects(fs.access(binPath), { code: "ENOENT" });
   await assert.rejects(fs.access(receiptPath), { code: "ENOENT" });
   assert.equal(await fs.readFile(unrelatedPath, "utf8"), "unrelated\n");
+});
+
+macTest("installer prefers the existing PixVerse CLI npm prefix", async (t) => {
+  const { root, packageRoot } = await createExtractedPackage(t);
+  const home = path.join(root, "home");
+  const { binRoot, logPath } = await createFakeCodex(root);
+  await fs.mkdir(home);
+  const pixversePrefix = await createPixverseCliFixture(root, binRoot);
+  const installer = path.join(packageRoot, "install.command");
+
+  await execFileAsync("zsh", [installer], {
+    env: cleanEnvironment({
+      home,
+      binRoot,
+      logPath,
+      extra: { PIXVERSE_API_SKIP_PIXVERSE_PREFIX: "0" },
+    }),
+    encoding: "utf8",
+  });
+
+  const installRoot = path.join(pixversePrefix, "lib/node_modules/pixverse-api");
+  const binPath = path.join(pixversePrefix, "bin/pixverse-api");
+  assert.equal((await fs.stat(path.join(installRoot, "package.json"))).isFile(), true);
+  assert.equal(await fs.readlink(binPath), "../lib/node_modules/pixverse-api/dist/index.js");
+  assert.deepEqual(await readCalls(logPath), [
+    ["plugin", "marketplace", "add", installRoot, "--json"],
+    ["plugin", "add", "pixverse-api@pixverse-private-beta", "--json"],
+  ]);
 });
 
 macTest("failed Codex registration restores the previously installed version", async (t) => {
   const { root, packageRoot } = await createExtractedPackage(t);
   const home = path.join(root, "home");
-  const { binRoot, logPath } = await createFakeCodex(root);
+  const { binRoot, logPath, npmPrefix } = await createFakeCodex(root);
   await fs.mkdir(home);
   const installer = path.join(packageRoot, "install.command");
   const successfulEnv = cleanEnvironment({ home, binRoot, logPath });
   await execFileAsync("zsh", [installer], { env: successfulEnv, encoding: "utf8" });
 
-  const installRoot = path.join(
-    home,
-    "Library/Application Support/PixVerse/api-plugin/0.3.0-beta.2",
-  );
+  const installRoot = path.join(npmPrefix, "lib/node_modules/pixverse-api");
   const markerPath = path.join(installRoot, "prior-install-marker.txt");
   await fs.writeFile(markerPath, "preserve prior install\n");
 
@@ -147,7 +201,7 @@ macTest("failed Codex registration restores the previously installed version", a
 macTest("installer rejects files that are not listed in the signed inventory", async (t) => {
   const { root, packageRoot } = await createExtractedPackage(t);
   const home = path.join(root, "home");
-  const { binRoot, logPath } = await createFakeCodex(root);
+  const { binRoot, logPath, npmPrefix } = await createFakeCodex(root);
   await fs.mkdir(home);
   await fs.mkdir(path.join(packageRoot, "plugins/pixverse-api/skills/unlisted"), { recursive: true });
   await fs.writeFile(
@@ -165,7 +219,7 @@ macTest("installer rejects files that are not listed in the signed inventory", a
 
   await assert.rejects(fs.access(logPath), { code: "ENOENT" });
   await assert.rejects(
-    fs.access(path.join(home, "Library/Application Support/PixVerse/api-plugin/0.3.0-beta.2")),
+    fs.access(path.join(npmPrefix, "lib/node_modules/pixverse-api")),
     { code: "ENOENT" },
   );
 });
@@ -173,7 +227,7 @@ macTest("installer rejects files that are not listed in the signed inventory", a
 macTest("uninstaller treats an already absent Codex registration as success", async (t) => {
   const { root, packageRoot } = await createExtractedPackage(t);
   const home = path.join(root, "home");
-  const { binRoot, logPath } = await createFakeCodex(root);
+  const { binRoot, logPath, npmPrefix } = await createFakeCodex(root);
   await fs.mkdir(home);
   const installer = path.join(packageRoot, "install.command");
   const uninstaller = path.join(packageRoot, "uninstall.command");
@@ -193,14 +247,14 @@ macTest("uninstaller treats an already absent Codex registration as success", as
   });
 
   const supportRoot = path.join(home, "Library/Application Support/PixVerse/api-plugin");
-  await assert.rejects(fs.access(path.join(supportRoot, "0.3.0-beta.2")), { code: "ENOENT" });
+  await assert.rejects(fs.access(path.join(npmPrefix, "lib/node_modules/pixverse-api")), { code: "ENOENT" });
   await assert.rejects(fs.access(path.join(supportRoot, "install-receipt.json")), { code: "ENOENT" });
 });
 
 macTest("plugin-add failure restores the prior files and Codex registration", async (t) => {
   const { root, packageRoot } = await createExtractedPackage(t);
   const home = path.join(root, "home");
-  const { binRoot, logPath } = await createFakeCodex(root);
+  const { binRoot, logPath, npmPrefix } = await createFakeCodex(root);
   await fs.mkdir(home);
   const installer = path.join(packageRoot, "install.command");
   await execFileAsync("zsh", [installer], {
@@ -208,10 +262,7 @@ macTest("plugin-add failure restores the prior files and Codex registration", as
     encoding: "utf8",
   });
 
-  const installRoot = path.join(
-    home,
-    "Library/Application Support/PixVerse/api-plugin/0.3.0-beta.2",
-  );
+  const installRoot = path.join(npmPrefix, "lib/node_modules/pixverse-api");
   const markerPath = path.join(installRoot, "prior-install-marker.txt");
   await fs.writeFile(markerPath, "preserve prior install\n");
 
@@ -244,7 +295,7 @@ macTest("plugin-add failure restores the prior files and Codex registration", as
 macTest("new-version plugin-add failure restores the receipt-owned older version", async (t) => {
   const { root, packageRoot } = await createExtractedPackage(t);
   const home = path.join(root, "home");
-  const { binRoot, logPath } = await createFakeCodex(root);
+  const { binRoot, logPath, npmPrefix } = await createFakeCodex(root);
   await fs.mkdir(home);
   const installer = path.join(packageRoot, "install.command");
   await execFileAsync("zsh", [installer], {
@@ -253,7 +304,7 @@ macTest("new-version plugin-add failure restores the receipt-owned older version
   });
 
   const supportRoot = path.join(home, "Library/Application Support/PixVerse/api-plugin");
-  const installRoot = path.join(supportRoot, "0.3.0-beta.2");
+  const installRoot = path.join(npmPrefix, "lib/node_modules/pixverse-api");
   const olderInstallRoot = path.join(supportRoot, "0.2.0-beta.9");
   const receiptPath = path.join(supportRoot, "install-receipt.json");
   await fs.rename(installRoot, olderInstallRoot);

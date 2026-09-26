@@ -16,7 +16,14 @@
 6. Close and reopen Codex again after saving credentials.
 7. Ask the PixVerse API Plugin to show help, check auth status, or perform a credential-free dry run.
 
-The installer verifies the package, copies it to a versioned directory under your user Library, registers the local marketplace, and installs `pixverse-api`. It does not request, read, copy, or store API credentials.
+The installer verifies the package, installs the API CLI using the same global Node pattern as the PixVerse CLI, registers the local Codex marketplace from that installed package, and installs `pixverse-api`. If the `pixverse` CLI is already installed, the installer places `pixverse-api` beside it; otherwise it uses `npm prefix -g`. It does not request, read, copy, or store API credentials.
+
+Installed CLI layout:
+
+```text
+<selected npm prefix>/lib/node_modules/pixverse-api
+<selected npm prefix>/bin/pixverse-api -> ../lib/node_modules/pixverse-api/dist/index.js
+```
 
 ## Credentials
 
@@ -34,11 +41,11 @@ Do not paste a key into Codex chat, a payload file, or a command argument.
 
 ## Upgrade
 
-Run the installer from the newer verified package. It keeps the receipt-owned older version until Codex registration succeeds, then removes that older package directory. If registration fails, the installer restores the older marketplace and plugin registration.
+Run the installer from the newer verified package. It keeps the receipt-owned older version until Codex registration succeeds, then removes that older package directory. If registration fails, the installer restores the older marketplace, plugin registration, and CLI shortcut.
 
 ## Remove
 
-Double-click `uninstall.command`, or run `zsh ./uninstall.command`. Removal uses the installer receipt and deletes only the registered plugin version. It does not remove credentials or unrelated files.
+Double-click `uninstall.command`, or run `zsh ./uninstall.command`. Removal uses the installer receipt and deletes only the registered plugin package and owned `pixverse-api` shortcut. It does not remove credentials or unrelated files.
 
 ## Private demo restriction
 

@@ -27,6 +27,8 @@ test("staging creates the self-contained marketplace from approved sources", asy
   });
 
   assert.equal(await exists(path.join(result.packageRoot, ".agents/plugins/marketplace.json")), true);
+  assert.equal(await exists(path.join(result.packageRoot, "package.json")), true);
+  assert.equal(await exists(path.join(result.packageRoot, "dist/index.js")), true);
   assert.equal(await exists(path.join(result.pluginRoot, ".codex-plugin/plugin.json")), true);
   assert.equal(await exists(path.join(result.pluginRoot, "scripts/pixverse-api")), true);
   assert.equal(await exists(path.join(result.pluginRoot, "runtime/src/cli.js")), true);
@@ -51,6 +53,10 @@ test("staging creates the self-contained marketplace from approved sources", asy
 
   const wrapperMode = (await fs.stat(path.join(result.pluginRoot, "scripts/pixverse-api"))).mode;
   assert.notEqual(wrapperMode & 0o100, 0);
+  const entrypointMode = (await fs.stat(path.join(result.packageRoot, "dist/index.js"))).mode;
+  assert.notEqual(entrypointMode & 0o100, 0);
+  const packageJson = JSON.parse(await fs.readFile(path.join(result.packageRoot, "package.json"), "utf8"));
+  assert.deepEqual(packageJson.bin, { "pixverse-api": "./dist/index.js" });
 });
 
 test("staged runtime metadata includes only production dependencies", async (t) => {
