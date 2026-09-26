@@ -8,6 +8,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 const pitchRoot = path.join(repoRoot, "deploy/brand-pitches/vips/human-reviewed-ecommerce");
 const dataPath = path.join(pitchRoot, "data/cases.json");
 const manifestPath = path.join(pitchRoot, "data/media-manifest.json");
+const productLinksPath = path.join(repoRoot, "test/fixtures/vips-product-links.json");
 const expectedCounts = Object.freeze({
   "viral-remix-and-editing": 11,
   "presenter-commerce": 3,
@@ -36,6 +37,7 @@ test("VIPS corpus preserves the exact reviewed scope", async () => {
   const data = await readData();
   assert.equal(data.schemaVersion, "vips-pitch.v1");
   assert.equal(data.source.revisionId, 1214);
+  assert.equal(data.source.productLinkRevisionId, 5);
   assert.equal(data.source.reviewedAt, "2026-09-20");
   assert.equal(data.chapters.length, 5);
 
@@ -46,6 +48,25 @@ test("VIPS corpus preserves the exact reviewed scope", async () => {
     Object.fromEntries(data.chapters.map(({ id, cases }) => [id, cases.length])),
     expectedCounts,
   );
+});
+
+test("VIPS product links exactly match the reviewed revision-5 mapping", async () => {
+  const [data, mapping, deployRaw] = await Promise.all([
+    readData(),
+    fs.readFile(productLinksPath, "utf8").then(JSON.parse),
+    fs.readFile(dataPath, "utf8"),
+  ]);
+  const records = data.chapters.flatMap(({ cases }) => cases.flatMap(({ id, inputs }) =>
+    inputs
+      .filter(({ type }) => type === "link")
+      .map(({ url }) => ({ caseId: id, url })),
+  ));
+
+  assert.equal(mapping.revisionId, 5);
+  assert.equal(records.length, 10);
+  assert.equal(new Set(records.map(({ url }) => url)).size, 9);
+  assert.deepEqual(records, mapping.records);
+  assert.doesNotMatch(deployRaw, new RegExp(mapping.sourceDocumentId));
 });
 
 test("every case retains evidence and attempt-level review", async () => {

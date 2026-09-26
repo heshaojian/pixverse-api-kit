@@ -5,6 +5,8 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
+import { renderProductCatalog } from "../deploy/brand-pitches/vips/human-reviewed-ecommerce/render.js";
+
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const pitchRoot = path.join(repoRoot, "deploy/brand-pitches/vips/human-reviewed-ecommerce");
 
@@ -14,6 +16,7 @@ const contentTypes = Object.freeze({
   ".js": "text/javascript",
   ".json": "application/json",
   ".svg": "image/svg+xml",
+  ".ico": "image/vnd.microsoft.icon",
   ".png": "image/png",
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
@@ -69,6 +72,8 @@ test("VIPS pitch artifact is self-contained over static HTTP", async () => {
       "/data-model.js",
       "/render.js",
       "/assets/brand/pixverse-logo.svg",
+      "/assets/brand/vips-icon.ico",
+      "/assets/brand/pixverse-touch-icon.png",
       "/assets/images/featured-presenter-poster.jpg",
       "/assets/images/featured-creative-poster.jpg",
       "/assets/images/featured-product-motion-poster.jpg",
@@ -81,6 +86,25 @@ test("VIPS pitch artifact is self-contained over static HTTP", async () => {
       const expectedType = contentTypes[path.extname(pathname).toLowerCase()] ?? "text/html";
       assert.match(response.headers.get("content-type") ?? "", new RegExp(escapeRegExp(expectedType)), pathname);
       await response.arrayBuffer();
+    }
+
+    const pageResponse = await fetch(`${baseUrl}/`);
+    assert.equal(pageResponse.status, 200);
+    const pageHtml = await pageResponse.text();
+    assert.match(pageHtml, /id="workflow-selector"/);
+    assert.match(pageHtml, /id="copy-pilot"/);
+    assert.match(pageHtml, /id="ledger-retry"/);
+    assert.match(pageHtml, /id="product-catalog-mount"/);
+
+    const data = JSON.parse(await fs.readFile(path.join(pitchRoot, "data/cases.json"), "utf8"));
+    const catalog = renderProductCatalog(data);
+    assert.equal((catalog.match(/class="product-catalog-card"/g) ?? []).length, 28);
+    assert.equal((catalog.match(/class="product-evidence-link"/g) ?? []).length, 28);
+    assert.equal((catalog.match(/class="product-catalog-link"/g) ?? []).length, 10);
+    assert.doesNotMatch(catalog, /<video\b/);
+    for (const tag of catalog.match(/<a\b[^>]*target="_blank"[^>]*>/g) ?? []) {
+      assert.match(tag, /href="https:\/\/detail\.vip\.com\//);
+      assert.match(tag, /rel="noreferrer"/);
     }
 
     const traversal = await fetch(`${baseUrl}/%2e%2e/package.json`);

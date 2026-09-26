@@ -1,7 +1,10 @@
 import {
   flattenCases,
+  getProductCatalogRecords,
   getVerdictMeta,
   isSafeMediaUrl,
+  isVerifiedProductUrl,
+  toAttemptDomId,
   validatePitchData,
 } from "./data-model.js";
 
@@ -50,11 +53,30 @@ const renderExternalMediaLink = (media) => {
   ].join("");
 };
 
+const safeProductUrl = (value) => {
+  if (!isVerifiedProductUrl(value)) throw new Error(`Invalid VIPS product URL: ${value}`);
+  return value;
+};
+
+const renderProductLink = ({ url, caseTitle }, className = "case-product-link") => [
+  `<a class="${escapeHtml(className)}" href="${escapeHtml(safeProductUrl(url))}" target="_blank" rel="noreferrer"`,
+  ` aria-label="查看${escapeHtml(caseTitle)}的唯品会商品详情">`,
+  `查看唯品会商品详情 <span aria-hidden="true">↗</span>`,
+  `</a>`,
+].join("");
+
+const renderDimensions = (media) => {
+  const { width, height } = media.dimensions;
+  if (width === null || height === null) return "";
+  return ` width="${width}" height="${height}"`;
+};
+
 const renderLocalImage = (media) => {
   const url = escapeHtml(safeUrl(media.url));
+  const dimensions = renderDimensions(media);
   return [
     `<figure class="media-frame media-frame-image" data-source-kind="${escapeHtml(media.sourceKind)}">`,
-    `<img data-src="${url}" loading="lazy" decoding="async" alt="${escapeHtml(media.alt)}">`,
+    `<img data-src="${url}" loading="lazy" decoding="async"${dimensions} alt="${escapeHtml(media.alt)}">`,
     `<figcaption>${escapeHtml(mediaLabel(media))}</figcaption>`,
     `<p class="media-unavailable" hidden>素材暂不可用。</p>`,
     "</figure>",
@@ -63,9 +85,10 @@ const renderLocalImage = (media) => {
 
 const renderLocalVideo = (media) => {
   const url = escapeHtml(safeUrl(media.url));
+  const dimensions = renderDimensions(media);
   return [
     `<figure class="media-frame media-frame-video" data-source-kind="${escapeHtml(media.sourceKind)}">`,
-    `<video controls playsinline preload="none" data-src="${url}" aria-label="${escapeHtml(mediaLabel(media))}"></video>`,
+    `<video controls playsinline preload="none" data-src="${url}"${dimensions} aria-label="${escapeHtml(mediaLabel(media))}"></video>`,
     `<figcaption>${escapeHtml(media.alt)}</figcaption>`,
     `<p class="media-unavailable" hidden>视频暂不可用。</p>`,
     "</figure>",
@@ -87,12 +110,15 @@ const renderMediaGroup = (items, title) => {
   ].join("");
 };
 
-const renderAttempt = (attempt) => {
+const renderAttempt = (recordId, attempt, representativeAttemptId) => {
   const prompt = attempt.prompt
     ? `<p class="attempt-prompt"><span>提示词：</span>${escapeHtml(attempt.prompt)}</p>`
     : "";
+  const media = attempt.id === representativeAttemptId && attempt.media.length
+    ? `<a class="representative-evidence-link" href="#${slug(recordId)}-representative-evidence">查看上方代表性结果</a>`
+    : renderMediaGroup(attempt.media, "输出素材");
   return [
-    `<li class="attempt" id="${slug(attempt.id)}">`,
+    `<li class="attempt" id="${slug(toAttemptDomId(recordId, attempt.id))}">`,
     `<div class="attempt-head">`,
     `<h5>${escapeHtml(attempt.label)}</h5>`,
     renderVerdict(attempt.verdict),
@@ -101,12 +127,28 @@ const renderAttempt = (attempt) => {
     renderList(attempt.parameters, "attempt-parameters"),
     prompt,
     renderList(attempt.observations, "attempt-observations"),
-    renderMediaGroup(attempt.media, "输出素材"),
+    media,
     "</li>",
   ].join("");
 };
 
+const findRepresentativeAttempt = (record) => [...record.attempts]
+  .reverse()
+  .find(({ media }) => media.length) ?? null;
+
 export function renderCase(record) {
+  const representativeAttempt = findRepresentativeAttempt(record);
+  const productInput = record.inputs.find(({ type }) => type === "link");
+  const productLink = productInput
+    ? renderProductLink({ url: productInput.url, caseTitle: record.title })
+    : "";
+  const representativeEvidence = representativeAttempt
+    ? [
+      `<div class="representative-evidence" id="${slug(record.id)}-representative-evidence">`,
+      renderMediaGroup(representativeAttempt.media, "代表性结果"),
+      `</div>`,
+    ].join("")
+    : "";
   return [
     `<details class="case-record" id="${slug(record.id)}">`,
     `<summary>`,
@@ -115,33 +157,109 @@ export function renderCase(record) {
     `</summary>`,
     `<div class="case-body">`,
     `<p class="case-request">${escapeHtml(record.request)}</p>`,
-    renderMediaGroup(record.inputs, "输入与参考"),
-    `<ol class="attempts">${record.attempts.map(renderAttempt).join("")}</ol>`,
-    `<details class="review-detail">`,
-    `<summary>评审详情</summary>`,
-    `<p>${escapeHtml(record.review.summary)}</p>`,
+    `<p class="review-summary">${escapeHtml(record.review.summary)}</p>`,
+    productLink,
     renderList(record.review.observations, "review-observations"),
+    representativeEvidence,
+    `<details class="complete-review-record">`,
+    `<summary>完整评审记录</summary>`,
+    `<div class="complete-review-body">`,
+    renderMediaGroup(record.inputs, "输入与参考"),
+    `<ol class="attempts">${record.attempts.map((attempt) => renderAttempt(record.id, attempt, representativeAttempt?.id)).join("")}</ol>`,
+    `</div>`,
     `</details>`,
     `</div>`,
     `</details>`,
   ].join("");
 }
 
+const groupCatalogRecords = (records) => records.reduce((items, record) => {
+  const previous = items.at(-1);
+  if (previous?.chapterId === record.chapterId) {
+    return Object.freeze([
+      ...items.slice(0, -1),
+      Object.freeze({ ...previous, records: Object.freeze([...previous.records, record]) }),
+    ]);
+  }
+  return Object.freeze([
+    ...items,
+    Object.freeze({
+      chapterId: record.chapterId,
+      chapterTitle: record.chapterTitle,
+      records: Object.freeze([record]),
+    }),
+  ]);
+}, Object.freeze([]));
+
+const renderCatalogPreview = (record) => {
+  if (!record.previewImage) {
+    return `<div class="product-catalog-placeholder" role="img" aria-label="${escapeHtml(record.caseTitle)}暂无预览图"><span>预览图待补充</span></div>`;
+  }
+  const { url, alt, width, height } = record.previewImage;
+  const dimensions = width === null || height === null ? "" : ` width="${width}" height="${height}"`;
+  return [
+    `<div class="product-catalog-preview">`,
+    `<img src="${escapeHtml(safeUrl(url))}" loading="lazy" decoding="async"${dimensions} alt="${escapeHtml(alt)}">`,
+    `</div>`,
+  ].join("");
+};
+
+const renderCatalogCard = (record) => {
+  const evidenceHref = `#${slug(record.caseId)}`;
+  const productLink = record.productUrl
+    ? renderProductLink({ url: record.productUrl, caseTitle: record.caseTitle }, "product-catalog-link")
+    : "";
+  return [
+    `<article class="product-catalog-card" data-media-status="${escapeHtml(record.mediaStatus)}">`,
+    renderCatalogPreview(record),
+    `<div class="product-catalog-card-body">`,
+    `<p class="product-catalog-workflow">${escapeHtml(record.chapterTitle)}</p>`,
+    `<h4>${escapeHtml(record.caseTitle)}</h4>`,
+    `<div class="product-catalog-meta">${renderVerdict(record.verdict)}<span class="product-media-status">${escapeHtml(record.mediaStatus)}</span></div>`,
+    `<div class="product-catalog-actions">`,
+    `<a class="product-evidence-link" href="${evidenceHref}">查看完整评审</a>`,
+    productLink,
+    `</div>`,
+    `</div>`,
+    `</article>`,
+  ].join("");
+};
+
+export function renderProductCatalog(data) {
+  const records = getProductCatalogRecords(data);
+  const groups = groupCatalogRecords(records);
+
+  return [
+    `<div class="product-catalog" data-product-count="${records.length}">`,
+    groups.map((group) => [
+      `<section class="product-catalog-group" aria-labelledby="product-group-${slug(group.chapterId)}">`,
+      `<h3 id="product-group-${slug(group.chapterId)}">${escapeHtml(group.chapterTitle)}</h3>`,
+      `<div class="product-catalog-grid">`,
+      group.records.map(renderCatalogCard).join(""),
+      `</div>`,
+      `</section>`,
+    ].join("")).join(""),
+    `</div>`,
+  ].join("");
+}
+
 export function renderChapter(chapter) {
   return [
-    `<section class="ledger-chapter" id="${slug(chapter.id)}">`,
-    `<header class="chapter-header">`,
-    `<p class="chapter-kicker">${renderVerdict(chapter.verdict)}</p>`,
-    `<h3>${escapeHtml(chapter.title)}</h3>`,
-    `<p>${escapeHtml(chapter.summary)}</p>`,
-    `</header>`,
+    `<details class="ledger-chapter" id="${slug(chapter.id)}">`,
+    `<summary class="chapter-summary">`,
+    `<span class="chapter-title">${escapeHtml(chapter.title)}</span>`,
+    renderVerdict(chapter.verdict),
+    `</summary>`,
+    `<div class="chapter-body">`,
+    `<p class="chapter-description">${escapeHtml(chapter.summary)}</p>`,
     `<div class="chapter-notes">`,
     renderList(chapter.strengths, "chapter-strengths"),
     renderList(chapter.limitations, "chapter-limitations"),
     renderList(chapter.operatingConditions, "chapter-operating-conditions"),
     `</div>`,
     chapter.cases.map(renderCase).join(""),
-    `</section>`,
+    `</div>`,
+    `</details>`,
   ].join("");
 }
 

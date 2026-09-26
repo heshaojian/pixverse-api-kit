@@ -36,6 +36,8 @@ const SOURCE_KINDS = new Set([
   "reviewed-output",
 ]);
 
+const PRODUCT_CATALOG_EXCLUSIONS = Object.freeze(["product-motion-prompt-baseline"]);
+
 const isObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
 
 const assertString = (value, label) => {
@@ -74,6 +76,19 @@ export function isSafeMediaUrl(value) {
   return /^assets\/(?:images|videos)\/[a-z0-9][a-z0-9.-]*$/.test(value);
 }
 
+export function isVerifiedProductUrl(value) {
+  if (!isSafeMediaUrl(value) || !/^https:/i.test(value)) return false;
+  try {
+    const parsed = new URL(value);
+    return parsed.hostname === "detail.vip.com"
+      && /^\/detail-[0-9]+-[0-9]+\.html$/.test(parsed.pathname)
+      && !parsed.search
+      && !parsed.hash;
+  } catch {
+    return false;
+  }
+}
+
 const assertDimensions = (dimensions, label) => {
   if (!isObject(dimensions)) throw new Error(`${label}.dimensions must be an object`);
   const { width, height, aspectRatio } = dimensions;
@@ -94,6 +109,9 @@ const assertMedia = (media, label) => {
   if (!["image", "video", "link"].includes(media.type)) throw new Error(`${label}.type is unsupported`);
   assertString(media.label, `${label}.label`);
   assertString(media.url, `${label}.url`);
+  if (media.type === "link" && !isVerifiedProductUrl(media.url)) {
+    throw new Error(`Invalid VIPS product URL: ${media.url}`);
+  }
   if (!isSafeMediaUrl(media.url)) throw new Error(`Unsafe media URL: ${media.url}`);
   if (!SOURCE_KINDS.has(media.sourceKind)) throw new Error(`${label}.sourceKind is unsupported`);
   assertString(media.alt, `${label}.alt`);
@@ -161,6 +179,60 @@ export function flattenCases(data) {
   return Object.freeze(data.chapters.flatMap(({ cases }) => cases));
 }
 
+export function getProductLinkRecords(data) {
+  const validated = validatePitchData(data);
+  return Object.freeze(validated.chapters.flatMap((chapter) =>
+    chapter.cases.flatMap((record) => record.inputs
+      .filter(({ type }) => type === "link")
+      .map(({ url }) => Object.freeze({
+        chapterId: chapter.id,
+        chapterTitle: chapter.title,
+        caseId: record.id,
+        caseTitle: record.title,
+        url,
+      }))),
+  ));
+}
+
+const findCatalogPreviewImage = (record) => {
+  const media = record.inputs.find(({ type }) => type === "image")
+    ?? record.attempts.flatMap(({ media: items }) => items).find(({ type }) => type === "image")
+    ?? null;
+  if (!media) return null;
+  return Object.freeze({
+    url: media.url,
+    alt: media.alt,
+    width: media.dimensions.width,
+    height: media.dimensions.height,
+  });
+};
+
+const getCatalogMediaStatus = (record, previewImage) => {
+  const hasVideo = record.attempts.some(({ media }) => media.some(({ type }) => type === "video"));
+  if (hasVideo) return "已有视频";
+  return previewImage ? "已有图片，视频待补充" : "视频待补充";
+};
+
+export function getProductCatalogRecords(data) {
+  const validated = validatePitchData(data);
+  return Object.freeze(validated.chapters.flatMap((chapter) => chapter.cases
+    .filter(({ id }) => !PRODUCT_CATALOG_EXCLUSIONS.includes(id))
+    .map((record) => {
+      const previewImage = findCatalogPreviewImage(record);
+      return Object.freeze({
+        chapterId: chapter.id,
+        chapterTitle: chapter.title,
+        caseId: record.id,
+        caseTitle: record.title,
+        verdict: record.review.verdict,
+        mediaStatus: getCatalogMediaStatus(record, previewImage),
+        previewImage,
+        productUrl: record.inputs.find(({ type }) => type === "link")?.url ?? null,
+        evidenceHref: `#${record.id}`,
+      });
+    })));
+}
+
 export function getVerdictMeta(verdict) {
   const meta = VERDICT_META[verdict];
   if (!meta) throw new Error(`Unknown verdict: ${verdict}`);
@@ -178,10 +250,86 @@ export function getFeaturedCases(data) {
   return Object.freeze(featured);
 }
 
+export function toggleWorkflowSelection(selectedIds, workflowId, maxSelections = 3) {
+  if (!Array.isArray(selectedIds)) throw new Error("selectedIds must be an array");
+  assertString(workflowId, "workflowId");
+  if (!Number.isInteger(maxSelections) || maxSelections < 1) {
+    throw new Error("maxSelections must be a positive integer");
+  }
+  const current = Object.freeze([...selectedIds]);
+  if (current.includes(workflowId)) {
+    return Object.freeze({
+      selectedIds: Object.freeze(current.filter((id) => id !== workflowId)),
+      reason: null,
+    });
+  }
+  if (current.length >= maxSelections) {
+    return Object.freeze({ selectedIds: current, reason: "limit-reached" });
+  }
+  return Object.freeze({
+    selectedIds: Object.freeze([...current, workflowId]),
+    reason: null,
+  });
+}
+
+export function buildPilotSummary({ data, selectedIds, safeguards }) {
+  const validated = validatePitchData(data);
+  if (!Array.isArray(selectedIds) || selectedIds.length !== 3 || new Set(selectedIds).size !== 3) {
+    throw new Error("Pilot summary requires exactly three workflows");
+  }
+  if (!Array.isArray(safeguards) || safeguards.some((item) => typeof item !== "string" || !item.trim())) {
+    throw new Error("safeguards must be non-empty strings");
+  }
+  const selected = new Set(selectedIds);
+  const workflows = validated.chapters.filter(({ id }) => selected.has(id));
+  if (workflows.length !== selected.size) throw new Error("Unknown workflow selection");
+  return [
+    "唯品会电商视频受控试点",
+    "",
+    "优先工作流：",
+    ...workflows.map(({ title }) => `- ${title}`),
+    "",
+    "共同评审边界：",
+    ...safeguards.map((item) => `- ${item}`),
+    "",
+    `来源：人工评审材料修订版 ${validated.source.revisionId}`,
+    `评审日期：${validated.source.reviewedAt}`,
+  ].join("\n");
+}
+
+export function toAttemptDomId(caseId, attemptId) {
+  assertString(caseId, "caseId");
+  assertString(attemptId, "attemptId");
+  return `${caseId}--${attemptId}`;
+}
+
+export function resolveEvidenceTarget(data, hashId) {
+  const validated = validatePitchData(data);
+  if (typeof hashId !== "string" || !hashId) return null;
+  for (const chapter of validated.chapters) {
+    if (chapter.id === hashId) {
+      return Object.freeze({ chapterId: chapter.id, caseId: null, attemptDomId: null });
+    }
+    for (const record of chapter.cases) {
+      if (record.id === hashId) {
+        return Object.freeze({ chapterId: chapter.id, caseId: record.id, attemptDomId: null });
+      }
+      for (const attempt of record.attempts) {
+        const attemptDomId = toAttemptDomId(record.id, attempt.id);
+        if (attemptDomId === hashId) {
+          return Object.freeze({ chapterId: chapter.id, caseId: record.id, attemptDomId });
+        }
+      }
+    }
+  }
+  return null;
+}
+
 export function validatePitchData(data) {
   if (!isObject(data)) throw new Error("Pitch data must be an object");
   if (data.schemaVersion !== "vips-pitch.v1") throw new Error("Unsupported schemaVersion");
   if (data.source?.revisionId !== 1214) throw new Error("Expected revision 1214");
+  if (data.source.productLinkRevisionId !== 5) throw new Error("Expected product-link revision 5");
   assertArray(data.featuredCaseIds, "featuredCaseIds");
   assertUnique(data.featuredCaseIds, "featured case id");
   assertArray(data.chapters, "chapters");

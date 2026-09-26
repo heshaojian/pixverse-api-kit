@@ -5,10 +5,17 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import {
+  buildPilotSummary,
   flattenCases,
   getFeaturedCases,
+  getProductCatalogRecords,
+  getProductLinkRecords,
   getVerdictMeta,
   isSafeMediaUrl,
+  isVerifiedProductUrl,
+  resolveEvidenceTarget,
+  toAttemptDomId,
+  toggleWorkflowSelection,
   validatePitchData,
 } from "../../deploy/brand-pitches/vips/human-reviewed-ecommerce/data-model.js";
 
@@ -17,6 +24,7 @@ const fixturePath = path.join(
   repoRoot,
   "deploy/brand-pitches/vips/human-reviewed-ecommerce/data/cases.json",
 );
+const catalogFixturePath = path.join(repoRoot, "test/fixtures/vips-product-catalog.json");
 
 const readFixture = async () => JSON.parse(await fs.readFile(fixturePath, "utf8"));
 
@@ -111,6 +119,153 @@ test("isSafeMediaUrl rejects malformed and ambiguous paths", () => {
   assert.equal(isSafeMediaUrl("https://example.com/video.mp4?download=1"), false);
   assert.equal(isSafeMediaUrl("https://example.com/video.mp4#preview"), false);
   assert.equal(isSafeMediaUrl("https://example.com/video.mp4"), true);
+});
+
+test("verified VIPS product URLs use the exact HTTPS detail route", () => {
+  assert.equal(
+    isVerifiedProductUrl("https://detail.vip.com/detail-0-6921774026741411905.html"),
+    true,
+  );
+  assert.equal(
+    isVerifiedProductUrl("https://detail.vip.com/detail-0-6921774026741411905.html?track=1"),
+    false,
+  );
+  assert.equal(
+    isVerifiedProductUrl("https://example.com/detail-0-6921774026741411905.html"),
+    false,
+  );
+  assert.equal(
+    isVerifiedProductUrl("https://detail.vip.com/detail-x-6921774026741411905.html"),
+    false,
+  );
+});
+
+test("product-link records preserve reviewed order and immutable provenance", async () => {
+  const fixture = await readFixture();
+  const mappingPath = path.join(repoRoot, "test/fixtures/vips-product-links.json");
+  const mapping = JSON.parse(await fs.readFile(mappingPath, "utf8"));
+  const records = getProductLinkRecords(fixture);
+
+  assert.equal(fixture.source.productLinkRevisionId, 5);
+  assert.equal(records.length, 10);
+  assert.equal(new Set(records.map(({ url }) => url)).size, 9);
+  assert.ok(Object.isFrozen(records));
+  assert.ok(records.every(Object.isFrozen));
+  assert.deepEqual(
+    records.map(({ caseId, url }) => ({ caseId, url })),
+    mapping.records,
+  );
+
+  const unsafe = structuredClone(fixture);
+  unsafe.chapters[0].cases[0].inputs.find(({ type }) => type === "link").url += "?track=1";
+  assert.throws(() => validatePitchData(unsafe), /VIPS product URL/i);
+});
+
+test("product catalog preserves all 28 reviewed products in source order", async () => {
+  const fixture = await readFixture();
+  const expected = JSON.parse(await fs.readFile(catalogFixturePath, "utf8"));
+  const records = getProductCatalogRecords(fixture);
+
+  assert.equal(records.length, 28);
+  assert.deepEqual(records.map(({ caseId }) => caseId), expected.caseIds);
+  assert.ok(!records.some(({ caseId }) => caseId === expected.excludedCaseId));
+  assert.ok(Object.isFrozen(records));
+  assert.ok(records.every(Object.isFrozen));
+  assert.equal(flattenCases(fixture).some(({ id }) => id === expected.excludedCaseId), true);
+});
+
+test("product catalog retains products whose videos are pending", async () => {
+  const expected = JSON.parse(await fs.readFile(catalogFixturePath, "utf8"));
+  const records = getProductCatalogRecords(await readFixture());
+  const pending = records.filter(({ mediaStatus }) => mediaStatus !== "已有视频");
+
+  assert.deepEqual(pending.map(({ caseId }) => caseId), expected.noVideoCaseIds);
+  assert.deepEqual(pending.map(({ mediaStatus }) => mediaStatus), [
+    "视频待补充",
+    "视频待补充",
+    "已有图片，视频待补充",
+    "已有图片，视频待补充",
+    "已有图片，视频待补充",
+  ]);
+  assert.ok(records.every(({ evidenceHref, caseId }) => evidenceHref === `#${caseId}`));
+});
+
+test("product catalog preserves verified links and freezes preview metadata", async () => {
+  const records = getProductCatalogRecords(await readFixture());
+  const linked = records.filter(({ productUrl }) => productUrl !== null);
+  const previews = records.flatMap(({ previewImage }) => previewImage ? [previewImage] : []);
+
+  assert.equal(linked.length, 10);
+  assert.equal(new Set(linked.map(({ productUrl }) => productUrl)).size, 9);
+  assert.ok(linked.every(({ productUrl }) => isVerifiedProductUrl(productUrl)));
+  assert.ok(previews.length > 0);
+  assert.ok(previews.every(Object.isFrozen));
+});
+
+test("pilot selection is immutable, reversible, and rejects a fourth workflow", async () => {
+  const fixture = await readFixture();
+  const ids = Object.freeze(fixture.chapters.slice(0, 3).map(({ id }) => id));
+  const rejected = toggleWorkflowSelection(ids, fixture.chapters[3].id);
+
+  assert.deepEqual(rejected, { selectedIds: ids, reason: "limit-reached" });
+  assert.ok(Object.isFrozen(rejected));
+  assert.ok(Object.isFrozen(rejected.selectedIds));
+
+  const deselected = toggleWorkflowSelection(ids, ids[1]);
+  assert.deepEqual(deselected, {
+    selectedIds: [ids[0], ids[2]],
+    reason: null,
+  });
+  assert.deepEqual(ids, fixture.chapters.slice(0, 3).map(({ id }) => id));
+});
+
+test("pilot summary requires exactly three valid workflows in chapter order", async () => {
+  const fixture = await readFixture();
+  const selectedIds = [fixture.chapters[2].id, fixture.chapters[0].id, fixture.chapters[1].id];
+  const safeguards = ["确认商品", "确认边界", "确认评审标准", "比较返工原因"];
+  const summary = buildPilotSummary({ data: fixture, selectedIds, safeguards });
+
+  assert.match(summary, /修订版 1214/);
+  assert.match(summary, new RegExp(fixture.source.reviewedAt));
+  const orderedTitles = fixture.chapters.slice(0, 3).map(({ title }) => title);
+  assert.ok(summary.indexOf(orderedTitles[0]) < summary.indexOf(orderedTitles[1]));
+  assert.ok(summary.indexOf(orderedTitles[1]) < summary.indexOf(orderedTitles[2]));
+  assert.ok(safeguards.every((item) => summary.includes(item)));
+  assert.throws(
+    () => buildPilotSummary({ data: fixture, selectedIds: selectedIds.slice(0, 2), safeguards }),
+    /exactly three/i,
+  );
+  assert.throws(
+    () => buildPilotSummary({ data: fixture, selectedIds: [selectedIds[0], selectedIds[1], "missing"], safeguards }),
+    /unknown workflow/i,
+  );
+});
+
+test("evidence targets use globally unique composite attempt ids", async () => {
+  const fixture = await readFixture();
+  const chapter = fixture.chapters[0];
+  const record = chapter.cases[0];
+  const attempt = record.attempts[0];
+  const attemptDomId = toAttemptDomId(record.id, attempt.id);
+
+  assert.equal(attemptDomId, `${record.id}--${attempt.id}`);
+  assert.deepEqual(resolveEvidenceTarget(fixture, chapter.id), {
+    chapterId: chapter.id,
+    caseId: null,
+    attemptDomId: null,
+  });
+  assert.deepEqual(resolveEvidenceTarget(fixture, record.id), {
+    chapterId: chapter.id,
+    caseId: record.id,
+    attemptDomId: null,
+  });
+  assert.deepEqual(resolveEvidenceTarget(fixture, attemptDomId), {
+    chapterId: chapter.id,
+    caseId: record.id,
+    attemptDomId,
+  });
+  assert.equal(resolveEvidenceTarget(fixture, attempt.id), null);
+  assert.equal(resolveEvidenceTarget(fixture, "missing"), null);
 });
 
 test("validatePitchData rejects unsupported nested records and top-level drift", async () => {

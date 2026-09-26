@@ -39,7 +39,7 @@ test("VIPS private preview ships strict noindex security headers", async () => {
 });
 
 test("VIPS private pitch text excludes secrets, internals, and active distribution hooks", async () => {
-  const forbidden = /YEE4dcLZAoiZC9x9vhzcZKLknsc|file_token|\/Users\/|mh_live_|API[-_ ]?KEY|Bearer\s+[A-Za-z0-9._-]+|(?:job|asset|video)[_-]?id\b|analytics|gtag|segment\.com|http:\/\/(?!www\.w3\.org\/2000\/svg)|javascript:|data:text\/html|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
+  const forbidden = /YEE4dcLZAoiZC9x9vhzcZKLknsc|L6sbdC5j3obuDoxrpcYcwGySn2e|feishu\.cn|file_token|\/Users\/|mh_live_|API[-_ ]?KEY|Bearer\s+[A-Za-z0-9._-]+|(?:job|asset|video)[_-]?id\b|analytics|gtag|segment\.com|http:\/\/(?!www\.w3\.org\/2000\/svg)|javascript:|data:text\/html|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
   for (const filePath of await collectTextFiles(pitchRoot)) {
     const relativePath = path.relative(pitchRoot, filePath);
     const text = await fs.readFile(filePath, "utf8");
