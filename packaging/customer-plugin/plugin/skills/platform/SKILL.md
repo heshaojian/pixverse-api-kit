@@ -25,8 +25,8 @@ Read `<plugin-root>/docs/api/platform-operations.md` for the complete operation 
 1. Resolve prerequisites with help, account reads, and live catalog calls.
 2. Validate a specialized request with `--dry-run`.
 3. For a billable operation, obtain explicit approval for the exact request immediately before submission.
-4. Prefer `run-job`, submit once with a fresh trace, and preserve the returned job directory and result ID.
-5. Poll the known ID or use `resume`. If acceptance is ambiguous and no ID was saved, stop for reconciliation instead of submitting again.
+4. Prefer `run-job`, submit once with a fresh trace; Platform billable commands wait by default and preserve the job directory, result ID, polling history, and terminal result.
+5. Use `--no-wait` only when asynchronous return is required, then continue the known ID with `resume`. If acceptance is ambiguous and no ID was saved, stop for reconciliation instead of submitting again.
 6. Treat success as transport success plus provider `ErrCode` equal to zero.
 
 Use `platform raw` only to diagnose a documented endpoint absent from the installed specialized catalog. Never use it to bypass validation, billing confirmation, authentication, trace, or recovery controls.

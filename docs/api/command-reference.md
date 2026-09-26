@@ -48,7 +48,7 @@ The general form is:
 pixverse-api platform <resource> <operation> [--payload /absolute/path/input.json] [--dry-run]
 ```
 
-`--dry-run` performs local normalization and validation and prints a redacted request description without making a network request. Billable specialized operations use the durable Platform job path even without the explicit `run-job` spelling; use `run-job` when you need polling controls.
+`--dry-run` performs local normalization and validation and prints a redacted request description without making a network request. Billable specialized operations use the durable Platform job path even without the explicit `run-job` spelling and wait for a terminal result by default; use `--no-wait` when you need asynchronous return after acceptance.
 
 | Area | Commands | Billing class |
 |---|---|---|
@@ -88,16 +88,20 @@ See [Platform Operations](platform-operations.md) for endpoint-specific payload 
 pixverse-api platform run-job \
   --operation agent.music-mv \
   --payload /absolute/path/music-mv.json \
-  --poll \
   --interval-ms 5000 \
   --timeout-ms 600000
+
+pixverse-api platform run-job \
+  --operation agent.music-mv \
+  --payload /absolute/path/music-mv.json \
+  --no-wait
 
 pixverse-api platform resume /absolute/path/pixverse-api-jobs/platform/<job-dir> \
   --interval-ms 5000 \
   --timeout-ms 600000
 ```
 
-`run-job` accepts only a billable Platform operation ID. `--poll` continues until a terminal result; without it, the command records the submission and known result ID. `--interval-ms` must be positive and `--timeout-ms` must be non-negative.
+`run-job` accepts only a billable Platform operation ID and waits until a terminal result by default. `--no-wait` records the submission and known result ID, then returns immediately without detached background polling. `--poll` remains accepted as an explicit wait compatibility alias and cannot be combined with `--no-wait`. `--interval-ms` must be positive and `--timeout-ms` must be non-negative.
 
 `resume` reads an existing job directory and polls its saved `video_id` or `image_id`. It never creates another generation. If the original submission is ambiguous and no result ID was saved, it returns `reconciliation_required`.
 

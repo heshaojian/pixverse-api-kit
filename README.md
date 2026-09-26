@@ -101,7 +101,7 @@ pixverse-api platform video text --payload /absolute/path/text-video.json --dry-
 pixverse-api growth-studio pdp create --payload /absolute/path/pdp.json --dry-run
 ```
 
-For live/billable jobs, use `run-job` or the provider-specific create command with the required confirmation flag. Keep the generated job directory so interrupted work can be resumed instead of resubmitted.
+For live/billable jobs, use `run-job` or the provider-specific create command with the required confirmation flag. Platform billable jobs wait by default. Keep the generated job directory so interrupted work can be resumed instead of resubmitted.
 
 ## Customer package contents
 
@@ -165,7 +165,8 @@ pixverse-api platform account usage --payload /absolute/path/usage-query.json
 pixverse-api platform resource templates --payload /absolute/path/template-query.json
 pixverse-api platform upload image /absolute/path/reference.png
 pixverse-api platform video text --payload /absolute/path/text-video.json --dry-run
-pixverse-api platform run-job --operation video.image --payload /absolute/path/image-video.json --poll
+pixverse-api platform run-job --operation video.image --payload /absolute/path/image-video.json
+pixverse-api platform run-job --operation video.image --payload /absolute/path/image-video.json --no-wait
 pixverse-api platform resume /absolute/path/pixverse-api-jobs/platform/<job-dir>
 ```
 
@@ -216,6 +217,7 @@ Legacy Growth Studio aliases such as `get`, `poll`, `run-job`, and `create-from-
 - Platform uses `API-KEY` and a fresh `Ai-trace-id` for every new request.
 - Growth Studio uses `Authorization: Bearer <PIXVERSE_GROWTH_API_KEY>`.
 - Keep all IDs as strings.
+- Platform billable jobs wait by default. Use `--no-wait` to return after acceptance, then use `resume` with the saved job directory; neither path resubmits generation.
 - Use `run-job` for new billable work and `resume` for an existing durable job.
 - For PDP, use `--dry-run`, optionally inspect the wallet snapshot, obtain approval immediately before `--confirm-billable`, and submit only once. A `202 Accepted` result is charged and queued.
 - After an ambiguous billable response, inspect saved artifacts and known IDs before retrying.
@@ -294,4 +296,4 @@ PIXVERSE_API_SKIP_PIXVERSE_PREFIX=1 zsh ./install.command
 
 ## Job Artifacts
 
-Platform `run-job` writes under `pixverse-api-jobs/platform/` by default. Growth Studio `run-job` and live PDP create write under `jobs/` by default. Both providers preserve redacted request evidence, known IDs, polling snapshots, final state, and safe error records. PDP can additionally preserve `ledger-source-id.json`. Use the matching provider or PDP `resume` command with that job directory to continue polling without submitting another generation.
+Platform `run-job` writes under `pixverse-api-jobs/platform/` by default. Platform default waiting writes polling snapshots and `final.json`; Platform `--no-wait` writes the accepted request and known ID for later `resume`. Growth Studio `run-job` and live PDP create write under `jobs/` by default. Both providers preserve redacted request evidence, known IDs, polling snapshots, final state, and safe error records. PDP can additionally preserve `ledger-source-id.json`. Use the matching provider or PDP `resume` command with that job directory to continue polling without submitting another generation.

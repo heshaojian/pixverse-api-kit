@@ -180,9 +180,15 @@ test("workflow and troubleshooting guidance preserves paid-call and webhook inva
   assert.match(skill, /references\/workflows-and-recovery\.md/);
   assert.match(skill, /references\/troubleshooting\.md/);
   assert.match(workflow, /--dry-run/);
+  assert.match(workflow, /waits? by default/i);
+  assert.match(workflow, /--no-wait/);
   assert.match(workflow, /run-job/);
   assert.match(workflow, /resume/);
   assert.match(workflow, /reconciliation_required/);
+  assert.doesNotMatch(workflow, /run-job[^\n]*--poll/);
+  const readme = await fs.readFile(path.join(ROOT, "README.md"), "utf8");
+  assert.match(readme, /platform run-job[^\n]*--no-wait/);
+  assert.match(readme, /Platform billable jobs wait by default/i);
   assert.match(workflow, /verify.*before.*pars/i);
   assert.match(workflow, /return.*`ok`.*after/i);
   assert.match(workflow, /https:\/\/docs\.platform\.pixverse\.ai\/how-to-use-webhook-1905378m0/);

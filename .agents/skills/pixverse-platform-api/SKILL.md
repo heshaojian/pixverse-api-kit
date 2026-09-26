@@ -25,8 +25,8 @@ Use only `PIXVERSE_PLATFORM_API_KEY` and the default `https://app-api.pixverse.a
 1. Resolve prerequisites with read-only catalog/account calls.
 2. Validate a specialized command locally and run it with `--dry-run`.
 3. For a billable operation, confirm the exact live spend is authorized in the active request immediately before submission.
-4. Submit once with a fresh trace ID, preferably through `run-job`; preserve the returned job directory and result ID.
-5. Poll the known image/video ID or use `resume`. If submission was ambiguous and no ID was saved, stop at `reconciliation_required`; do not resubmit.
+4. Submit once with a fresh trace ID, preferably through `run-job`; Platform billable commands wait by default and preserve the job directory, result ID, polling history, and terminal result.
+5. Use `--no-wait` only when asynchronous return is required, then continue the known job with `resume`. If submission was ambiguous and no result ID was saved, stop at `reconciliation_required`; do not resubmit.
 6. Treat success as transport success plus `ErrCode === 0`.
 
 Use `platform raw` only for diagnosis or a newly documented endpoint absent from the specialized catalog. Do not use raw access to bypass specialized validation, authentication, trace, billing, or recovery controls.

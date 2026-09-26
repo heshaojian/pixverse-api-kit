@@ -10,7 +10,7 @@
 
 ## Durable Jobs
 
-Use the durable submission surface for billable work: Platform `run-job`, Growth Studio `run-job`, or Growth Studio `pdp create --confirm-billable`. Each writes a durable, redacted request artifact before submission. A new Platform job gets a fresh UUID `Ai-trace-id`; recovery may reuse only the saved trace from `request.json`. Growth Studio stores its own trace and never borrows Platform credentials or identifiers.
+Use the durable submission surface for billable work: Platform `run-job`, Growth Studio `run-job`, or Growth Studio `pdp create --confirm-billable`. Each writes a durable, redacted request artifact before submission. Platform billable jobs wait by default; use `--no-wait` only when asynchronous return is required, then resume from the saved job directory. A new Platform job gets a fresh UUID `Ai-trace-id`; recovery may reuse only the saved trace from `request.json`. Growth Studio stores its own trace and never borrows Platform credentials or identifiers.
 
 Depending on the provider and how far the job reached, its directory can contain:
 
