@@ -127,6 +127,16 @@ async function writePackageEntrypoint(packageRoot) {
     type: "module",
     description: "PixVerse API CLI and Codex plugin for Platform API and Growth Studio API workflows.",
     bin: { "pixverse-api": "./dist/index.js" },
+    files: [
+      ".agents",
+      "INSTALL-MACOS.md",
+      "MANIFEST.sha256",
+      "auth.command",
+      "dist",
+      "install.command",
+      "plugins",
+      "uninstall.command",
+    ],
     engines: { node: ">=20" },
   };
   const entrypoint = `#!/usr/bin/env node

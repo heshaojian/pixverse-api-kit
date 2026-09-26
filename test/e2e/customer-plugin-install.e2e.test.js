@@ -60,10 +60,10 @@ process.stdout.write(JSON.stringify({ ok: true }) + "\\n");
   const codexPath = path.join(binRoot, "codex");
   await fs.writeFile(codexPath, executable, { mode: 0o755 });
   await fs.chmod(codexPath, 0o755);
-  const npmExecutable = `#!/usr/bin/env node
+const npmExecutable = `#!/usr/bin/env node
 const args = process.argv.slice(2);
 if (args[0] === "prefix" && args[1] === "-g") {
-  process.stdout.write(${JSON.stringify(npmPrefix)} + "\\n");
+  process.stdout.write((process.env.FAKE_NPM_PREFIX || ${JSON.stringify(npmPrefix)}) + "\\n");
   process.exit(0);
 }
 process.stderr.write("fake npm only supports: npm prefix -g\\n");
@@ -167,6 +167,52 @@ macTest("installer prefers the existing PixVerse CLI npm prefix", async (t) => {
     ["plugin", "marketplace", "add", installRoot, "--json"],
     ["plugin", "add", "pixverse-api@pixverse-private-beta", "--json"],
   ]);
+});
+
+macTest("installer keeps the receipt prefix when PATH later resolves a different PixVerse CLI", async (t) => {
+  const { root, packageRoot } = await createExtractedPackage(t);
+  const home = path.join(root, "home");
+  const { binRoot, logPath } = await createFakeCodex(root);
+  await fs.mkdir(home);
+  const originalPixversePrefix = await createPixverseCliFixture(root, binRoot);
+  const installer = path.join(packageRoot, "install.command");
+
+  await execFileAsync("zsh", [installer], {
+    env: cleanEnvironment({
+      home,
+      binRoot,
+      logPath,
+      extra: { PIXVERSE_API_SKIP_PIXVERSE_PREFIX: "0" },
+    }),
+    encoding: "utf8",
+  });
+
+  const otherPrefix = path.join(root, "other-prefix");
+  const otherBinRoot = path.join(otherPrefix, "bin");
+  await fs.mkdir(otherBinRoot, { recursive: true });
+  await createPixverseCliFixture(path.join(root, "other"), otherBinRoot);
+
+  await execFileAsync("zsh", [installer], {
+    env: cleanEnvironment({
+      home,
+      binRoot: `${otherBinRoot}:${binRoot}`,
+      logPath,
+      extra: {
+        PIXVERSE_API_SKIP_PIXVERSE_PREFIX: "0",
+        FAKE_NPM_PREFIX: otherPrefix,
+      },
+    }),
+    encoding: "utf8",
+  });
+
+  const originalInstallRoot = path.join(originalPixversePrefix, "lib/node_modules/pixverse-api");
+  const originalBinPath = path.join(originalPixversePrefix, "bin/pixverse-api");
+  const otherInstallRoot = path.join(otherPrefix, "lib/node_modules/pixverse-api");
+  const otherBinPath = path.join(otherPrefix, "bin/pixverse-api");
+  assert.equal((await fs.stat(path.join(originalInstallRoot, "package.json"))).isFile(), true);
+  assert.equal(await fs.readlink(originalBinPath), "../lib/node_modules/pixverse-api/dist/index.js");
+  await assert.rejects(fs.access(otherInstallRoot), { code: "ENOENT" });
+  await assert.rejects(fs.access(otherBinPath), { code: "ENOENT" });
 });
 
 macTest("failed Codex registration restores the previously installed version", async (t) => {

@@ -30,6 +30,15 @@ PRIOR_VERSION=""
 PRIOR_BIN_PATH=""
 PRIOR_BIN_TARGET=""
 
+set_install_paths() {
+  INSTALL_PARENT="$NPM_PREFIX/lib/node_modules"
+  INSTALL_ROOT="$INSTALL_PARENT/$CLI_PACKAGE_NAME"
+  BIN_ROOT="$NPM_PREFIX/bin"
+  BIN_PATH="$BIN_ROOT/$CLI_PACKAGE_NAME"
+  BACKUP_ROOT="$INSTALL_PARENT/.pixverse-api-backup-$VERSION-$$"
+  BACKUP_BIN_PATH="$BIN_ROOT/.pixverse-api-bin-backup-$VERSION-$$"
+}
+
 safe_remove_directory() {
   local target="$1"
   SUPPORT_ROOT_VALUE="$SUPPORT_ROOT" LEGACY_SUPPORT_ROOT_VALUE="$LEGACY_SUPPORT_ROOT" INSTALL_PARENT_VALUE="$INSTALL_PARENT" PRIOR_INSTALL_ROOT_VALUE="$PRIOR_INSTALL_ROOT" TARGET_VALUE="$target" "$NODE_BIN" -e '
@@ -179,12 +188,7 @@ try {
     NPM_PREFIX="$PIXVERSE_PREFIX"
   fi
 fi
-INSTALL_PARENT="$NPM_PREFIX/lib/node_modules"
-INSTALL_ROOT="$INSTALL_PARENT/$CLI_PACKAGE_NAME"
-BIN_ROOT="$NPM_PREFIX/bin"
-BIN_PATH="$BIN_ROOT/$CLI_PACKAGE_NAME"
-BACKUP_ROOT="$INSTALL_PARENT/.pixverse-api-backup-$VERSION-$$"
-BACKUP_BIN_PATH="$BIN_ROOT/.pixverse-api-bin-backup-$VERSION-$$"
+set_install_paths
 
 if [[ -f "$RECEIPT_PATH" || -f "$LEGACY_RECEIPT_PATH" ]]; then
   RECEIPT_TO_READ="$RECEIPT_PATH"
@@ -232,6 +236,10 @@ process.stdout.write(`${installRoot}\n${receipt.version}\n${binPath}\n${binTarge
   PRIOR_VERSION="${PRIOR_RECEIPT_LINES[2]}"
   PRIOR_BIN_PATH="${PRIOR_RECEIPT_LINES[3]}"
   PRIOR_BIN_TARGET="${PRIOR_RECEIPT_LINES[4]:-}"
+  if [[ "$PRIOR_INSTALL_ROOT" == */lib/node_modules/pixverse-api ]]; then
+    NPM_PREFIX="${PRIOR_INSTALL_ROOT%/lib/node_modules/pixverse-api}"
+    set_install_paths
+  fi
 fi
 
 for required_file in .agents/plugins/marketplace.json MANIFEST.sha256 plugins/pixverse-api/.codex-plugin/plugin.json; do
