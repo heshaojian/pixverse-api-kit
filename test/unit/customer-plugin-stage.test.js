@@ -26,7 +26,7 @@ test("staging creates the self-contained marketplace from approved sources", asy
     installDependencies: false,
   });
 
-  assert.equal(await exists(path.join(result.packageRoot, "marketplace.json")), true);
+  assert.equal(await exists(path.join(result.packageRoot, ".agents/plugins/marketplace.json")), true);
   assert.equal(await exists(path.join(result.pluginRoot, ".codex-plugin/plugin.json")), true);
   assert.equal(await exists(path.join(result.pluginRoot, "scripts/pixverse-api")), true);
   assert.equal(await exists(path.join(result.pluginRoot, "runtime/src/cli.js")), true);

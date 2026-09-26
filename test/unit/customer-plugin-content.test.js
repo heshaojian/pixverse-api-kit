@@ -21,7 +21,7 @@ async function collectTextFiles(directory) {
 }
 
 test("customer plugin manifests use the approved identity and policy", async () => {
-  const marketplace = await readJson("marketplace.json");
+  const marketplace = await readJson(".agents/plugins/marketplace.json");
   const plugin = await readJson("plugin/.codex-plugin/plugin.json");
 
   assert.equal(marketplace.name, "pixverse-private-beta");

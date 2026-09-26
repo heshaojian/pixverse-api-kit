@@ -54,7 +54,7 @@ restore_previous_install() {
 }
 
 cleanup() {
-  local status=$?
+  local exit_status=$?
   if [[ "$SUCCEEDED" -ne 1 ]]; then
     if [[ "$PLUGIN_ADDED" -eq 1 ]]; then
       "$CODEX_BIN" plugin remove "$PLUGIN_NAME@$MARKETPLACE_NAME" --json >/dev/null 2>&1 || true
@@ -74,7 +74,7 @@ cleanup() {
   if [[ -n "$TEMP_ROOT" && -d "$TEMP_ROOT" ]]; then
     safe_remove_directory "$TEMP_ROOT" || true
   fi
-  return "$status"
+  return "$exit_status"
 }
 trap cleanup EXIT
 
@@ -130,7 +130,7 @@ process.stdout.write(`${expectedRoot}\n${receipt.version}`);
   PRIOR_VERSION="${PRIOR_RECEIPT_LINES[2]}"
 fi
 
-for required_file in marketplace.json MANIFEST.sha256 plugins/pixverse-api/.codex-plugin/plugin.json; do
+for required_file in .agents/plugins/marketplace.json MANIFEST.sha256 plugins/pixverse-api/.codex-plugin/plugin.json; do
   if [[ ! -f "$SOURCE_ROOT/$required_file" ]]; then
     echo "The extracted plugin package is incomplete: $required_file is missing." >&2
     exit 1

@@ -19,7 +19,7 @@ test("verifier accepts the sanitized staged plugin", async (t) => {
 
   assert.equal(result.status, "passed");
   assert.equal(result.checks.every((check) => check.status === "passed"), true);
-  assert.equal(result.files.includes("marketplace.json"), true);
+  assert.equal(result.files.includes(".agents/plugins/marketplace.json"), true);
   assert.equal(result.files.includes("plugins/pixverse-api/.codex-plugin/plugin.json"), true);
 });
 
@@ -42,7 +42,7 @@ test("verifier rejects forbidden files without exposing their contents", async (
 test("verifier rejects symlinks, invalid manifests, and unsafe wrapper modes", async (t) => {
   await t.test("symlink", async (subtest) => {
     const { packageRoot } = await createStagedPackage(subtest);
-    await fs.symlink("marketplace.json", path.join(packageRoot, "linked-marketplace.json"));
+    await fs.symlink(".agents/plugins/marketplace.json", path.join(packageRoot, "linked-marketplace.json"));
     await assert.rejects(verifyCustomerPlugin({ packageRoot }), /symlink is not allowed/);
   });
 

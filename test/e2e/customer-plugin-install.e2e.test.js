@@ -90,7 +90,7 @@ macTest("macOS helpers install and remove only receipt-owned plugin state", asyn
   const supportRoot = path.join(home, "Library/Application Support/PixVerse/API Plugin");
   const installRoot = path.join(supportRoot, "0.3.0-beta.2");
   const receiptPath = path.join(supportRoot, "install-receipt.json");
-  assert.equal((await fs.stat(path.join(installRoot, "marketplace.json"))).isFile(), true);
+  assert.equal((await fs.stat(path.join(installRoot, ".agents/plugins/marketplace.json"))).isFile(), true);
   assert.equal((await fs.stat(receiptPath)).mode & 0o077, 0);
   assert.deepEqual(await readCalls(logPath), [
     ["plugin", "marketplace", "add", installRoot, "--json"],

@@ -66,7 +66,7 @@ export const CUSTOMER_PLUGIN_ALLOWLIST = Object.freeze({
   packageFiles: Object.freeze(["package.json", "package-lock.json"]),
   pluginSource: "packaging/customer-plugin",
   packageRootFiles: Object.freeze([
-    "marketplace.json",
+    ".agents/plugins/marketplace.json",
     "INSTALL-MACOS.md",
     "Install PixVerse API Plugin.command",
     "Uninstall PixVerse API Plugin.command",

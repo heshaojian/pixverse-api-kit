@@ -103,7 +103,7 @@ function isDeniedPath(relativePath) {
 
 function isAllowedTopLevelPath(relativePath) {
   const [topLevel] = relativePath.split("/");
-  return topLevel === "marketplace.json"
+  return topLevel === ".agents"
     || topLevel === "INSTALL-MACOS.md"
     || topLevel === "Install PixVerse API Plugin.command"
     || topLevel === "Uninstall PixVerse API Plugin.command"
@@ -130,7 +130,10 @@ async function validateTextContent(packageRoot, entries) {
 }
 
 async function validateManifests(packageRoot) {
-  const marketplace = await readJson(path.join(packageRoot, "marketplace.json"), "marketplace manifest");
+  const marketplace = await readJson(
+    path.join(packageRoot, ".agents", "plugins", "marketplace.json"),
+    "marketplace manifest",
+  );
   if (marketplace.name !== CUSTOMER_PLUGIN_RELEASE.marketplaceName) {
     throw new Error("Codex marketplace name does not match the release configuration.");
   }
