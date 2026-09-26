@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import { PLATFORM_OPERATIONS } from "../../src/platform/operations.js";
 import { getPlatformHelp, runPlatformCommand } from "../../src/platform/cli.js";
 import { createMockApiServer, sendJson } from "../helpers/mock-api-server.js";
+import { readJobArtifacts } from "../helpers/temp-job-dir.js";
 
 const TEST_KEY = ["fixture", "platform", "credential"].join("-");
 
@@ -17,7 +18,7 @@ test("Platform help is catalog-driven and exposes every specialized operation", 
     assert.match(help, new RegExp(`pixverse-api platform ${operation.command.join(" ").replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
   }
   assert.match(help, /platform raw <method> <\/openapi\/v2\/path>/);
-  assert.equal((help.match(/pixverse-api platform /g) ?? []).length, PLATFORM_OPERATIONS.length + 1);
+  assert.equal((help.match(/pixverse-api platform /g) ?? []).length, PLATFORM_OPERATIONS.length + 3);
 });
 
 test("catalog commands read --payload and produce a stable JSON-safe result over loopback", async (t) => {
@@ -38,15 +39,57 @@ test("catalog commands read --payload and produce a stable JSON-safe result over
     prompt: "quiet product shot", model: "v6", duration: 5, quality: "720p", aspect_ratio: "16:9",
   }));
 
-  const result = await runPlatformCommand(["video", "text", "--payload", payloadPath], {
+  const result = await runPlatformCommand(["video", "text", "--payload", payloadPath, "--no-wait"], {
     env: { PIXVERSE_PLATFORM_API_KEY: TEST_KEY, PIXVERSE_PLATFORM_BASE_URL: server.baseUrl },
     fetchImpl: globalThis.fetch,
     cwd: directory,
   });
 
   assert.equal(result.operation, "video.text");
-  assert.equal(result.data.video_id, "627410861853514292");
+  assert.equal(result.status, "submitted");
+  assert.equal(result.id, "627410861853514292");
+  assert.match(result.job_dir, /video-text/);
   assert.equal(server.requests.length, 1);
+});
+
+test("billable Platform commands submit once and wait for the known ID by default", async (t) => {
+  let creates = 0;
+  let statusReads = 0;
+  const server = await createMockApiServer((request, response) => {
+    if (request.url === "/openapi/v2/video/text/generate") {
+      creates += 1;
+      sendJson(response, { ErrCode: 0, ErrMsg: "success", Resp: { video_id: "42" } });
+      return;
+    }
+    assert.equal(request.url, "/openapi/v2/video/result/42");
+    statusReads += 1;
+    sendJson(response, { ErrCode: 0, ErrMsg: "success", Resp: { id: "42", status: 1 } });
+  });
+  t.after(() => server.close());
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "platform-default-wait-"));
+  const payloadPath = path.join(directory, "payload.json");
+  await fs.writeFile(payloadPath, JSON.stringify({
+    prompt: "quiet product shot", model: "v6", duration: 5,
+    quality: "720p", aspect_ratio: "16:9",
+  }));
+
+  const result = await runPlatformCommand(["video", "text", "--payload", payloadPath], {
+    env: { PIXVERSE_PLATFORM_API_KEY: TEST_KEY, PIXVERSE_PLATFORM_BASE_URL: server.baseUrl },
+    fetchImpl: globalThis.fetch,
+    cwd: directory,
+    sleep: async () => {},
+  });
+  const artifacts = await readJobArtifacts(result.job_dir);
+
+  assert.equal(creates, 1);
+  assert.equal(statusReads, 1);
+  assert.equal(result.id, "42");
+  assert.equal(result.status, "succeeded");
+  assert.equal(result.terminal, true);
+  assert.equal(artifacts["video-id.json"].video_id, "42");
+  assert.equal(artifacts["polling.jsonl"].at(-1).status, "succeeded");
+  assert.equal(artifacts["final.json"].status, "succeeded");
+  assert.equal(artifacts["final.json"].id, "42");
 });
 
 test("audio verification posts one synchronous request without creating a job", async (t) => {
