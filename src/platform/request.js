@@ -39,7 +39,7 @@ export async function buildPlatformRequest(operation, normalizedInput) {
 }
 
 function serializeJsonBody(operation, payload) {
-  if (!new Set(["audio.verify", "agent.music-mv"]).has(operation.id)) {
+  if (!new Set(["audio.verify", "agent.music-mv", "video.upscale"]).has(operation.id)) {
     return JSON.stringify(payload);
   }
   const wirePayload = { ...payload };
@@ -52,6 +52,11 @@ function serializeJsonBody(operation, payload) {
       ...reference,
       img_id: decimalStringToBigInt(reference.img_id),
     }));
+  }
+  for (const field of ["source_video_id", "video_media_id"]) {
+    if (wirePayload[field] !== undefined) {
+      wirePayload[field] = decimalStringToBigInt(wirePayload[field]);
+    }
   }
   return JSON_BIG.stringify(wirePayload);
 }

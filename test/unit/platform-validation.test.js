@@ -223,6 +223,28 @@ test("audio verification requires a positive decimal media ID", async () => {
   );
 });
 
+test("video upscale accepts exactly one validated Platform video source", async () => {
+  const operation = getPlatformOperation("video.upscale");
+  const uploaded = await normalizeAndValidatePlatformInput(operation, { video_media_id: 42 });
+  assert.deepEqual(uploaded.payload, { video_media_id: "42" });
+  const generated = await normalizeAndValidatePlatformInput(operation, { source_video_id: "43" });
+  assert.deepEqual(generated.payload, { source_video_id: "43" });
+
+  for (const video_media_id of ["0", "-1", "not-an-id", "18446744073709551616"]) {
+    await assert.rejects(
+      normalizeAndValidatePlatformInput(operation, { video_media_id }),
+      /video_media_id.*positive decimal|video_media_id.*uint64/i,
+    );
+  }
+  await assert.rejects(
+    normalizeAndValidatePlatformInput(operation, {
+      source_video_id: "43",
+      video_media_id: "42",
+    }),
+    /exactly one.*source_video_id.*video_media_id/i,
+  );
+});
+
 test("Music MV normalizes the documented image alias without mutating frozen input", async () => {
   const operation = getPlatformOperation("agent.music-mv");
   const reference = Object.freeze({ img_id: "164913710", ref_name: "Character Image" });

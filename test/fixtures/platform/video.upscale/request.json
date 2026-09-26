@@ -5,6 +5,6 @@
   "method": "POST",
   "path": "/openapi/v2/video/upscale/generate",
   "body": {
-    "source_video_id": "1"
+    "source_video_id": 1
   }
 }

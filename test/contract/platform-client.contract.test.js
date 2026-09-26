@@ -253,6 +253,22 @@ test("Music MV uint64 identifiers stay strings internally but serialize as lossl
   assert.equal(unrelatedRequest.body, '{"audio_media_id":"18446744073709551615"}');
 });
 
+test("upscale media IDs stay strings internally but serialize as lossless JSON numbers", async () => {
+  const input = deepFreeze({
+    payload: { video_media_id: "426563984800177" },
+    query: {},
+    pathParams: {},
+    files: {},
+  });
+
+  const request = await buildPlatformRequest({
+    id: "video.upscale", method: "POST", path: "/upscale", bodyMode: "json",
+  }, input);
+
+  assert.equal(request.body, '{"video_media_id":426563984800177}');
+  assert.equal(input.payload.video_media_id, "426563984800177");
+});
+
 test("client and request boundaries reject malformed construction inputs", async () => {
   for (const options of [
     { apiKey: "", baseUrl: BASE_URL, fetchImpl: () => {} },

@@ -71,6 +71,9 @@ export async function validateSpecializedOperation(operation, payload, query = p
       return;
     case "video.upscale":
       requireExactlyOneField(operation, payload, VIDEO_SOURCES);
+      for (const field of VIDEO_SOURCES) {
+        if (isPresent(payload[field])) validatePositiveDecimalId(operation, field, payload[field]);
+      }
       return;
     case "agent.viral-recreation": return validateViralAgent(operation, payload, context);
     case "agent.real-estate": return validateRealEstateAgent(operation, payload);
