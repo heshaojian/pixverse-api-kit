@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
+import { serializeError } from "../../src/core/errors.js";
 import { runPlatformCommand } from "../../src/platform/cli.js";
 import { submitPlatformJob, resumePlatformJob } from "../../src/platform/jobs.js";
 import { PLATFORM_OPERATIONS } from "../../src/platform/operations.js";
@@ -166,6 +167,44 @@ test("resume without a saved ID performs no network request and returns reconcil
   assert.equal(calls, 0);
   assert.equal(resumed.status, "reconciliation_required");
   assert.equal(resumed.trace_id, TRACE);
+});
+
+test("a polling timeout exposes the durable job directory and accepted result ID", async (t) => {
+  const root = await createTempJobRoot(t);
+  const acceptedId = "627410861853514292";
+  let jobDir;
+
+  await assert.rejects(submitPlatformJob({ execute: async (id) => {
+    if (id === "video.text") return {
+      operation: id,
+      traceId: TRACE,
+      envelope: { ErrCode: 0, Resp: { video_id: acceptedId } },
+      data: { video_id: acceptedId },
+    };
+    return {
+      operation: id,
+      traceId: `${TRACE}-status`,
+      envelope: { ErrCode: 0, Resp: { id: acceptedId, status: 5 } },
+      data: { id: acceptedId, status: 5 },
+    };
+  } }, "video.text", INPUT, {
+    jobRoot: root,
+    traceIdFactory: () => TRACE,
+    poll: true,
+    timeoutMs: 0,
+    sleep: async () => {},
+    now: () => 0,
+  }), (error) => {
+    const serialized = serializeError(error);
+    jobDir = serialized.details?.job_dir;
+    assert.equal(serialized.category, "timeout");
+    assert.equal(serialized.details?.id, acceptedId);
+    assert.match(jobDir, /video-text$/);
+    return true;
+  });
+
+  assert.deepEqual(await fs.readFile(path.join(jobDir, "video-id.json"), "utf8")
+    .then(JSON.parse), { video_id: acceptedId });
 });
 
 test("every billable catalog command delegates through the durable job layer", async (t) => {

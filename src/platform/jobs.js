@@ -169,14 +169,37 @@ async function pollKnownJob(client, { jobDir, operation, id, traceId, options })
     if (final.status !== "succeeded") throw terminalStatusError(final);
     return final;
   } catch (error) {
+    const recoveryError = error?.category === "timeout"
+      ? timeoutRecoveryError(error, { jobDir, id })
+      : error;
     if (error?.category === "timeout" && lastSnapshot) {
       await writeArtifactIfMissing(jobDir, "final.json", finalJobSnapshot({
         operation, traceId, jobDir, id, snapshot: lastSnapshot,
       }));
     }
-    await persistFailure(jobDir, error, { operation: operation.id, traceId });
-    throw error;
+    await persistFailure(jobDir, recoveryError, { operation: operation.id, traceId });
+    throw recoveryError;
   }
+}
+
+function timeoutRecoveryError(error, { jobDir, id }) {
+  return new PixverseCliError(error.message, {
+    category: error.category,
+    provider: error.provider,
+    operation: error.operation,
+    status: error.status,
+    code: error.code,
+    retryable: error.retryable,
+    retryAfter: error.retryAfter,
+    traceId: error.traceId,
+    requestId: error.requestId,
+    details: redact({
+      ...(error.details ?? {}),
+      job_dir: jobDir,
+      id: String(id),
+    }),
+    cause: error,
+  });
 }
 
 function defaultSleep(milliseconds) {
