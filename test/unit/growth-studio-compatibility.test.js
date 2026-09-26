@@ -39,7 +39,8 @@ test("flat modules preserve Growth Studio named exports", () => {
   assert.equal(flatClient.validateEditPayload, growthValidation.validateEditPayload);
   assert.equal(flatClient.validateFolderPayload, growthValidation.validateFolderPayload);
   assert.equal(flatClient.PDP_CREATE_PATH, growthPdp.PDP_CREATE_PATH);
-  assert.equal(flatClient.PDP_WIRE_TYPE, growthPdp.PDP_WIRE_TYPE);
+  assert.equal(flatClient.PDP_CREATE_ROUTE, growthPdp.PDP_CREATE_ROUTE);
+  assert.equal("PDP_WIRE_TYPE" in flatClient, false);
   assert.equal(flatClient.describePdpDryRun, growthPdp.describePdpDryRun);
   assert.equal(flatClient.normalizePdpPayload, growthPdp.normalizePdpPayload);
   assert.equal(flatClient.validatePdpPayload, growthPdp.validatePdpPayload);
@@ -526,7 +527,7 @@ test("PDP dry run validates relative to context cwd without credentials, artifac
   });
 
   assert.equal(result.billable, false);
-  assert.equal(result.body.type, "ecommerce_fashion_pdp");
+  assert.equal("type" in result.body, false);
   assert.equal(clientAccesses, 0);
   assert.deepEqual(await fs.readdir(root), ["pdp.json"]);
 });

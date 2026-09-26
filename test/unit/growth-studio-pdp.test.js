@@ -3,7 +3,7 @@ import test from "node:test";
 
 import {
   PDP_CREATE_PATH,
-  PDP_WIRE_TYPE,
+  PDP_CREATE_ROUTE,
   describePdpDryRun,
   normalizePdpPayload,
   validatePdpPayload,
@@ -44,7 +44,7 @@ function minimalPayload() {
   };
 }
 
-test("PDP normalization injects the private wire type without mutating caller input", () => {
+test("PDP normalization produces the dedicated endpoint body without mutating caller input", () => {
   const payload = validPayload();
   const snapshot = structuredClone(payload);
 
@@ -56,7 +56,7 @@ test("PDP normalization injects the private wire type without mutating caller in
   assert.notEqual(normalized.product.images, payload.product.images);
   assert.notEqual(normalized.product.images[0], payload.product.images[0]);
   assert.notEqual(normalized.product.price, payload.product.price);
-  assert.equal(normalized.type, PDP_WIRE_TYPE);
+  assert.equal("type" in normalized, false);
   assert.deepEqual(normalized.product, payload.product);
   assert.deepEqual(normalized.video, payload.video);
 
@@ -99,7 +99,8 @@ test("PDP dry run describes the exact non-billable wire request", () => {
   assert.equal(result.billable, false);
   assert.equal(result.method, "POST");
   assert.equal(result.path, PDP_CREATE_PATH);
-  assert.equal(result.body.type, "ecommerce_fashion_pdp");
+  assert.equal(PDP_CREATE_ROUTE, "/ecommerce_pdp/video");
+  assert.equal("type" in result.body, false);
 });
 
 test("PDP rejects fields that the paid endpoint would ignore or reject", () => {
@@ -202,7 +203,6 @@ test("PDP accepts the documented minimum payload and omits absent optional field
 
   assert.doesNotThrow(() => validatePdpPayload(payload));
   assert.deepEqual(normalizePdpPayload(payload), {
-    type: PDP_WIRE_TYPE,
     product: {
       title: "Linen Summer Shirt",
       images: [{ url: "https://media.pixverse.ai/example/front.webp" }],

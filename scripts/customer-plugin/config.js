@@ -3,9 +3,9 @@ import path from "node:path";
 export const CUSTOMER_PLUGIN_RELEASE = Object.freeze({
   pluginName: "pixverse-api",
   marketplaceName: "pixverse-private-beta",
-  version: "0.3.0-beta.1",
-  archiveBaseName: "pixverse-api-plugin-codex-0.3.0-beta.1",
-  sourceDateEpoch: 1_789_948_800,
+  version: "0.3.0-beta.2",
+  archiveBaseName: "pixverse-api-plugin-codex-0.3.0-beta.2",
+  sourceDateEpoch: 1_790_294_400,
 });
 
 export const CUSTOMER_PLUGIN_ALLOWLIST = Object.freeze({

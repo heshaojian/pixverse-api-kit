@@ -35,7 +35,7 @@ test("packaging command builds and re-verifies the extracted Codex plugin", asyn
   const extractRoot = path.join(root, "extract");
   await fs.mkdir(extractRoot);
   await execFileAsync("unzip", ["-q", result.archivePath, "-d", extractRoot]);
-  const packageRoot = path.join(extractRoot, "pixverse-api-plugin-codex-0.3.0-beta.1");
+  const packageRoot = path.join(extractRoot, "pixverse-api-plugin-codex-0.3.0-beta.2");
   const pluginRoot = path.join(packageRoot, "plugins/pixverse-api");
   const wrapper = path.join(pluginRoot, "scripts/pixverse-api");
   const processOptions = {
@@ -49,7 +49,7 @@ test("packaging command builds and re-verifies the extracted Codex plugin", asyn
   assert.equal((await verifyCustomerPlugin({ packageRoot })).status, "passed");
 
   const version = await execFileAsync(wrapper, ["--version"], processOptions);
-  assert.equal(version.stdout, "0.3.0-beta.1\n");
+  assert.equal(version.stdout, "0.3.0-beta.2\n");
 
   const dryRun = await execFileAsync(wrapper, [
     "growth-studio",
@@ -61,7 +61,8 @@ test("packaging command builds and re-verifies the extracted Codex plugin", asyn
   ], processOptions);
   const dryRunResult = JSON.parse(dryRun.stdout);
   assert.equal(dryRunResult.billable, false);
-  assert.equal(dryRunResult.path, "/openapi/v1/ka/videos");
+  assert.equal(dryRunResult.path, "/openapi/v1/ecommerce_pdp/video");
+  assert.equal("type" in dryRunResult.body, false);
 
   await assert.rejects(fs.access(path.join(pluginRoot, "runtime/node_modules/c8")), { code: "ENOENT" });
   assert.equal((await fs.stat(path.join(packageRoot, "Install PixVerse API Plugin.command"))).isFile(), true);

@@ -107,11 +107,8 @@ test("executable PDP create submits once, polls once, and persists recovery arti
     assert.equal(request.headers.authorization, "Bearer mh_live_fixture");
     assert.equal(request.headers["api-key"], undefined);
 
-    if (request.method === "POST" && request.url === "/openapi/v1/ka/videos") {
-      assert.deepEqual(JSON.parse(request.body.toString()), {
-        type: "ecommerce_fashion_pdp",
-        ...publicPayload,
-      });
+    if (request.method === "POST" && request.url === "/openapi/v1/ecommerce_pdp/video") {
+      assert.deepEqual(JSON.parse(request.body.toString()), publicPayload);
       return sendJson(response, {
         video_id: "627410861853514292",
         ledger_source_id: "627410861853514292",
@@ -163,7 +160,7 @@ test("executable PDP create submits once, polls once, and persists recovery arti
   assert.equal(output.folder_id, undefined);
   assert.ok(output.job_dir.startsWith(await fs.realpath(jobsDir)));
   assert.deepEqual(server.requests.map(({ method, url }) => `${method} ${url}`), [
-    "POST /openapi/v1/ka/videos",
+    "POST /openapi/v1/ecommerce_pdp/video",
     "GET /openapi/v1/videos/627410861853514292",
   ]);
   assert.equal(server.requests.filter(({ method }) => method === "POST").length, 1);
@@ -171,8 +168,8 @@ test("executable PDP create submits once, polls once, and persists recovery arti
   const requestArtifact = JSON.parse(await fs.readFile(path.join(output.job_dir, "request.json"), "utf8"));
   assert.equal(requestArtifact.provider, "growth-studio");
   assert.equal(requestArtifact.workflow, "pdp");
-  assert.equal(requestArtifact.endpoint, "/openapi/v1/ka/videos");
-  assert.equal(requestArtifact.payload.type, "ecommerce_fashion_pdp");
+  assert.equal(requestArtifact.endpoint, "/openapi/v1/ecommerce_pdp/video");
+  assert.equal("type" in requestArtifact.payload, false);
   assert.equal(requestArtifact.payload.product.source_url, undefined);
   assert.equal(requestArtifact.payload.folder_id, undefined);
   assert.deepEqual(JSON.parse(await fs.readFile(path.join(output.job_dir, "video-id.json"), "utf8")), {

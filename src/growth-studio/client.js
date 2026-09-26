@@ -6,7 +6,7 @@ import {
   validateEditPayload,
   validateFolderPayload,
 } from "./validation.js";
-import { normalizePdpPayload } from "./pdp.js";
+import { PDP_CREATE_ROUTE, normalizePdpPayload } from "./pdp.js";
 import { normalizeWalletLedgerOptions } from "./wallet.js";
 
 export {
@@ -16,7 +16,7 @@ export {
 } from "./validation.js";
 export {
   PDP_CREATE_PATH,
-  PDP_WIRE_TYPE,
+  PDP_CREATE_ROUTE,
   describePdpDryRun,
   normalizePdpPayload,
   validatePdpPayload,
@@ -147,7 +147,7 @@ export class GrowthStudioClient {
   }
 
   async createPdpVideo(payload, options = {}) {
-    return this.request("POST", "/ka/videos", {
+    return this.request("POST", PDP_CREATE_ROUTE, {
       json: normalizePdpPayload(payload),
       traceId: options.traceId,
     });

@@ -18,6 +18,8 @@ Resolve the installed plugin root from this `SKILL.md` location and execute `<pl
 
 The current PDP request requires `product`. `video` may be omitted, `null`, or an object. An object requires `mode` set to `standard` or `pro`; `quality` may be `normal` or `high`. Omitted and null video configuration use provider defaults and are omitted from the wire request.
 
+PDP submits exactly once to `POST /openapi/v1/ecommerce_pdp/video`, with only `product` and the optional `video` object in the request body. There is no fallback create route and no completion callback. Wait five seconds before the first status read, then poll the returned video resource and honor `Retry-After` while it remains queued or processing.
+
 ## Recovery
 
 A successful create acceptance means queued and charged, not completed. Never retry a create automatically after a timeout, connection loss, malformed response, or interrupted poll. If a saved video ID exists, use `pdp resume <job-dir>`. If no ID was saved, retain the redacted evidence and stop at reconciliation.

@@ -39,7 +39,7 @@ test("PDP payload reference is merchant-neutral and accepted by the executable n
   assert.equal(payload.product.source_url, undefined);
   assert.equal(payload.folder_id, undefined);
   assert.equal(payload.metadata, undefined);
-  assert.equal(normalized.type, "ecommerce_fashion_pdp");
+  assert.equal("type" in normalized, false);
   assert.equal(payload.product.images.length >= 1, true);
   assert.equal(payload.video.mode, "pro");
   for (const { url } of payload.product.images) {
@@ -134,8 +134,8 @@ test("public PDP documentation is linked and states the safe single-submit contr
   assert.match(guide, /source_type.*video/i);
   assert.match(guide, /free generation|no ledger entry/i);
   assert.match(guide, /ledger-source-id\.json/);
-  assert.match(guide, /\/openapi\/v1\/ka\/videos/);
-  assert.match(guide, /ecommerce_fashion_pdp/);
+  assert.match(guide, /\/openapi\/v1\/ecommerce_pdp\/video/);
+  assert.doesNotMatch(guide, /\/openapi\/v1\/ka\/videos|ecommerce_fashion_pdp/);
   assert.doesNotMatch(combined, /aisphere\.feishu\.cn|feishu\.cn\/docx/i);
 });
 

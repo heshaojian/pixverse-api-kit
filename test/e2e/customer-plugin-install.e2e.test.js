@@ -29,7 +29,7 @@ async function createExtractedPackage(t) {
   await execFileAsync("unzip", ["-q", archived.archivePath, "-d", extractRoot]);
   return {
     root,
-    packageRoot: path.join(extractRoot, "pixverse-api-plugin-codex-0.3.0-beta.1"),
+    packageRoot: path.join(extractRoot, "pixverse-api-plugin-codex-0.3.0-beta.2"),
   };
 }
 
@@ -88,7 +88,7 @@ macTest("macOS helpers install and remove only receipt-owned plugin state", asyn
   await execFileAsync("zsh", [installer], { env, encoding: "utf8" });
 
   const supportRoot = path.join(home, "Library/Application Support/PixVerse/API Plugin");
-  const installRoot = path.join(supportRoot, "0.3.0-beta.1");
+  const installRoot = path.join(supportRoot, "0.3.0-beta.2");
   const receiptPath = path.join(supportRoot, "install-receipt.json");
   assert.equal((await fs.stat(path.join(installRoot, "marketplace.json"))).isFile(), true);
   assert.equal((await fs.stat(receiptPath)).mode & 0o077, 0);
@@ -123,7 +123,7 @@ macTest("failed Codex registration restores the previously installed version", a
 
   const installRoot = path.join(
     home,
-    "Library/Application Support/PixVerse/API Plugin/0.3.0-beta.1",
+    "Library/Application Support/PixVerse/API Plugin/0.3.0-beta.2",
   );
   const markerPath = path.join(installRoot, "prior-install-marker.txt");
   await fs.writeFile(markerPath, "preserve prior install\n");
@@ -165,7 +165,7 @@ macTest("installer rejects files that are not listed in the signed inventory", a
 
   await assert.rejects(fs.access(logPath), { code: "ENOENT" });
   await assert.rejects(
-    fs.access(path.join(home, "Library/Application Support/PixVerse/API Plugin/0.3.0-beta.1")),
+    fs.access(path.join(home, "Library/Application Support/PixVerse/API Plugin/0.3.0-beta.2")),
     { code: "ENOENT" },
   );
 });
@@ -193,7 +193,7 @@ macTest("uninstaller treats an already absent Codex registration as success", as
   });
 
   const supportRoot = path.join(home, "Library/Application Support/PixVerse/API Plugin");
-  await assert.rejects(fs.access(path.join(supportRoot, "0.3.0-beta.1")), { code: "ENOENT" });
+  await assert.rejects(fs.access(path.join(supportRoot, "0.3.0-beta.2")), { code: "ENOENT" });
   await assert.rejects(fs.access(path.join(supportRoot, "install-receipt.json")), { code: "ENOENT" });
 });
 
@@ -210,7 +210,7 @@ macTest("plugin-add failure restores the prior files and Codex registration", as
 
   const installRoot = path.join(
     home,
-    "Library/Application Support/PixVerse/API Plugin/0.3.0-beta.1",
+    "Library/Application Support/PixVerse/API Plugin/0.3.0-beta.2",
   );
   const markerPath = path.join(installRoot, "prior-install-marker.txt");
   await fs.writeFile(markerPath, "preserve prior install\n");
@@ -253,7 +253,7 @@ macTest("new-version plugin-add failure restores the receipt-owned older version
   });
 
   const supportRoot = path.join(home, "Library/Application Support/PixVerse/API Plugin");
-  const installRoot = path.join(supportRoot, "0.3.0-beta.1");
+  const installRoot = path.join(supportRoot, "0.3.0-beta.2");
   const olderInstallRoot = path.join(supportRoot, "0.2.0-beta.9");
   const receiptPath = path.join(supportRoot, "install-receipt.json");
   await fs.rename(installRoot, olderInstallRoot);

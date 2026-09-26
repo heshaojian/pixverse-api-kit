@@ -152,11 +152,10 @@ test("PDP jobs submit once and persist exact wire and reconciliation identifiers
   assert.deepEqual(request, {
     provider: "growth-studio",
     workflow: "pdp",
-    endpoint: "/openapi/v1/ka/videos",
+    endpoint: "/openapi/v1/ecommerce_pdp/video",
     trace_id: "pdp-fixture",
     created_at: request.created_at,
     payload: {
-      type: "ecommerce_fashion_pdp",
       product: {
         title: "Linen Summer Shirt",
         images: [{ url: "https://media.pixverse.ai/example/front.webp" }],

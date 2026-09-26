@@ -10,10 +10,10 @@ Build the sanitized, self-contained Codex plugin candidate with:
 npm run package:customer-plugin
 ```
 
-The local artifacts are written to `dist/customer-plugin/0.3.0-beta.1/`:
+The local artifacts are written to `dist/customer-plugin/0.3.0-beta.2/`:
 
-- `pixverse-api-plugin-codex-0.3.0-beta.1.zip`
-- `pixverse-api-plugin-codex-0.3.0-beta.1.zip.sha256`
+- `pixverse-api-plugin-codex-0.3.0-beta.2.zip`
+- `pixverse-api-plugin-codex-0.3.0-beta.2.zip.sha256`
 - `release-report.json`
 
 The build requires Node.js 20+, `zip`, and `unzip`. It stages only approved CLI, API documentation, plugin, and production dependency files; validates the extracted archive; and never reads API credentials or sends paid PixVerse requests. The archive includes double-click macOS install and uninstall helpers plus command-line fallback instructions.

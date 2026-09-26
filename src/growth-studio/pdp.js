@@ -1,5 +1,5 @@
-export const PDP_WIRE_TYPE = "ecommerce_fashion_pdp";
-export const PDP_CREATE_PATH = "/openapi/v1/ka/videos";
+export const PDP_CREATE_ROUTE = "/ecommerce_pdp/video";
+export const PDP_CREATE_PATH = `/openapi/v1${PDP_CREATE_ROUTE}`;
 
 const ROOT_FIELDS = new Set(["product", "video"]);
 const PRODUCT_FIELDS = new Set(["title", "description", "images", "brand", "price"]);
@@ -150,7 +150,6 @@ export function validatePdpPayload(payload) {
 export function normalizePdpPayload(payload) {
   validatePdpPayload(payload);
   return {
-    type: PDP_WIRE_TYPE,
     product: normalizeProduct(payload.product),
     ...(payload.video === undefined || payload.video === null
       ? {}

@@ -102,12 +102,11 @@ test("Growth Studio PDP uses bearer auth and the exact PDP wire contract", async
   assert.equal(result.body.ledger_source_id, "627410861853514292");
   assert.equal(result.requestId, "pdp-create-fixture");
   assert.equal(calls[0].method, "POST");
-  assert.equal(new URL(calls[0].url).pathname, "/openapi/v1/ka/videos");
+  assert.equal(new URL(calls[0].url).pathname, "/openapi/v1/ecommerce_pdp/video");
   assert.equal(calls[0].headers.get("Authorization"), "Bearer growth-fixture-key");
   assert.equal(calls[0].headers.get("Ai-Trace-Id"), "pdp-create-fixture");
   assert.equal(calls[0].headers.has("API-KEY"), false);
   assert.deepEqual(await describeRecordedBody(calls[0].body), {
-    type: "ecommerce_fashion_pdp",
     product: {
       title: "Linen Summer Shirt",
       images: [{ url: "https://media.pixverse.ai/example/front.webp" }],
@@ -164,7 +163,7 @@ test("Growth Studio PDP submission is single-attempt on transport and HTTP failu
     /fixture connection reset/,
   );
   assert.equal(transportRecorder.calls.length, 1);
-  assert.equal(new URL(transportRecorder.calls[0].url).pathname, "/openapi/v1/ka/videos");
+  assert.equal(new URL(transportRecorder.calls[0].url).pathname, "/openapi/v1/ecommerce_pdp/video");
 
   const unavailableRecorder = createRecordingFetch([
     jsonResponse({
@@ -201,7 +200,7 @@ test("Growth Studio PDP submission is single-attempt on transport and HTTP failu
     },
   );
   assert.equal(unavailableRecorder.calls.length, 1);
-  assert.equal(new URL(unavailableRecorder.calls[0].url).pathname, "/openapi/v1/ka/videos");
+  assert.equal(new URL(unavailableRecorder.calls[0].url).pathname, "/openapi/v1/ecommerce_pdp/video");
 });
 
 test("Growth Studio wallet methods preserve formatted strings and validated pagination", async () => {

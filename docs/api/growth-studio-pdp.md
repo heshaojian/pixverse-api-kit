@@ -119,6 +119,18 @@ A live PDP create writes a timestamped job directory under `jobs/` unless `--job
 
 PDP does not perform folder resolution, so it does not create `folder.json`.
 
+## API Contract
+
+The CLI submits the normalized public payload exactly once to:
+
+```text
+POST /openapi/v1/ecommerce_pdp/video
+```
+
+The request body contains `product` and, when configured, `video`; no private discriminator is added. A successful submission returns `202 Accepted`, a `Location` header for `/openapi/v1/videos/{video_id}`, and identifiers including `video_id`, `ledger_source_id`, and `request_id` when available.
+
+PDP does not provide a completion callback or webhook. Wait at least five seconds before the first status read, then poll `GET /openapi/v1/videos/{video_id}`. Treat `queued` and `processing` as nonterminal and honor `Retry-After` (five seconds when absent); `succeeded`, `failed`, and `canceled` are terminal.
+
 ## Ambiguous Submission and Ledger Reconciliation
 
 Create has no caller-provided idempotency key and is never automatically retried. After a timeout, connection loss, malformed response, or interrupted poll:
@@ -140,6 +152,6 @@ A missing ledger entry does not prove that submission failed. It may be a free g
 
 ## Maintainer Implementation Note
 
-The public capability name is PDP. Internally, the adapter adds `type: "ecommerce_fashion_pdp"` and submits once to `POST /openapi/v1/ka/videos`; callers should not place either implementation detail in the public payload.
+The public capability name is PDP. Keep its dedicated create endpoint and exact public payload separate from the existing URL-based Growth Studio video workflow. Do not add private routing fields or fall back to another create endpoint.
 
 See also [Command Reference](command-reference.md) and [Safety and Recovery](safety-and-recovery.md).

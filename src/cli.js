@@ -8,7 +8,7 @@ import { formatError, formatSuccess } from "./cli/output.js";
 import { routeCommand } from "./cli/router.js";
 
 const LEGACY_WARNING = 'Warning: legacy command syntax is deprecated; use the "pixverse-api growth-studio" namespace.\n';
-export const CLI_VERSION = "0.3.0-beta.1";
+export const CLI_VERSION = "0.3.0-beta.2";
 
 export async function main(argv = [], context = {}) {
   const stdout = context.stdout ?? process.stdout;

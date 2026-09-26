@@ -14,7 +14,7 @@ Use the local `pixverse-api growth-studio ...` CLI from this repository. It keep
 - Use the upload, folder, avatar, video, and wallet commands directly for read-only or supporting operations.
 - For complete PDP fields and command options, see the repository's [Growth Studio PDP API guide](../../../docs/api/growth-studio-pdp.md).
 
-PDP and URL-based video generation are separate workflows. PDP accepts uploaded PixVerse image URLs; it does not accept a merchant page URL, folder fields, arbitrary metadata, or the private upstream type.
+PDP and URL-based video generation are separate workflows. PDP accepts uploaded PixVerse image URLs; it does not accept a merchant page URL, folder fields, arbitrary metadata, or a routing discriminator. Its create route is `POST /openapi/v1/ecommerce_pdp/video`; do not fall back to the general video-create route.
 
 ## Setup and Provider Boundary
 
@@ -41,6 +41,7 @@ A non-loopback custom origin must be HTTPS, explicitly enabled with `PIXVERSE_GR
 - For PDP, validate first with `--dry-run`, optionally inspect the read-only wallet snapshot, and obtain explicit approval immediately before running the command with `--confirm-billable`.
 - A successful PDP `--dry-run` loads no credentials, sends no network request, and creates no job artifacts.
 - Treat a PDP `202 Accepted` response as charged and queued, not completed. Submit once, then poll or resume.
+- PDP has no completion callback. Wait five seconds before the first status read, then poll the returned video resource and honor `Retry-After` while it is queued or processing.
 - Preserve `video_id`, `ledger_source_id`, `ledger_id`, folder IDs, and monetary amounts as strings.
 - After a timeout or connection loss, use saved artifacts and status or ledger reads to reconcile. Do not use create as a recovery operation.
 - Respect `Retry-After` for safe read-only polling rather than using tight loops.

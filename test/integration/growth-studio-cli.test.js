@@ -113,8 +113,8 @@ test("PDP dry run resolves its payload from the command context without credenti
   const result = JSON.parse(output.stdout());
   assert.equal(result.capability, "pdp");
   assert.equal(result.billable, false);
-  assert.equal(result.path, "/openapi/v1/ka/videos");
-  assert.equal(result.body.type, "ecommerce_fashion_pdp");
+  assert.equal(result.path, "/openapi/v1/ecommerce_pdp/video");
+  assert.equal("type" in result.body, false);
   assert.deepEqual(await fs.readdir(root), ["pdp.json"]);
 });
 

@@ -38,7 +38,7 @@ Run exactly one confirmed create:
 npm run cli -- growth-studio pdp create --payload /absolute/path/pdp.json --confirm-billable
 ```
 
-The command creates durable evidence before its one network submission. A `202 Accepted` response means the job is charged and queued, not finished. Never retry or resubmit create automatically, including after a timeout, connection loss, malformed response, or interrupted poll.
+The command creates durable evidence before its one network submission to `POST /openapi/v1/ecommerce_pdp/video`. The outbound body contains only `product` and, when configured, `video`. A `202 Accepted` response means the job is charged and queued, not finished; its `Location` header identifies `/openapi/v1/videos/{video_id}`. Never retry or resubmit create automatically, including after a timeout, connection loss, malformed response, or interrupted poll.
 
 Keep the returned `job_dir`, `video_id`, and optional `ledger_source_id`. Preserve every identifier and monetary amount as a string.
 
@@ -58,6 +58,8 @@ npm run cli -- growth-studio pdp resume /absolute/path/jobs/<job-dir>
 ```
 
 Resume is poll-only. It never calls create. A saved `failed` or `canceled` state is terminal and should be reported with its resource error and `request_id`.
+
+PDP has no completion callback. The CLI waits five seconds before its first status read, then polls the returned video resource. While status is `queued` or `processing`, honor `Retry-After` and otherwise wait five seconds. `succeeded`, `failed`, and `canceled` are terminal.
 
 ## Artifacts and Reconciliation
 
