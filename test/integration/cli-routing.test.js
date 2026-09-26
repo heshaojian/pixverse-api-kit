@@ -199,7 +199,7 @@ test("auth commands store dedicated Platform and Growth Studio API keys", async 
   assert.equal(statusJson.growthStudio.source, "user-file");
   assert.doesNotMatch(status.stdout(), /platform-fixture-key|mh_live_fixture_key/);
 
-  const credentialsPath = path.join(home, "Library/Application Support/PixVerse/API Plugin/credentials.env");
+  const credentialsPath = path.join(home, "Library/Application Support/PixVerse/api-plugin/credentials.env");
   const stats = await fs.stat(credentialsPath);
   assert.equal(stats.mode & 0o077, 0);
   const saved = await fs.readFile(credentialsPath, "utf8");
@@ -250,27 +250,31 @@ test("executable CLI help and unknown commands return stable exit codes", async 
   assert.match(unknown.stderr, /Unknown provider or command/);
 });
 
-test("non-Growth executable routes do not read Growth Studio dotenv state", async () => {
+test("non-Growth executable routes do not read Growth Studio dotenv state", async (t) => {
   const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-api-routing-"));
+  const home = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-api-routing-home-"));
+  t.after(() => fs.rm(home, { recursive: true, force: true }));
   await fs.mkdir(path.join(cwd, ".env"));
 
-  const help = await runCli(["--help"], { cwd });
+  const help = await runCli(["--help"], { cwd, env: { HOME: home } });
   assert.equal(help.exitCode, 0);
   assert.match(help.stdout, /pixverse-api growth-studio/);
   assert.equal(help.stderr, "");
 
-  const unknown = await runCli(["unknown"], { cwd });
+  const unknown = await runCli(["unknown"], { cwd, env: { HOME: home } });
   assert.equal(unknown.exitCode, 1);
   assert.match(unknown.stderr, /Unknown provider or command/);
   assert.doesNotMatch(unknown.stderr, /EISDIR|\.env/);
 
-  const platform = await runCli(["platform", "account", "balance"], { cwd });
+  const platform = await runCli(["platform", "account", "balance"], { cwd, env: { HOME: home } });
   assert.equal(platform.exitCode, 1);
   assert.match(platform.stderr, /PIXVERSE_PLATFORM_API_KEY/);
   assert.doesNotMatch(platform.stderr, /EISDIR/);
 });
 
-test("Growth Studio executable still loads provider configuration from cwd dotenv", async () => {
+test("Growth Studio executable still loads provider configuration from cwd dotenv", async (t) => {
+  const home = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-growth-home-"));
+  t.after(() => fs.rm(home, { recursive: true, force: true }));
   const server = http.createServer((request, response) => {
     assert.equal(request.url, "/marketing_hub/folder/list");
     response.setHeader("content-type", "application/json");
@@ -290,6 +294,7 @@ test("Growth Studio executable still loads provider configuration from cwd doten
     const result = await runCli(["growth-studio", "folders", "list"], {
       cwd,
       env: {
+        HOME: home,
         PIXVERSE_GROWTH_API_KEY: "",
         PIXVERSE_GROWTH_BASE_URL: "",
       },
@@ -302,7 +307,9 @@ test("Growth Studio executable still loads provider configuration from cwd doten
   }
 });
 
-test("Platform executable lazily loads only its provider configuration from cwd dotenv", async () => {
+test("Platform executable lazily loads only its provider configuration from cwd dotenv", async (t) => {
+  const home = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-platform-home-"));
+  t.after(() => fs.rm(home, { recursive: true, force: true }));
   const server = http.createServer((request, response) => {
     assert.equal(request.url, "/openapi/v2/account/balance");
     assert.equal(request.headers["api-key"], "platform-fixture-credential");
@@ -324,6 +331,7 @@ test("Platform executable lazily loads only its provider configuration from cwd 
     const result = await runCli(["platform", "account", "balance"], {
       cwd,
       env: {
+        HOME: home,
         PIXVERSE_PLATFORM_API_KEY: "",
         PIXVERSE_PLATFORM_BASE_URL: "",
         PIXVERSE_GROWTH_API_KEY: "",
@@ -340,7 +348,7 @@ test("Platform executable lazily loads only its provider configuration from cwd 
 test("executable routes load dedicated API credentials from the user auth store", async (t) => {
   const home = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-api-user-store-"));
   t.after(() => fs.rm(home, { recursive: true, force: true }));
-  const supportRoot = path.join(home, "Library/Application Support/PixVerse/API Plugin");
+  const supportRoot = path.join(home, "Library/Application Support/PixVerse/api-plugin");
   await fs.mkdir(supportRoot, { recursive: true });
 
   const server = http.createServer((request, response) => {

@@ -12,8 +12,8 @@ npm run package:customer-plugin
 
 The local artifacts are written to `dist/customer-plugin/0.3.0-beta.2/`:
 
-- `pixverse-api-plugin-codex-0.3.0-beta.2.zip`
-- `pixverse-api-plugin-codex-0.3.0-beta.2.zip.sha256`
+- `pixverse-api-plugin-0.3.0-beta.2.zip`
+- `pixverse-api-plugin-0.3.0-beta.2.zip.sha256`
 - `release-report.json`
 
 The build requires Node.js 20+, `zip`, and `unzip`. It stages only approved CLI, API documentation, plugin, and production dependency files; validates the extracted archive; and never reads API credentials or sends paid PixVerse requests. The archive includes double-click macOS install and uninstall helpers plus command-line fallback instructions.
@@ -32,7 +32,7 @@ pixverse-api --help
 
 If you do not want a global npm link, replace `pixverse-api` in the examples with `npm run cli --`.
 
-For non-technical users, use the packaged `Configure PixVerse API Credentials.command` helper. For CLI setup, store the dedicated API keys in the user credential file:
+For non-technical users, use the packaged `auth.command` helper. For CLI setup, store the dedicated API keys in the user credential file:
 
 ```bash
 printf '%s' '<platform-api-key>' | pixverse-api auth login platform --stdin

@@ -70,7 +70,9 @@ test("customer plugin exports three neutral wrapper-based skills", async () => {
 test("customer plugin includes the complete private-demo documentation set", async () => {
   const requiredFiles = [
     "INSTALL-MACOS.md",
-    "Configure PixVerse API Credentials.command",
+    "auth.command",
+    "install.command",
+    "uninstall.command",
     "plugin/LICENSE",
     "plugin/NOTICE",
     "plugin/README.md",

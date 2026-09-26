@@ -21,7 +21,7 @@ const PROVIDER_KEYS = Object.freeze({
 
 export function getUserCredentialsPath(env = process.env) {
   const home = env.HOME || os.homedir();
-  return path.join(home, "Library", "Application Support", "PixVerse", "API Plugin", "credentials.env");
+  return path.join(home, "Library", "Application Support", "PixVerse", "api-plugin", "credentials.env");
 }
 
 export function loadUserCredentials(env = process.env, filePath = getUserCredentialsPath(env)) {

@@ -27,7 +27,7 @@ Do not assume a global command, package checkout, or package-manager link.
 
 ## Credentials
 
-For customer setup, prefer the packaged `Configure PixVerse API Credentials.command` helper. It saves the dedicated Platform and Growth Studio API keys in the user's private PixVerse API Plugin support folder. For command-line setup, use `pixverse-api auth login platform --stdin`, `pixverse-api auth login growth-studio --stdin`, `pixverse-api auth status`, and `pixverse-api auth logout ...`.
+For customer setup, prefer the packaged `auth.command` helper. It saves the dedicated Platform and Growth Studio API keys in the user's private PixVerse API Plugin support folder. For command-line setup, use `pixverse-api auth login platform --stdin`, `pixverse-api auth login growth-studio --stdin`, `pixverse-api auth status`, and `pixverse-api auth logout ...`.
 
 ## Shared safety
 

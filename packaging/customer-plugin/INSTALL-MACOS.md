@@ -9,10 +9,10 @@
 ## Install
 
 1. Keep the extracted package together in one directory.
-2. Double-click `Install PixVerse API Plugin.command`.
-3. If macOS blocks the helper, Control-click it, choose **Open**, and confirm. The command-line fallback is `zsh "./Install PixVerse API Plugin.command"` from the extracted directory.
+2. Double-click `install.command`.
+3. If macOS blocks the helper, Control-click it, choose **Open**, and confirm. The command-line fallback is `zsh ./install.command` from the extracted directory.
 4. Close and reopen Codex after installation so a new task can discover the skills.
-5. Double-click `Configure PixVerse API Credentials.command` and paste the dedicated Platform and/or Growth Studio API keys.
+5. Double-click `auth.command` and paste the dedicated Platform and/or Growth Studio API keys.
 6. Close and reopen Codex again after saving credentials.
 7. Ask the PixVerse API Plugin to show help, check auth status, or perform a credential-free dry run.
 
@@ -20,7 +20,7 @@ The installer verifies the package, copies it to a versioned directory under you
 
 ## Credentials
 
-Most users should use `Configure PixVerse API Credentials.command`. It saves keys for the current macOS user under `~/Library/Application Support/PixVerse/API Plugin/credentials.env` with private file permissions. Platform and Growth Studio use dedicated API keys and never substitute for one another.
+Most users should use `auth.command`. It saves keys for the current macOS user under `~/Library/Application Support/PixVerse/api-plugin/credentials.env` with private file permissions. Platform and Growth Studio use dedicated API keys and never substitute for one another.
 
 Command-line fallback:
 
@@ -38,7 +38,7 @@ Run the installer from the newer verified package. It keeps the receipt-owned ol
 
 ## Remove
 
-Double-click `Uninstall PixVerse API Plugin.command`, or run `zsh "./Uninstall PixVerse API Plugin.command"`. Removal uses the installer receipt and deletes only the registered plugin version. It does not remove credentials or unrelated files.
+Double-click `uninstall.command`, or run `zsh ./uninstall.command`. Removal uses the installer receipt and deletes only the registered plugin version. It does not remove credentials or unrelated files.
 
 ## Private demo restriction
 

@@ -22,7 +22,7 @@ pixverse-api auth logout platform
 pixverse-api auth path
 ```
 
-The packaged macOS build also includes `Configure PixVerse API Credentials.command`, which prompts for the same two dedicated API keys and stores them for the current macOS user.
+The packaged macOS build also includes `auth.command`, which prompts for the same two dedicated API keys and stores them for the current macOS user.
 
 | Provider | Required key | Default origin |
 |---|---|---|

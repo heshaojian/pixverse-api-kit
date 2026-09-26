@@ -7,7 +7,7 @@ description: Use PixVerse Platform API for discovery, uploads, image and video g
 
 Resolve the installed plugin root from this `SKILL.md` location and execute `<plugin-root>/scripts/pixverse-api platform ...`. Use only `PIXVERSE_PLATFORM_API_KEY` and keep all API identifiers as strings.
 
-If credentials are missing, route setup to `pixverse-api auth login platform --stdin` or the packaged `Configure PixVerse API Credentials.command`. Do not ask the user to paste the key into chat.
+If credentials are missing, route setup to `pixverse-api auth login platform --stdin` or the packaged `auth.command`. Do not ask the user to paste the key into chat.
 
 ## Select the operation
 

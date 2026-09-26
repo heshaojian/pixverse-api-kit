@@ -42,7 +42,7 @@ test("customer plugin archive is deterministic and has verifiable sidecars", asy
   const extractRoot = path.join(root, "extracted");
   await fs.mkdir(extractRoot);
   await execFileAsync("unzip", ["-q", first.archivePath, "-d", extractRoot]);
-  const extractedPackage = path.join(extractRoot, "pixverse-api-plugin-codex-0.3.0-beta.2");
+  const extractedPackage = path.join(extractRoot, "pixverse-api-plugin-0.3.0-beta.2");
   const manifest = await verifyManifest(extractedPackage);
   assert.equal(manifest.status, "passed");
   assert.equal(manifest.files.length > 0, true);

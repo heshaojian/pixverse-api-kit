@@ -4,7 +4,7 @@ export const CUSTOMER_PLUGIN_RELEASE = Object.freeze({
   pluginName: "pixverse-api",
   marketplaceName: "pixverse-private-beta",
   version: "0.3.0-beta.2",
-  archiveBaseName: "pixverse-api-plugin-codex-0.3.0-beta.2",
+  archiveBaseName: "pixverse-api-plugin-0.3.0-beta.2",
   sourceDateEpoch: 1_790_294_400,
 });
 
@@ -68,10 +68,10 @@ export const CUSTOMER_PLUGIN_ALLOWLIST = Object.freeze({
   pluginSource: "packaging/customer-plugin",
   packageRootFiles: Object.freeze([
     ".agents/plugins/marketplace.json",
-    "Configure PixVerse API Credentials.command",
+    "auth.command",
     "INSTALL-MACOS.md",
-    "Install PixVerse API Plugin.command",
-    "Uninstall PixVerse API Plugin.command",
+    "install.command",
+    "uninstall.command",
   ]),
 });
 

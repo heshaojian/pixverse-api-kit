@@ -17,6 +17,7 @@ test("child CLI processes strip ambient PixVerse API keys unless explicitly supp
   ];
   const previous = Object.fromEntries(secretNames.map((name) => [name, process.env[name]]));
   const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-no-paid-network-"));
+  const home = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-no-paid-network-home-"));
   for (const name of secretNames) process.env[name] = `${name.toLowerCase()}-fixture`;
   const server = await createMockApiServer((_request, response) => sendJson(response, {
     ErrCode: 0,
@@ -26,6 +27,7 @@ test("child CLI processes strip ambient PixVerse API keys unless explicitly supp
   t.after(async () => {
     await server.close();
     await fs.rm(cwd, { recursive: true, force: true });
+    await fs.rm(home, { recursive: true, force: true });
     for (const name of secretNames) {
       if (previous[name] === undefined) delete process.env[name];
       else process.env[name] = previous[name];
@@ -34,7 +36,7 @@ test("child CLI processes strip ambient PixVerse API keys unless explicitly supp
   assert.equal(new URL(server.baseUrl).hostname, "127.0.0.1");
 
   const inherited = await runCli(["platform", "account", "balance"], {
-    env: { PIXVERSE_PLATFORM_BASE_URL: server.baseUrl },
+    env: { HOME: home, PIXVERSE_PLATFORM_BASE_URL: server.baseUrl },
     cwd,
   });
   assert.equal(inherited.exitCode, 1);
@@ -42,7 +44,7 @@ test("child CLI processes strip ambient PixVerse API keys unless explicitly supp
   assert.equal(server.requests.length, 0);
 
   const inheritedGrowth = await runCli(["growth-studio", "folders", "list"], {
-    env: { PIXVERSE_GROWTH_BASE_URL: server.baseUrl },
+    env: { HOME: home, PIXVERSE_GROWTH_BASE_URL: server.baseUrl },
     cwd,
   });
   assert.equal(inheritedGrowth.exitCode, 1);
@@ -51,6 +53,7 @@ test("child CLI processes strip ambient PixVerse API keys unless explicitly supp
 
   const explicit = await runCli(["platform", "account", "balance"], {
     env: {
+      HOME: home,
       PIXVERSE_PLATFORM_API_KEY: "platform-fixture-key",
       PIXVERSE_PLATFORM_BASE_URL: server.baseUrl,
     },
@@ -80,7 +83,11 @@ test("child CLI helpers reject credentials without an explicit loopback provider
 
 test("child CLI helpers reject provider credentials loaded from an unsafe cwd dotenv", async (t) => {
   const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-unsafe-dotenv-"));
-  t.after(() => fs.rm(cwd, { recursive: true, force: true }));
+  const home = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-unsafe-dotenv-home-"));
+  t.after(async () => {
+    await fs.rm(cwd, { recursive: true, force: true });
+    await fs.rm(home, { recursive: true, force: true });
+  });
   await fs.writeFile(path.join(cwd, ".env"), [
     "PIXVERSE_PLATFORM_API_KEY=platform-fixture-key",
     "PIXVERSE_PLATFORM_BASE_URL=https://app-api.pixverse.ai",
@@ -88,7 +95,7 @@ test("child CLI helpers reject provider credentials loaded from an unsafe cwd do
   ].join("\n"));
 
   assert.throws(
-    () => runCli(["platform", "account", "balance"], { cwd }),
+    () => runCli(["platform", "account", "balance"], { cwd, env: { HOME: home } }),
     /credentials in cwd\/\.env require a loopback PIXVERSE_PLATFORM_BASE_URL/,
   );
 });

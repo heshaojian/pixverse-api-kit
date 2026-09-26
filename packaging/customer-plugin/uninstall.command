@@ -3,7 +3,7 @@ set -euo pipefail
 
 EXPECTED_PLUGIN="pixverse-api"
 EXPECTED_MARKETPLACE="pixverse-private-beta"
-SUPPORT_ROOT="$HOME/Library/Application Support/PixVerse/API Plugin"
+SUPPORT_ROOT="$HOME/Library/Application Support/PixVerse/api-plugin"
 RECEIPT_PATH="$SUPPORT_ROOT/install-receipt.json"
 
 safe_remove_directory() {

@@ -35,7 +35,7 @@ test("packaging command builds and re-verifies the extracted Codex plugin", asyn
   const extractRoot = path.join(root, "extract");
   await fs.mkdir(extractRoot);
   await execFileAsync("unzip", ["-q", result.archivePath, "-d", extractRoot]);
-  const packageRoot = path.join(extractRoot, "pixverse-api-plugin-codex-0.3.0-beta.2");
+  const packageRoot = path.join(extractRoot, "pixverse-api-plugin-0.3.0-beta.2");
   const pluginRoot = path.join(packageRoot, "plugins/pixverse-api");
   const wrapper = path.join(pluginRoot, "scripts/pixverse-api");
   const processOptions = {
@@ -65,6 +65,7 @@ test("packaging command builds and re-verifies the extracted Codex plugin", asyn
   assert.equal("type" in dryRunResult.body, false);
 
   await assert.rejects(fs.access(path.join(pluginRoot, "runtime/node_modules/c8")), { code: "ENOENT" });
-  assert.equal((await fs.stat(path.join(packageRoot, "Install PixVerse API Plugin.command"))).isFile(), true);
-  assert.equal((await fs.stat(path.join(packageRoot, "Uninstall PixVerse API Plugin.command"))).isFile(), true);
+  assert.equal((await fs.stat(path.join(packageRoot, "install.command"))).isFile(), true);
+  assert.equal((await fs.stat(path.join(packageRoot, "auth.command"))).isFile(), true);
+  assert.equal((await fs.stat(path.join(packageRoot, "uninstall.command"))).isFile(), true);
 });

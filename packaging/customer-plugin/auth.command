@@ -1,8 +1,9 @@
 #!/bin/zsh
 set -euo pipefail
 
-SUPPORT_ROOT="$HOME/Library/Application Support/PixVerse/API Plugin"
+SUPPORT_ROOT="$HOME/Library/Application Support/PixVerse/api-plugin"
 CREDENTIALS_PATH="$SUPPORT_ROOT/credentials.env"
+LEGACY_CREDENTIALS_PATH="$HOME/Library/Application Support/PixVerse/API Plugin/credentials.env"
 
 NODE_BIN="$(command -v node || true)"
 if [[ -z "$NODE_BIN" ]]; then
@@ -22,17 +23,18 @@ read -r -s "growth_key?Growth Studio API key: "
 echo
 echo
 
-if [[ -z "$platform_key" && -z "$growth_key" && ! -f "$CREDENTIALS_PATH" ]]; then
+if [[ -z "$platform_key" && -z "$growth_key" && ! -f "$CREDENTIALS_PATH" && ! -f "$LEGACY_CREDENTIALS_PATH" ]]; then
   echo "No keys were entered, so no credential file was created."
   exit 0
 fi
 
 /bin/mkdir -p -- "$SUPPORT_ROOT"
-PLATFORM_KEY="$platform_key" GROWTH_KEY="$growth_key" CREDENTIALS_PATH="$CREDENTIALS_PATH" "$NODE_BIN" <<'NODE'
+PLATFORM_KEY="$platform_key" GROWTH_KEY="$growth_key" CREDENTIALS_PATH="$CREDENTIALS_PATH" LEGACY_CREDENTIALS_PATH="$LEGACY_CREDENTIALS_PATH" "$NODE_BIN" <<'NODE'
 const fs = require("node:fs");
 const path = require("node:path");
 
 const credentialsPath = process.env.CREDENTIALS_PATH;
+const legacyCredentialsPath = process.env.LEGACY_CREDENTIALS_PATH;
 const platformKey = (process.env.PLATFORM_KEY || "").trim();
 const growthKey = (process.env.GROWTH_KEY || "").trim();
 if (growthKey && !growthKey.startsWith("mh_live_")) {
@@ -45,8 +47,13 @@ const allowed = new Set([
   "PIXVERSE_GROWTH_API_KEY",
 ]);
 const values = {};
-if (fs.existsSync(credentialsPath)) {
-  for (const line of fs.readFileSync(credentialsPath, "utf8").split(/\r?\n/)) {
+const readFromPath = fs.existsSync(credentialsPath)
+  ? credentialsPath
+  : fs.existsSync(legacyCredentialsPath)
+    ? legacyCredentialsPath
+    : null;
+if (readFromPath) {
+  for (const line of fs.readFileSync(readFromPath, "utf8").split(/\r?\n/)) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("#")) continue;
     const separator = trimmed.indexOf("=");
@@ -61,7 +68,7 @@ if (growthKey) values["PIXVERSE_GROWTH_API_KEY"] = growthKey;
 
 const rows = [
   "# PixVerse API Plugin credentials",
-  "# Created by Configure PixVerse API Credentials.command.",
+  "# Created by auth.command.",
 ];
 for (const key of ["PIXVERSE_PLATFORM_API_KEY", "PIXVERSE_GROWTH_API_KEY"]) {
   if (values[key]) rows.push(`${key}=${JSON.stringify(values[key])}`);
