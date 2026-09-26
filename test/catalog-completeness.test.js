@@ -30,6 +30,8 @@ test("Platform catalog, validators, fixtures, and help cover the independent inv
     assert.equal(operation.validationPolicy, expected.id);
     assert.equal(matchPlatformCommand(operation.command), operation);
     assert.match(help, new RegExp(escapeRegExp(`pixverse-api platform ${operation.command.join(" ")}`)));
+    const helpLine = help.split("\n").find((line) => line.includes(`pixverse-api platform ${operation.command.join(" ")}`));
+    assert.equal(helpLine.includes("[--no-wait]"), operation.billing === "billable");
     if (MUSIC_MV_OPERATION_IDS.has(operation.id)) {
       assert.equal(operation.documentationUrl, MUSIC_MV_DOCUMENTATION_URL);
     } else {
@@ -50,6 +52,8 @@ test("Platform catalog, validators, fixtures, and help cover the independent inv
     const normalized = await normalizeAndValidatePlatformInput(operation, requestFixture.input);
     assert.equal(normalized.validationSummary.policy, expected.validationPolicy);
   }
+  assert.match(help, /pixverse-api platform run-job .*\[--no-wait\]/);
+  assert.match(help, /pixverse-api platform resume <job-directory>/);
 });
 
 test("Task 11 skill markers cover every Platform operation", async () => {

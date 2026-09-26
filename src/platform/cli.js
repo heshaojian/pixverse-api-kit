@@ -42,7 +42,9 @@ export async function runPlatformCommand(args, context = {}) {
   if (operation.billing === "billable") {
     return (context.submitPlatformJob ?? submitPlatformJob)(client, operation.id, input, {
       ...jobOptions(context),
-      poll: false,
+      poll: options.poll,
+      intervalMs: options.intervalMs ?? context.intervalMs,
+      timeoutMs: options.timeoutMs ?? context.timeoutMs,
     });
   }
   return client.execute(operation.id, input, {
@@ -52,13 +54,14 @@ export async function runPlatformCommand(args, context = {}) {
 }
 
 export function getPlatformHelp() {
-  const commands = PLATFORM_OPERATIONS.map(({ command }) => (
-    `  pixverse-api platform ${command.join(" ")} [--payload <path>] [--dry-run]`
-  ));
+  const commands = PLATFORM_OPERATIONS.map((operation) => {
+    const waitHelp = operation.billing === "billable" ? " [--no-wait]" : "";
+    return `  pixverse-api platform ${operation.command.join(" ")} [--payload <path>] [--dry-run]${waitHelp}`;
+  });
   commands.push("  pixverse-api platform raw <method> </openapi/v2/path> [--payload <path>] [--header <name:value>]");
   commands.push("\nDurable jobs:");
-  commands.push("  run-job --operation <operation-id> --payload <path> [--poll]");
-  commands.push("  resume <job-directory>");
+  commands.push("  pixverse-api platform run-job --operation <operation-id> --payload <path> [--no-wait]");
+  commands.push("  pixverse-api platform resume <job-directory>");
   return `Usage:\n${commands.join("\n")}`;
 }
 
@@ -90,14 +93,18 @@ async function runResumeCommand(args, context) {
 }
 
 function parseJobOptions(args) {
-  const options = { poll: false };
+  let options = { poll: true };
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
-    if (arg === "--operation") options.operationId = readOptionValue(args, ++index, arg);
-    else if (arg === "--payload") options.payloadPath = readOptionValue(args, ++index, arg);
-    else if (arg === "--poll") options.poll = true;
-    else if (arg === "--interval-ms") options.intervalMs = readPositiveNumberOption(args, ++index, arg);
-    else if (arg === "--timeout-ms") options.timeoutMs = readNonNegativeNumberOption(args, ++index, arg);
+    if (arg === "--operation") options = { ...options, operationId: readOptionValue(args, ++index, arg) };
+    else if (arg === "--payload") options = { ...options, payloadPath: readOptionValue(args, ++index, arg) };
+    else if (arg === "--poll") options = applyWaitMode(options, "wait");
+    else if (arg === "--no-wait") options = applyWaitMode(options, "no-wait");
+    else if (arg === "--interval-ms") {
+      options = applyTimingOption(options, "intervalMs", readPositiveNumberOption(args, ++index, arg));
+    } else if (arg === "--timeout-ms") {
+      options = applyTimingOption(options, "timeoutMs", readNonNegativeNumberOption(args, ++index, arg));
+    }
     else if (arg === "--json") continue;
     else if (arg === "--trace-id") throw cliError("New jobs cannot reuse a caller trace ID.", "TRACE_REUSE_FORBIDDEN", options.operationId);
     else throw cliError("Unknown Platform job option.", "UNKNOWN_PLATFORM_OPTION", options.operationId);
@@ -192,17 +199,53 @@ function safeDryRunNormalized(normalized) {
 }
 
 function parseSpecializedOptions(args, operation) {
-  const options = { positional: [] };
+  let options = { positional: [], poll: operation.billing === "billable" };
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
-    if (arg === "--payload") options.payloadPath = readOptionValue(args, ++index, arg);
-    else if (arg === "--dry-run") options.dryRun = true;
-    else if (arg === "--json") options.json = true;
+    if (arg === "--payload") options = { ...options, payloadPath: readOptionValue(args, ++index, arg) };
+    else if (arg === "--dry-run") options = { ...options, dryRun: true };
+    else if (arg === "--json") options = { ...options, json: true };
+    else if (arg === "--poll") options = applyWaitMode(options, "wait", operation);
+    else if (arg === "--no-wait") options = applyWaitMode(options, "no-wait", operation);
+    else if (arg === "--interval-ms") {
+      options = applyTimingOption(options, "intervalMs", readPositiveNumberOption(args, ++index, arg), operation);
+    } else if (arg === "--timeout-ms") {
+      options = applyTimingOption(options, "timeoutMs", readNonNegativeNumberOption(args, ++index, arg), operation);
+    }
     else if (arg === "--trace-id") throw cliError("Caller trace reuse is allowed only by an explicit recovery command.", "TRACE_REUSE_FORBIDDEN", operation.id);
     else if (arg.startsWith("--")) throw cliError("Unknown Platform option.", "UNKNOWN_PLATFORM_OPTION", operation.id);
-    else options.positional.push(arg);
+    else options = { ...options, positional: [...options.positional, arg] };
   }
   return options;
+}
+
+function applyWaitMode(options, mode, operation) {
+  if (operation && operation.billing !== "billable") {
+    throw cliError(
+      "Wait options are available only for billable Platform commands.",
+      "INVALID_PLATFORM_WAIT_OPTION",
+      operation.id,
+    );
+  }
+  if (options.waitMode && options.waitMode !== mode) {
+    throw cliError(
+      "--poll cannot be combined with --no-wait.",
+      "CONFLICTING_PLATFORM_WAIT_OPTIONS",
+      operation?.id,
+    );
+  }
+  return { ...options, waitMode: mode, poll: mode === "wait" };
+}
+
+function applyTimingOption(options, field, value, operation) {
+  if (operation && operation.billing !== "billable") {
+    throw cliError(
+      "Polling timing options are available only for billable Platform commands.",
+      "INVALID_PLATFORM_WAIT_OPTION",
+      operation.id,
+    );
+  }
+  return { ...options, [field]: value };
 }
 
 async function resolveSpecializedInput(operation, options, context) {

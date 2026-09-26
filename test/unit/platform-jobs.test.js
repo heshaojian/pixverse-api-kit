@@ -187,7 +187,38 @@ test("every billable catalog command delegates through the durable job layer", a
   }
   assert.deepEqual(calls.map(({ operationId }) => operationId),
     PLATFORM_OPERATIONS.filter(({ billing }) => billing === "billable").map(({ id }) => id));
-  assert.equal(calls.every(({ options }) => options.poll === false && options.jobRoot === root), true);
+  assert.equal(calls.every(({ options }) => options.poll === true && options.jobRoot === root), true);
+});
+
+test("Platform commands wait by default and expose explicit asynchronous execution", async (t) => {
+  const root = await createTempJobRoot(t);
+  const payloadPath = path.join(root, "payload.json");
+  await fs.writeFile(payloadPath, JSON.stringify({
+    prompt: "safe product shot", model: "v6", duration: 5,
+    quality: "720p", aspect_ratio: "16:9",
+  }));
+  const calls = [];
+  const context = {
+    client: {}, cwd: root, jobRoot: root,
+    submitPlatformJob: async (...args) => {
+      calls.push(args);
+      return { status: args[3].poll ? "succeeded" : "submitted" };
+    },
+  };
+
+  await runPlatformCommand(["video", "text", "--payload", payloadPath], context);
+  await runPlatformCommand(["video", "text", "--payload", payloadPath, "--no-wait"], context);
+  await runPlatformCommand([
+    "run-job", "--operation", "video.text", "--payload", payloadPath,
+    "--interval-ms", "25", "--timeout-ms", "500",
+  ], context);
+  await runPlatformCommand([
+    "run-job", "--operation", "video.text", "--payload", payloadPath, "--poll",
+  ], context);
+
+  assert.deepEqual(calls.map(([, , , options]) => options.poll), [true, false, true, true]);
+  assert.equal(calls[2][3].intervalMs, 25);
+  assert.equal(calls[2][3].timeoutMs, 500);
 });
 
 test("run-job opts into polling and resume delegates without a new generation", async (t) => {
@@ -260,7 +291,11 @@ test("image jobs persist string image IDs and poll the image status operation", 
 
 test("job command boundary rejects unsafe or incomplete recovery controls", async (t) => {
   const root = await createTempJobRoot(t);
-  const context = { client: {}, cwd: root, submitPlatformJob: async () => ({}) };
+  let submissions = 0;
+  const context = {
+    client: {}, cwd: root,
+    submitPlatformJob: async () => { submissions += 1; return {}; },
+  };
   const invalid = [
     ["run-job"],
     ["run-job", "--operation", "account.balance", "--payload", "x.json"],
@@ -269,12 +304,17 @@ test("job command boundary rejects unsafe or incomplete recovery controls", asyn
     ["run-job", "--operation", "video.text", "--unknown"],
     ["run-job", "--operation", "video.text", "--interval-ms", "0"],
     ["run-job", "--operation", "video.text", "--timeout-ms", "-1"],
+    ["run-job", "--operation", "video.text", "--payload", "x.json", "--poll", "--no-wait"],
+    ["video", "text", "--payload", "x.json", "--poll", "--no-wait"],
+    ["account", "balance", "--no-wait"],
+    ["video", "status", "42", "--poll"],
     ["resume"],
     ["resume", "one", "two"],
     ["resume", "one", "--unknown"],
   ];
   for (const argv of invalid) await assert.rejects(runPlatformCommand(argv, context),
     (error) => error.provider === "platform" && error.category === "validation");
+  assert.equal(submissions, 0);
 });
 
 test("polling respects a successful response Retry-After hint", async (t) => {
