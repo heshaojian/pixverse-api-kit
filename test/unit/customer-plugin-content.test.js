@@ -90,3 +90,12 @@ test("customer plugin includes the complete private-demo documentation set", asy
   const notice = await fs.readFile(path.join(PLUGIN_ROOT, "NOTICE"), "utf8");
   assert.match(notice, /json-bigint 1\.0\.0/);
 });
+
+test("credential helper confirms paste without echoing key contents", async () => {
+  const helper = await fs.readFile(path.join(SOURCE_ROOT, "auth.command"), "utf8");
+  assert.match(helper, /Platform API key captured: \$\{#platform_key\} characters\./);
+  assert.match(helper, /Growth Studio API key captured: \$\{#growth_key\} characters\./);
+  assert.match(helper, /Platform API key: \$\{configured\.platform \? "configured" : "missing"\}/);
+  assert.match(helper, /Growth Studio API key: \$\{configured\.growthStudio \? "configured" : "missing"\}/);
+  assert.doesNotMatch(helper, /last 4|substring|slice\(-4\)|platformKey\}/);
+});

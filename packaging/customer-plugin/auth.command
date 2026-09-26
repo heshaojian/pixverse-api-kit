@@ -19,8 +19,18 @@ echo
 
 read -r -s "platform_key?Platform API key: "
 echo
+if [[ -n "$platform_key" ]]; then
+  echo "Platform API key captured: ${#platform_key} characters."
+else
+  echo "Platform API key left blank; keeping existing value if one is configured."
+fi
 read -r -s "growth_key?Growth Studio API key: "
 echo
+if [[ -n "$growth_key" ]]; then
+  echo "Growth Studio API key captured: ${#growth_key} characters."
+else
+  echo "Growth Studio API key left blank; keeping existing value if one is configured."
+fi
 echo
 
 if [[ -z "$platform_key" && -z "$growth_key" && ! -f "$CREDENTIALS_PATH" && ! -f "$LEGACY_CREDENTIALS_PATH" ]]; then
@@ -79,7 +89,14 @@ fs.writeFileSync(temporaryPath, `${rows.join("\n")}\n`, { mode: 0o600 });
 fs.chmodSync(temporaryPath, 0o600);
 fs.renameSync(temporaryPath, credentialsPath);
 fs.chmodSync(credentialsPath, 0o600);
+
+const configured = {
+  platform: Boolean(values["PIXVERSE_PLATFORM_API_KEY"]),
+  growthStudio: Boolean(values["PIXVERSE_GROWTH_API_KEY"]),
+};
+process.stdout.write("Credentials saved for this macOS user.\n");
+process.stdout.write(`Platform API key: ${configured.platform ? "configured" : "missing"}\n`);
+process.stdout.write(`Growth Studio API key: ${configured.growthStudio ? "configured" : "missing"}\n`);
 NODE
 
-echo "Credentials saved for this macOS user."
 echo "Close and reopen Codex, then start a new task."
