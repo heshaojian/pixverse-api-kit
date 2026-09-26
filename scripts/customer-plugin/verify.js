@@ -104,6 +104,7 @@ function isDeniedPath(relativePath) {
 function isAllowedTopLevelPath(relativePath) {
   const [topLevel] = relativePath.split("/");
   return topLevel === ".agents"
+    || topLevel === "Configure PixVerse API Credentials.command"
     || topLevel === "INSTALL-MACOS.md"
     || topLevel === "Install PixVerse API Plugin.command"
     || topLevel === "Uninstall PixVerse API Plugin.command"

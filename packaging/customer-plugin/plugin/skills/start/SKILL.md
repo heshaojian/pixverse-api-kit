@@ -25,6 +25,10 @@ Do not assume a global command, package checkout, or package-manager link.
 - Growth Studio uses only `PIXVERSE_GROWTH_API_KEY`.
 - Never substitute one provider's key, balance, identifiers, or approval for the other.
 
+## Credentials
+
+For customer setup, prefer the packaged `Configure PixVerse API Credentials.command` helper. It saves the dedicated Platform and Growth Studio API keys in the user's private PixVerse API Plugin support folder. For command-line setup, use `pixverse-api auth login platform --stdin`, `pixverse-api auth login growth-studio --stdin`, `pixverse-api auth status`, and `pixverse-api auth logout ...`.
+
 ## Shared safety
 
 Start with help, discovery, read-only checks, or a dry run. Before any billable request, show the exact provider, operation, payload, and known cost information, then obtain explicit approval for that submission. Submit once, preserve returned identifiers and job artifacts, and resume polling rather than recreating an unclear or interrupted job.

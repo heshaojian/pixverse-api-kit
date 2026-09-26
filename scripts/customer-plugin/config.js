@@ -23,6 +23,7 @@ export const CUSTOMER_PLUGIN_ALLOWLIST = Object.freeze({
     "src/core/polling.js",
     "src/core/redaction.js",
     "src/core/trace.js",
+    "src/credentials.js",
     "src/folders.js",
     "src/growth-studio/cli.js",
     "src/growth-studio/client.js",
@@ -67,6 +68,7 @@ export const CUSTOMER_PLUGIN_ALLOWLIST = Object.freeze({
   pluginSource: "packaging/customer-plugin",
   packageRootFiles: Object.freeze([
     ".agents/plugins/marketplace.json",
+    "Configure PixVerse API Credentials.command",
     "INSTALL-MACOS.md",
     "Install PixVerse API Plugin.command",
     "Uninstall PixVerse API Plugin.command",

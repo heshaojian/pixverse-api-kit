@@ -12,6 +12,18 @@ pixverse-api growth-studio --help
 
 ## Configuration
 
+The customer-friendly setup follows the PixVerse CLI auth pattern, but stores dedicated server API keys:
+
+```bash
+printf '%s' '<platform-api-key>' | pixverse-api auth login platform --stdin
+printf '%s' '<growth-studio-api-key>' | pixverse-api auth login growth-studio --stdin
+pixverse-api auth status
+pixverse-api auth logout platform
+pixverse-api auth path
+```
+
+The packaged macOS build also includes `Configure PixVerse API Credentials.command`, which prompts for the same two dedicated API keys and stores them for the current macOS user.
+
 | Provider | Required key | Default origin |
 |---|---|---|
 | Platform | `PIXVERSE_PLATFORM_API_KEY` | `https://app-api.pixverse.ai` |

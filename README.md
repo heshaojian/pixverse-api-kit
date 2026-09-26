@@ -32,11 +32,15 @@ pixverse-api --help
 
 If you do not want a global npm link, replace `pixverse-api` in the examples with `npm run cli --`.
 
+For non-technical users, use the packaged `Configure PixVerse API Credentials.command` helper. For CLI setup, store the dedicated API keys in the user credential file:
+
 ```bash
-cp .env.example .env
+printf '%s' '<platform-api-key>' | pixverse-api auth login platform --stdin
+printf '%s' '<growth-studio-api-key>' | pixverse-api auth login growth-studio --stdin
+pixverse-api auth status
 ```
 
-Put API keys in `.env`:
+For development in this checkout, `.env` still works:
 
 ```bash
 PIXVERSE_PLATFORM_API_KEY=...

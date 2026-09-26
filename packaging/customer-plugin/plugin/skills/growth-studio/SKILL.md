@@ -7,6 +7,8 @@ description: Use PixVerse Growth Studio API for PDP product videos, uploads, wal
 
 Resolve the installed plugin root from this `SKILL.md` location and execute `<plugin-root>/scripts/pixverse-api growth-studio ...`. Use only `PIXVERSE_GROWTH_API_KEY`; never use Platform or web-product credentials.
 
+If credentials are missing, route setup to `pixverse-api auth login growth-studio --stdin` or the packaged `Configure PixVerse API Credentials.command`. Do not ask the user to paste the key into chat.
+
 ## PDP workflow
 
 1. Prepare a product with a title and one to eight uploaded `https://media.pixverse.ai/...` image URLs.

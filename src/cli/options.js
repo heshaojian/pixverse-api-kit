@@ -4,9 +4,11 @@ export function isHelpRequest(argv) {
 
 export function getTopLevelHelp() {
   return `Usage:
+  pixverse-api auth <login|status|logout|path> [options]
   pixverse-api platform <resource> <operation> [options]
   pixverse-api growth-studio <resource> <operation> [options]
 
+Run "pixverse-api auth --help" for credential setup.
 Run "pixverse-api <provider> --help" for provider commands.
 Legacy Growth Studio commands remain available during the 0.x release series.`;
 }

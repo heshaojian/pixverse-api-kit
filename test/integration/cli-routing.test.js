@@ -172,6 +172,65 @@ test("platform routing does not load Growth Studio configuration", async () => {
   assert.match(output.stderr(), /PIXVERSE_PLATFORM_API_KEY/);
 });
 
+test("auth commands store dedicated Platform and Growth Studio API keys", async (t) => {
+  const home = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-api-auth-home-"));
+  t.after(() => fs.rm(home, { recursive: true, force: true }));
+  const platform = captureOutput();
+  const growth = captureOutput();
+  const env = { HOME: home };
+
+  assert.equal(await main(["auth", "login", "platform", "--stdin"], {
+    env,
+    stdin: "platform-fixture-key\n",
+    ...platform.context,
+  }), 0);
+  assert.equal(await main(["auth", "login", "growth-studio", "--stdin"], {
+    env,
+    stdin: "mh_live_fixture_key\n",
+    ...growth.context,
+  }), 0);
+
+  const status = captureOutput();
+  assert.equal(await main(["auth", "status"], { env, ...status.context }), 0);
+  const statusJson = JSON.parse(status.stdout());
+  assert.equal(statusJson.platform.configured, true);
+  assert.equal(statusJson.platform.source, "user-file");
+  assert.equal(statusJson.growthStudio.configured, true);
+  assert.equal(statusJson.growthStudio.source, "user-file");
+  assert.doesNotMatch(status.stdout(), /platform-fixture-key|mh_live_fixture_key/);
+
+  const credentialsPath = path.join(home, "Library/Application Support/PixVerse/API Plugin/credentials.env");
+  const stats = await fs.stat(credentialsPath);
+  assert.equal(stats.mode & 0o077, 0);
+  const saved = await fs.readFile(credentialsPath, "utf8");
+  assert.match(saved, new RegExp(`PIXVERSE_PLATFORM_${"API_KEY"}=`));
+  assert.match(saved, new RegExp(`PIXVERSE_GROWTH_${"API_KEY"}=`));
+});
+
+test("auth logout removes only the selected dedicated API key", async (t) => {
+  const home = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-api-auth-logout-"));
+  t.after(() => fs.rm(home, { recursive: true, force: true }));
+  const env = { HOME: home };
+
+  assert.equal(await main(["auth", "login", "platform", "--stdin"], {
+    env,
+    stdin: "platform-fixture-key\n",
+    ...captureOutput().context,
+  }), 0);
+  assert.equal(await main(["auth", "login", "growth-studio", "--stdin"], {
+    env,
+    stdin: "mh_live_fixture_key\n",
+    ...captureOutput().context,
+  }), 0);
+  assert.equal(await main(["auth", "logout", "platform"], { env, ...captureOutput().context }), 0);
+
+  const status = captureOutput();
+  assert.equal(await main(["auth", "status"], { env, ...status.context }), 0);
+  const statusJson = JSON.parse(status.stdout());
+  assert.equal(statusJson.platform.configured, false);
+  assert.equal(statusJson.growthStudio.configured, true);
+});
+
 test("CLI module import is process-isolated and has no output", async () => {
   const result = await importCli({ env: { PIXVERSE_GROWTH_API_KEY: "" } });
   assert.equal(result.exitCode, 0);
@@ -272,6 +331,44 @@ test("Platform executable lazily loads only its provider configuration from cwd 
     });
     assert.equal(result.exitCode, 0);
     assert.equal(JSON.parse(result.stdout).data.credit_monthly, 12);
+    assert.equal(result.stderr, "");
+  } finally {
+    await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+  }
+});
+
+test("executable routes load dedicated API credentials from the user auth store", async (t) => {
+  const home = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-api-user-store-"));
+  t.after(() => fs.rm(home, { recursive: true, force: true }));
+  const supportRoot = path.join(home, "Library/Application Support/PixVerse/API Plugin");
+  await fs.mkdir(supportRoot, { recursive: true });
+
+  const server = http.createServer((request, response) => {
+    assert.equal(request.url, "/openapi/v2/account/balance");
+    assert.equal(request.headers["api-key"], "platform-fixture-user-store-key");
+    response.setHeader("content-type", "application/json");
+    response.end('{"ErrCode":0,"ErrMsg":"success","Resp":{"credit_monthly":18}}');
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const { port } = server.address();
+  await fs.writeFile(path.join(supportRoot, "credentials.env"), [
+    "PIXVERSE_PLATFORM_API_KEY=platform-fixture-user-store-key",
+    `PIXVERSE_PLATFORM_BASE_URL=http://127.0.0.1:${port}`,
+    "PIXVERSE_GROWTH_API_KEY=mh_live_fixture_must_not_be_used",
+    "",
+  ].join("\n"), { mode: 0o600 });
+
+  try {
+    const result = await runCli(["platform", "account", "balance"], {
+      env: {
+        HOME: home,
+        PIXVERSE_PLATFORM_API_KEY: "",
+        PIXVERSE_PLATFORM_BASE_URL: "",
+        PIXVERSE_GROWTH_API_KEY: "",
+      },
+    });
+    assert.equal(result.exitCode, 0);
+    assert.equal(JSON.parse(result.stdout).data.credit_monthly, 18);
     assert.equal(result.stderr, "");
   } finally {
     await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
