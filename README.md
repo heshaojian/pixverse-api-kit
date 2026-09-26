@@ -1,16 +1,111 @@
 # PixVerse API Kit
 
-Agent-safe PixVerse API tools for the Platform API and Growth Studio API. The installed binary is `pixverse-api`; the general PixVerse web CLI remains separate.
+Agent-safe PixVerse API tools for two dedicated server-side APIs:
 
-## Private macOS Codex plugin demo
+- **Platform API** — discovery, uploads, image/video generation, editing, agents, account reads, status, webhooks, and durable recovery.
+- **Growth Studio API** — PDP product videos, uploads, folders, wallet reads, product-page workflows, polling, and durable recovery.
 
-Build the sanitized, self-contained Codex plugin candidate with:
+The installed command is `pixverse-api`. It is separate from the public PixVerse web CLI named `pixverse`.
+
+## Quick start
+
+### 1. Install the packaged CLI and Codex plugin
+
+Build the self-contained package:
 
 ```bash
 npm run package:customer-plugin
 ```
 
-The local artifacts are written to `dist/customer-plugin/0.3.0-beta.2/`:
+Open the generated archive:
+
+```bash
+open dist/customer-plugin/0.3.0-beta.2/pixverse-api-plugin-0.3.0-beta.2.zip
+```
+
+Then double-click `install.command` inside the extracted folder. If macOS blocks it, Control-click `install.command`, choose **Open**, and confirm.
+
+Command-line install from the extracted folder:
+
+```bash
+zsh ./install.command
+```
+
+The installer registers the Codex plugin and installs the CLI in a global Node-style layout:
+
+```text
+<selected npm prefix>/lib/node_modules/pixverse-api
+<selected npm prefix>/bin/pixverse-api -> ../lib/node_modules/pixverse-api/dist/index.js
+```
+
+By default it installs beside the existing `pixverse` CLI when one is found, then falls back to `npm prefix -g`. To force the real global npm prefix, run the installer with:
+
+```bash
+PIXVERSE_API_SKIP_PIXVERSE_PREFIX=1 zsh ./install.command
+```
+
+Verify the install:
+
+```bash
+which pixverse-api
+pixverse-api --version
+pixverse-api --help
+```
+
+### 2. Configure credentials
+
+Platform and Growth Studio use different API keys. Do not reuse one provider's key for the other provider.
+
+For most users, use the packaged helper:
+
+```bash
+open "$(npm prefix -g)/lib/node_modules/pixverse-api/auth.command"
+```
+
+CLI fallback:
+
+```bash
+printf '%s' '<platform-api-key>' | pixverse-api auth login platform --stdin
+printf '%s' '<growth-studio-api-key>' | pixverse-api auth login growth-studio --stdin
+pixverse-api auth status
+```
+
+If the key is on your clipboard, this avoids saving accidental newlines:
+
+```bash
+pbpaste | tr -d '\r\n' | pixverse-api auth login platform --stdin
+pbpaste | tr -d '\r\n' | pixverse-api auth login growth-studio --stdin
+```
+
+Credentials are saved for the current macOS user at:
+
+```text
+~/Library/Application Support/PixVerse/api-plugin/credentials.env
+```
+
+Never paste API keys into Codex chat, prompt files, payload JSON, or shell history as command arguments.
+
+### 3. Verify read-only access
+
+```bash
+pixverse-api auth status
+pixverse-api platform account balance
+pixverse-api growth-studio wallet balance
+pixverse-api platform resource templates --payload ./template-query.json
+```
+
+### 4. Run a safe dry run before paid work
+
+```bash
+pixverse-api platform video text --payload /absolute/path/text-video.json --dry-run
+pixverse-api growth-studio pdp create --payload /absolute/path/pdp.json --dry-run
+```
+
+For live/billable jobs, use `run-job` or the provider-specific create command with the required confirmation flag. Keep the generated job directory so interrupted work can be resumed instead of resubmitted.
+
+## Customer package contents
+
+The package artifacts are written to `dist/customer-plugin/0.3.0-beta.2/`:
 
 - `pixverse-api-plugin-0.3.0-beta.2.zip`
 - `pixverse-api-plugin-0.3.0-beta.2.zip.sha256`
@@ -18,16 +113,9 @@ The local artifacts are written to `dist/customer-plugin/0.3.0-beta.2/`:
 
 The build requires Node.js 20+, npm, `zip`, and `unzip`. It stages only approved CLI, API documentation, plugin, and production dependency files; validates the extracted archive; and never reads API credentials or sends paid PixVerse requests. The archive includes double-click macOS install and uninstall helpers plus command-line fallback instructions.
 
-The packaged installer follows the same global Node layout as the PixVerse CLI. It prefers the existing `pixverse` CLI prefix when one is available, then falls back to `npm prefix -g`:
-
-```text
-<selected npm prefix>/lib/node_modules/pixverse-api
-<selected npm prefix>/bin/pixverse-api -> ../lib/node_modules/pixverse-api/dist/index.js
-```
-
 The included private evaluation license is a legal draft. The generated archive must remain local and must not be published, uploaded, or shared externally until legal and release approval are recorded.
 
-## Local Setup
+## Development setup
 
 This package is private and is not published to npm. Install its pinned dependencies from this checkout, then link the `pixverse-api` binary locally:
 
@@ -38,14 +126,6 @@ pixverse-api --help
 ```
 
 If you do not want a global npm link, replace `pixverse-api` in the examples with `npm run cli --`.
-
-For non-technical users, use the packaged `auth.command` helper. For CLI setup, store the dedicated API keys in the user credential file:
-
-```bash
-printf '%s' '<platform-api-key>' | pixverse-api auth login platform --stdin
-printf '%s' '<growth-studio-api-key>' | pixverse-api auth login growth-studio --stdin
-pixverse-api auth status
-```
 
 For development in this checkout, `.env` still works:
 
@@ -70,22 +150,23 @@ PIXVERSE_GROWTH_ALLOW_CUSTOM_BASE_URL=true
 
 Those flags deliberately allow credentials to be sent to the configured custom origin. Use them only for a server you control and keep them out of normal production configuration.
 
-## Provider Commands
+## Provider commands
 
 ```bash
-npm run cli -- platform --help
-npm run cli -- growth-studio --help
+pixverse-api platform --help
+pixverse-api growth-studio --help
 ```
 
 Platform examples:
 
 ```bash
-npm run cli -- platform account balance
-npm run cli -- platform resource templates --payload /absolute/path/template-query.json
-npm run cli -- platform upload image /absolute/path/reference.png
-npm run cli -- platform video text --payload /absolute/path/text-video.json --dry-run
-npm run cli -- platform run-job --operation video.image --payload /absolute/path/image-video.json --poll
-npm run cli -- platform resume /absolute/path/pixverse-api-jobs/platform/<job-dir>
+pixverse-api platform account balance
+pixverse-api platform account usage --payload /absolute/path/usage-query.json
+pixverse-api platform resource templates --payload /absolute/path/template-query.json
+pixverse-api platform upload image /absolute/path/reference.png
+pixverse-api platform video text --payload /absolute/path/text-video.json --dry-run
+pixverse-api platform run-job --operation video.image --payload /absolute/path/image-video.json --poll
+pixverse-api platform resume /absolute/path/pixverse-api-jobs/platform/<job-dir>
 ```
 
 ### Platform API Capabilities
@@ -113,17 +194,17 @@ Platform workflows keep credentials, credits, identifiers, validation, and durab
 Growth Studio examples:
 
 ```bash
-npm run cli -- growth-studio avatars list
-npm run cli -- growth-studio folders list
-npm run cli -- growth-studio folders ensure "Campaign Alpha"
-npm run cli -- growth-studio upload image /absolute/path/product.webp
-npm run cli -- growth-studio pdp create --payload /absolute/path/pdp.json --dry-run
-npm run cli -- growth-studio wallet balance
-npm run cli -- growth-studio video create-from-url "https://shop.example.com/products/item"
-npm run cli -- growth-studio video create-from-json /absolute/path/payload.json
-npm run cli -- growth-studio run-job --payload /absolute/path/payload.json --folder-name "Campaign Alpha"
-npm run cli -- growth-studio resume /absolute/path/jobs/<job-dir>
-npm run cli -- growth-studio video poll 627410861853514292
+pixverse-api growth-studio avatars list
+pixverse-api growth-studio folders list
+pixverse-api growth-studio folders ensure "Campaign Alpha"
+pixverse-api growth-studio upload image /absolute/path/product.webp
+pixverse-api growth-studio pdp create --payload /absolute/path/pdp.json --dry-run
+pixverse-api growth-studio wallet balance
+pixverse-api growth-studio video create-from-url "https://shop.example.com/products/item"
+pixverse-api growth-studio video create-from-json /absolute/path/payload.json
+pixverse-api growth-studio run-job --payload /absolute/path/payload.json --folder-name "Campaign Alpha"
+pixverse-api growth-studio resume /absolute/path/jobs/<job-dir>
+pixverse-api growth-studio video poll 627410861853514292
 ```
 
 PDP is the merchant-neutral product-detail-page video workflow for the currently supported fashion/apparel category. It uses uploaded PixVerse image URLs, has a credential-free `--dry-run`, and requires explicit approval immediately before a live `--confirm-billable` submission. A live create is submitted once and recorded durably. See [`docs/api/growth-studio-pdp.md`](docs/api/growth-studio-pdp.md).
@@ -140,6 +221,66 @@ Legacy Growth Studio aliases such as `get`, `poll`, `run-job`, and `create-from-
 - After an ambiguous billable response, inspect saved artifacts and known IDs before retrying.
 - `resume` polls a saved ID only; it never resubmits a generation. If no ID was saved, it reports that reconciliation is required.
 - Default automated tests use loopback or injected clients and do not submit paid jobs.
+
+## Troubleshooting
+
+### `apiKey is not registered`
+
+The CLI found a Platform key, but the Platform service rejected that exact key. Common causes:
+
+- The key belongs to Growth Studio, not Platform.
+- The key was copied with hidden characters.
+- Multiple copies of a key were pasted into the same prompt.
+- A command, file path, or terminal escape sequence was pasted instead of the key.
+
+Reset only the Platform key:
+
+```bash
+pixverse-api auth logout platform
+pbpaste | tr -d '\r\n' | pixverse-api auth login platform --stdin
+pixverse-api platform account balance
+```
+
+Reset only the Growth Studio key:
+
+```bash
+pixverse-api auth logout growth-studio
+pbpaste | tr -d '\r\n' | pixverse-api auth login growth-studio --stdin
+pixverse-api growth-studio wallet balance
+```
+
+### `pixverse-api: command not found`
+
+Check where npm installs global commands:
+
+```bash
+npm prefix -g
+ls -l "$(npm prefix -g)/bin/pixverse-api"
+```
+
+If the command exists but is not on `PATH`, open a new terminal or add `<npm prefix>/bin` to your shell path.
+
+### Codex does not see the plugin
+
+After install, close and reopen Codex, then start a new task. The installer registers:
+
+```text
+pixverse-api@pixverse-private-beta
+```
+
+You can inspect registration with:
+
+```bash
+codex plugin list
+```
+
+### Force reinstall into the global npm prefix
+
+If you have multiple Node installations and want the package under `npm prefix -g` instead of beside the existing `pixverse` CLI:
+
+```bash
+PIXVERSE_API_SKIP_PIXVERSE_PREFIX=1 zsh ./install.command
+```
 
 ## Docs
 
