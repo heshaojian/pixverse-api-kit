@@ -1,6 +1,0 @@
-/*
-  X-Robots-Tag: noindex, nofollow, noarchive
-  X-Content-Type-Options: nosniff
-  Referrer-Policy: no-referrer
-  Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self'; img-src 'self' data:; media-src 'self' https://media.pixverse.ai; style-src 'self'; script-src 'self'; connect-src 'self' https://media.pixverse.ai; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'

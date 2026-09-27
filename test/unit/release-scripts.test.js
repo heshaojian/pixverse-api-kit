@@ -87,7 +87,7 @@ test("secret scanner covers every tracked text surface, ignores untracked and bi
   assert.equal(first.every((finding) => !("value" in finding)), true);
 });
 
-test("default tests are hermetic and pitch asset tests are opt-in", async () => {
+test("default tests are hermetic and pitch production lives outside API Kit", async () => {
   const packageJson = JSON.parse(await fs.readFile(new URL("../../package.json", import.meta.url), "utf8"));
   const rootApiTests = [
     "test/client.test.js",
@@ -95,18 +95,32 @@ test("default tests are hermetic and pitch asset tests are opt-in", async () => 
     "test/jobs.test.js",
     "test/platform-skill.test.js",
   ];
+  const removedScripts = [
+    "compare:revolve",
+    "test:pitches",
+    "test:revolve-pdp-review",
+    "test:revolve-pdp-review:coverage",
+    "test:vips-pitch:coverage",
+  ];
+  const removedPaths = [
+    "deploy/brand-pitches",
+    "docs/brand-pitches",
+    "payloads",
+    "pixverse-cli-jobs",
+    "qa/revolve-v3-v4-comparison",
+  ];
 
   assert.equal(packageJson.scripts.test, "npm run test:api");
   assert.match(packageJson.scripts["test:api"], /--import \.\/scripts\/no-paid-network\.js/);
-  assert.doesNotMatch(packageJson.scripts["test:api"], /brand-pitch|plaud-|revolve-/);
   for (const file of rootApiTests) {
     assert.match(packageJson.scripts["test:api"], new RegExp(file.replaceAll(".", "\\.")));
     assert.match(packageJson.scripts["test:coverage"], new RegExp(file.replaceAll(".", "\\.")));
-    assert.doesNotMatch(packageJson.scripts["test:pitches"], new RegExp(file.replaceAll(".", "\\.")));
   }
-  assert.match(packageJson.scripts["test:pitches"], /brand-pitch/);
-  assert.match(packageJson.scripts["test:pitches"], /plaud-/);
-  assert.match(packageJson.scripts["test:pitches"], /revolve-/);
+  for (const script of removedScripts) assert.equal(packageJson.scripts[script], undefined, script);
+  const { stdout: trackedPitchFiles } = await execFileAsync("git", ["ls-files", "--", ...removedPaths], {
+    cwd: process.cwd(),
+  });
+  assert.equal(trackedPitchFiles.trim(), "");
 });
 
 test("CI runs credential-free release gates", async () => {
