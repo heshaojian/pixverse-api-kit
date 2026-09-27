@@ -1,8 +1,8 @@
 # Customer Distribution Readiness
 
-**Status:** Planned
+**Status:** In progress
 
-**Reviewed:** 2026-09-19
+**Reviewed:** 2026-09-27
 
 ## Decision
 
@@ -22,15 +22,7 @@ The general web-product CLI remains the separate `pixverse` executable. Platform
 
 ## Why the current repository must remain internal
 
-The API CLI is mixed with customer-specific and internal working material, including:
-
-- brand pitch sites and customer assets;
-- PLAUD, REVOLVE, and other customer payloads;
-- prompts, generation records, job IDs, and remote media references;
-- pitch QA tooling and project-specific tests;
-- internal plans, specifications, and agent instructions.
-
-Deleting these files from the current branch would not remove them from Git history. A customer repository must therefore start with fresh history rather than as a branch or ordinary clone of this repository.
+Customer pitch pages, tracked payloads, production evidence, QA tools, and pitch tests were separated into the private `heshaojian/pixverse-pitch-studio` repository and removed from the current API Kit tree on 2026-09-27. Historical customer and internal material still exists in this repository's Git history, and internal plans remain in the working tree. A customer repository must therefore still start with fresh history rather than as a branch or ordinary clone of this repository.
 
 The current npm package boundary is also unsafe for distribution. At review time, `npm pack --dry-run` included 426 files, including 209 customer or pitch-related files. A strict package allowlist is required.
 
@@ -76,7 +68,7 @@ Customer-facing skills must also remove personal names, customer names, internal
 
 - [ ] Create a new customer distribution repository from a sanitized export with fresh Git history.
 - [ ] Keep the current internal repository private.
-- [ ] Remove every customer-specific, GTM, job-record, and internal-planning surface listed above.
+- [x] Remove tracked customer-specific pitch, payload, job-record, QA, and pitch-test surfaces from the current API Kit tree.
 - [ ] Run a full-history Gitleaks or TruffleHog scan on the new repository.
 - [ ] Run the tracked-file secret scanner and dependency audit on the exact release tree.
 - [ ] Decide whether distribution is proprietary customer-use, source-available, or open source.

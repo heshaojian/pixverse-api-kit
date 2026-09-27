@@ -7,6 +7,12 @@ Agent-safe PixVerse API tools for two dedicated server-side APIs:
 
 The installed command is `pixverse-api`. It is separate from the public PixVerse web CLI named `pixverse`.
 
+## Repository boundary
+
+Customer pitch pages, reviewed customer payloads, pitch-production evidence, and pitch QA now live in the private [`pixverse-pitch-studio`](https://github.com/heshaojian/pixverse-pitch-studio) repository. This API Kit owns only the Platform and Growth Studio CLI, API skills and documentation, durable recovery, security controls, and customer-plugin packaging.
+
+Historical pitch material remains in this repository's Git history. Share the curated customer plugin, not this development repository, unless a separately reviewed distribution repository is approved.
+
 ## Quick start
 
 ### 1. Install the packaged CLI and Codex plugin
