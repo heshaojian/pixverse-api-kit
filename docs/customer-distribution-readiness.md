@@ -75,7 +75,8 @@ Customer-facing skills must also remove personal names, customer names, internal
 - [ ] Add approved `LICENSE`, `NOTICE`, `SECURITY.md`, and `SUPPORT.md` files.
 - [ ] Clarify whether Growth Studio is available to every recipient or only entitled accounts.
 - [x] Add a strict npm `files` allowlist or build a separate curated distribution directory.
-- [ ] Verify that the packaged artifact contains no internal or customer-specific paths.
+- [x] Verify that the current internal npm package dry run contains no internal or customer-specific paths.
+- [ ] Verify that the exact customer release artifact contains no internal or customer-specific paths.
 
 ## P1: Customer installation and onboarding
 
