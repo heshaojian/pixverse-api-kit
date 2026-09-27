@@ -7,6 +7,21 @@
   "bin": {
     "pixverse-api": "./src/cli.js"
   },
+  "files": [
+    ".agents/skills/pixverse-api/",
+    ".agents/skills/pixverse-growth-studio-api/",
+    ".agents/skills/pixverse-platform-api/",
+    ".env.example",
+    "docs/api/",
+    "packaging/customer-plugin/",
+    "scripts/check-syntax.js",
+    "scripts/customer-plugin/",
+    "scripts/no-paid-network.js",
+    "scripts/package-customer-plugin.js",
+    "scripts/scan-secrets.js",
+    "src/",
+    "README.md"
+  ],
   "scripts": {
     "cli": "node ./src/cli.js",
     "test": "npm run test:api",

@@ -24,7 +24,7 @@ The general web-product CLI remains the separate `pixverse` executable. Platform
 
 Customer pitch pages, tracked payloads, production evidence, QA tools, and pitch tests were separated into the private `heshaojian/pixverse-pitch-studio` repository and removed from the current API Kit tree on 2026-09-27. Historical customer and internal material still exists in this repository's Git history, and internal plans remain in the working tree. A customer repository must therefore still start with fresh history rather than as a branch or ordinary clone of this repository.
 
-The current npm package boundary is also unsafe for distribution. At review time, `npm pack --dry-run` included 426 files, including 209 customer or pitch-related files. A strict package allowlist is required.
+The npm package now has a strict `files` allowlist for CLI, API docs, packaging helpers, and customer-plugin sources only. Treat that allowlist as a guardrail, not a distribution approval: customer releases still need to be built from a clean, reviewed tree with fresh history.
 
 ## Intended customer distribution
 
@@ -74,7 +74,7 @@ Customer-facing skills must also remove personal names, customer names, internal
 - [ ] Decide whether distribution is proprietary customer-use, source-available, or open source.
 - [ ] Add approved `LICENSE`, `NOTICE`, `SECURITY.md`, and `SUPPORT.md` files.
 - [ ] Clarify whether Growth Studio is available to every recipient or only entitled accounts.
-- [ ] Add a strict npm `files` allowlist or build a separate curated distribution directory.
+- [x] Add a strict npm `files` allowlist or build a separate curated distribution directory.
 - [ ] Verify that the packaged artifact contains no internal or customer-specific paths.
 
 ## P1: Customer installation and onboarding
@@ -128,7 +128,7 @@ examples/README.md
 
 ## Versioning recommendation
 
-The current `0.2.0` version should remain an internal development version. Use a prerelease such as `0.3.0-beta.1` for the first customer design partner.
+The current `0.3.0-beta.2` version should remain an internal/private beta version until the customer distribution repository and release gates are complete.
 
 Promote to `1.0.0` only after stabilizing:
 

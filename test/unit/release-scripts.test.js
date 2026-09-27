@@ -121,6 +121,65 @@ test("default tests are hermetic and pitch production lives outside API Kit", as
     cwd: process.cwd(),
   });
   assert.equal(trackedPitchFiles.trim(), "");
+
+  const deniedPackagedPrefixes = [
+    ".superpowers/",
+    "deploy/",
+    "docs/brand-pitches/",
+    "docs/superpowers/",
+    "payloads/",
+    "pixverse-api-jobs/",
+    "pixverse-cli-jobs/",
+    "qa/",
+    "scripts/prepare-revolve",
+    "test/plaud-",
+    "test/revolve-",
+    "test/vips-",
+  ];
+  const { stdout: packOutput } = await execFileAsync("npm", ["pack", "--dry-run", "--json"], {
+    cwd: process.cwd(),
+    maxBuffer: 8 * 1024 * 1024,
+  });
+  const [{ files: packagedFiles }] = JSON.parse(packOutput);
+  const packagedPaths = packagedFiles.map(({ path: packagedPath }) => packagedPath);
+  const deniedPackagedPaths = packagedPaths.filter((packagedPath) => (
+    deniedPackagedPrefixes.some((prefix) => packagedPath.startsWith(prefix))
+  ));
+  assert.deepEqual(deniedPackagedPaths, []);
+});
+
+test("npm package allowlist excludes local pitch artifacts and job records", async () => {
+  const packageJson = JSON.parse(await fs.readFile(new URL("../../package.json", import.meta.url), "utf8"));
+  assert.deepEqual(packageJson.files, [
+    ".agents/skills/pixverse-api/",
+    ".agents/skills/pixverse-growth-studio-api/",
+    ".agents/skills/pixverse-platform-api/",
+    ".env.example",
+    "docs/api/",
+    "packaging/customer-plugin/",
+    "scripts/check-syntax.js",
+    "scripts/customer-plugin/",
+    "scripts/no-paid-network.js",
+    "scripts/package-customer-plugin.js",
+    "scripts/scan-secrets.js",
+    "src/",
+    "README.md",
+  ]);
+
+  const blocked = [
+    ".superpowers/",
+    "deploy/",
+    "docs/superpowers/",
+    "payloads/",
+    "pixverse-api-jobs/",
+    "pixverse-cli-jobs/",
+    "qa/",
+    "test/",
+    "tmp/",
+  ];
+  for (const entry of blocked) {
+    assert.equal(packageJson.files.includes(entry), false, entry);
+  }
 });
 
 test("CI runs credential-free release gates", async () => {
