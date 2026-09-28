@@ -7,6 +7,8 @@ import { scanTextForSecrets } from "../scan-secrets.js";
 import {
   CUSTOMER_PLUGIN_DENIED_PATHS,
   CUSTOMER_PLUGIN_RELEASE,
+  STANDALONE_SKILL_OWNER_MARKER,
+  STANDALONE_SKILL_PREFIX,
 } from "./config.js";
 
 const execFileAsync = promisify(execFile);
@@ -28,7 +30,9 @@ export async function verifyCustomerPlugin({ packageRoot, pluginValidatorPath } 
   validatePaths(entries);
   await validateTextContent(resolvedPackageRoot, entries);
   const { marketplace, plugin, pluginRoot } = await validateManifests(resolvedPackageRoot);
+  await validateClaudeManifests(resolvedPackageRoot, pluginRoot);
   await validateSkills(pluginRoot);
+  await validateStandaloneSkills(resolvedPackageRoot);
   await validateRuntimeSyntax(entries);
   await validateWrapper(pluginRoot);
   if (pluginValidatorPath) {
@@ -39,7 +43,9 @@ export async function verifyCustomerPlugin({ packageRoot, pluginValidatorPath } 
     Object.freeze({ name: "inventory", status: "passed" }),
     Object.freeze({ name: "content-safety", status: "passed" }),
     Object.freeze({ name: "codex-manifests", status: "passed" }),
+    Object.freeze({ name: "claude-manifests", status: "passed" }),
     Object.freeze({ name: "skills", status: "passed" }),
+    Object.freeze({ name: "standalone-skills", status: "passed" }),
     Object.freeze({ name: "runtime-syntax", status: "passed" }),
     Object.freeze({ name: "embedded-cli", status: "passed" }),
   ]);
@@ -104,6 +110,8 @@ function isDeniedPath(relativePath) {
 function isAllowedTopLevelPath(relativePath) {
   const [topLevel] = relativePath.split("/");
   return topLevel === ".agents"
+    || topLevel === ".claude-plugin"
+    || topLevel === "agent-skills"
     || topLevel === "INSTALL-MACOS.md"
     || topLevel === "auth.command"
     || topLevel === "dist"
@@ -181,6 +189,33 @@ async function validateManifests(packageRoot) {
   return Object.freeze({ marketplace, plugin, pluginRoot });
 }
 
+async function validateClaudeManifests(packageRoot, pluginRoot) {
+  const marketplace = await readJson(
+    path.join(packageRoot, ".claude-plugin", "marketplace.json"),
+    "Claude Code marketplace manifest",
+  );
+  if (marketplace.name !== CUSTOMER_PLUGIN_RELEASE.marketplaceName || marketplace.owner?.name !== "PixVerse") {
+    throw new Error("Claude Code marketplace identity is invalid.");
+  }
+  const entry = marketplace.plugins?.[0];
+  if (marketplace.plugins?.length !== 1
+      || entry?.name !== CUSTOMER_PLUGIN_RELEASE.pluginName
+      || entry?.source !== "./plugins/pixverse-api"
+      || entry?.version !== CUSTOMER_PLUGIN_RELEASE.version) {
+    throw new Error("Claude Code marketplace must contain exactly the PixVerse API plugin at the release version.");
+  }
+
+  const plugin = await readJson(path.join(pluginRoot, ".claude-plugin", "plugin.json"), "Claude Code plugin manifest");
+  if (plugin.name !== CUSTOMER_PLUGIN_RELEASE.pluginName
+      || plugin.version !== CUSTOMER_PLUGIN_RELEASE.version
+      || plugin.author?.name !== "PixVerse") {
+    throw new Error("Claude Code plugin manifest metadata is invalid.");
+  }
+  if (plugin.mcpServers || plugin.hooks || plugin.commands || plugin.agents || plugin.lspServers) {
+    throw new Error("Claude Code plugin declares an unsupported component.");
+  }
+}
+
 async function validateSkills(pluginRoot) {
   const skillsRoot = path.join(pluginRoot, "skills");
   const entries = await fs.readdir(skillsRoot, { withFileTypes: true });
@@ -193,6 +228,28 @@ async function validateSkills(pluginRoot) {
     const text = await fs.readFile(path.join(skillsRoot, name, "SKILL.md"), "utf8");
     if (!new RegExp(`^---\\nname: ${name}\\n`, "m").test(text)) {
       throw new Error(`Codex skill frontmatter is invalid: ${name}.`);
+    }
+  }
+}
+
+async function validateStandaloneSkills(packageRoot) {
+  const skillsRoot = path.join(packageRoot, "agent-skills");
+  const entries = await fs.readdir(skillsRoot, { withFileTypes: true });
+  const names = entries.map((entry) => entry.name).toSorted();
+  const expected = ["growth-studio", "platform", "start"].map((name) => `${STANDALONE_SKILL_PREFIX}${name}`);
+  if (JSON.stringify(names) !== JSON.stringify(expected) || !entries.every((entry) => entry.isDirectory())) {
+    throw new Error(`Standalone skills must be exactly: ${expected.join(", ")}.`);
+  }
+  for (const name of names) {
+    const text = await fs.readFile(path.join(skillsRoot, name, "SKILL.md"), "utf8");
+    if (!new RegExp(`^---\\nname: ${name}\\ndescription: \\S`).test(text)) {
+      throw new Error(`Standalone skill frontmatter is invalid: ${name}.`);
+    }
+    const marker = await fs.stat(path.join(skillsRoot, name, STANDALONE_SKILL_OWNER_MARKER)).catch(() => null);
+    if (!marker?.isFile()) throw new Error(`Standalone skill ownership marker is missing: ${name}.`);
+    for (const reference of text.matchAll(/`(references\/[^`]+)`/g)) {
+      const referenced = await fs.stat(path.join(skillsRoot, name, reference[1])).catch(() => null);
+      if (!referenced?.isFile()) throw new Error(`Standalone skill reference is missing: ${name}/${reference[1]}.`);
     }
   }
 }
@@ -223,8 +280,8 @@ async function validateWrapper(pluginRoot) {
 
 async function validateRuntimeSyntax(entries) {
   const runtimeJavaScript = entries.filter(({ type, relativePath }) => type === "file"
-    && relativePath.startsWith("plugins/pixverse-api/runtime/src/")
-    && relativePath.endsWith(".js"));
+    && ((relativePath.startsWith("plugins/pixverse-api/runtime/src/") && relativePath.endsWith(".js"))
+      || relativePath === "dist/agents.js"));
   for (const entry of runtimeJavaScript) {
     await execFileAsync(process.execPath, ["--check", entry.fullPath], {
       encoding: "utf8",

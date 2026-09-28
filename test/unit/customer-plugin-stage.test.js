@@ -35,6 +35,23 @@ test("staging creates the self-contained marketplace from approved sources", asy
   assert.equal(await exists(path.join(result.pluginRoot, "runtime/package.json")), true);
   assert.equal(await exists(path.join(result.pluginRoot, "runtime/package-lock.json")), true);
   assert.equal(await exists(path.join(result.pluginRoot, "docs/api/platform-operations.md")), true);
+  assert.equal(await exists(path.join(result.packageRoot, ".claude-plugin/marketplace.json")), true);
+  assert.equal(await exists(path.join(result.pluginRoot, ".claude-plugin/plugin.json")), true);
+  assert.equal(await exists(path.join(result.pluginRoot, "skills/platform/references/platform-operations.md")), true);
+  assert.equal(await exists(path.join(result.pluginRoot, "skills/growth-studio/references/pdp-standard-high.json")), true);
+  assert.deepEqual(
+    [...new Set(result.files.filter((file) => file.startsWith("agent-skills/")).map((file) => file.split("/")[1]))],
+    ["pixverse-api-growth-studio", "pixverse-api-platform", "pixverse-api-start"],
+  );
+  const standaloneSkill = await fs.readFile(
+    path.join(result.packageRoot, "agent-skills/pixverse-api-platform/SKILL.md"),
+    "utf8",
+  );
+  const pluginSkill = await fs.readFile(path.join(result.pluginRoot, "skills/platform/SKILL.md"), "utf8");
+  assert.equal(standaloneSkill, pluginSkill.replace(/^---\nname: platform\n/, "---\nname: pixverse-api-platform\n"));
+  assert.equal(await exists(path.join(result.packageRoot, "agent-skills/pixverse-api-platform/.pixverse-api-plugin")), true);
+  const agentsMode = (await fs.stat(path.join(result.packageRoot, "dist/agents.js"))).mode;
+  assert.notEqual(agentsMode & 0o100, 0);
   assert.equal(await exists(path.join(result.packageRoot, "payloads")), false);
   assert.equal(await exists(path.join(result.packageRoot, "docs/superpowers")), false);
   assert.deepEqual(result.files, [...result.files].sort());

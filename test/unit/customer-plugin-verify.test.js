@@ -52,6 +52,26 @@ test("verifier rejects symlinks, invalid manifests, and unsafe wrapper modes", a
     await assert.rejects(verifyCustomerPlugin({ packageRoot }), /plugin manifest name/);
   });
 
+  await t.test("Claude Code manifest", async (subtest) => {
+    const { packageRoot, pluginRoot } = await createStagedPackage(subtest);
+    const manifestPath = path.join(pluginRoot, ".claude-plugin/plugin.json");
+    const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
+    await fs.writeFile(manifestPath, JSON.stringify({ ...manifest, hooks: "./hooks.json" }));
+    await assert.rejects(verifyCustomerPlugin({ packageRoot }), /Claude Code plugin declares an unsupported component/);
+  });
+
+  await t.test("standalone skill ownership marker", async (subtest) => {
+    const { packageRoot } = await createStagedPackage(subtest);
+    await fs.rm(path.join(packageRoot, "agent-skills/pixverse-api-start/.pixverse-api-plugin"));
+    await assert.rejects(verifyCustomerPlugin({ packageRoot }), /ownership marker is missing: pixverse-api-start/);
+  });
+
+  await t.test("standalone skill reference", async (subtest) => {
+    const { packageRoot } = await createStagedPackage(subtest);
+    await fs.rm(path.join(packageRoot, "agent-skills/pixverse-api-platform/references/platform-operations.md"));
+    await assert.rejects(verifyCustomerPlugin({ packageRoot }), /reference is missing: pixverse-api-platform/);
+  });
+
   await t.test("wrapper mode", async (subtest) => {
     const { packageRoot, pluginRoot } = await createStagedPackage(subtest);
     await fs.chmod(path.join(pluginRoot, "scripts/pixverse-api"), 0o644);

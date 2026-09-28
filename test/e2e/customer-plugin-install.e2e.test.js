@@ -82,6 +82,7 @@ function cleanEnvironment({ home, binRoot, logPath, extra = {} }) {
     PATH: `${binRoot}:${process.env.PATH}`,
     CODEX_CALL_LOG: logPath,
     PIXVERSE_API_SKIP_PIXVERSE_PREFIX: "1",
+    PIXVERSE_API_AGENTS: "codex",
     ...extra,
   };
 }
@@ -390,4 +391,96 @@ macTest("new-version plugin-add failure restores the receipt-owned older version
     ["plugin", "marketplace", "add", olderInstallRoot, "--json"],
     ["plugin", "add", "pixverse-api@pixverse-private-beta", "--json"],
   ]);
+});
+
+async function createFakeClaude(binRoot) {
+  const executable = `#!/usr/bin/env node
+import fs from "node:fs";
+const args = process.argv.slice(2);
+fs.appendFileSync(process.env.CLAUDE_CALL_LOG, JSON.stringify(args) + "\\n");
+if (args.join(" ") === "plugin marketplace list --json") process.stdout.write("[]");
+else if (args[1] === "install") process.stdout.write(JSON.stringify({ outcome: "ok" }) + "\\n");
+`;
+  const claudePath = path.join(binRoot, "claude");
+  await fs.writeFile(claudePath, executable, { mode: 0o755 });
+  await fs.chmod(claudePath, 0o755);
+}
+
+macTest("installer registers Claude Code and standalone skills without Codex", async (t) => {
+  const { root, packageRoot } = await createExtractedPackage(t);
+  const home = path.join(root, "home");
+  const { binRoot, logPath, npmPrefix } = await createFakeCodex(root);
+  await fs.rm(path.join(binRoot, "codex"));
+  await createFakeClaude(binRoot);
+  await fs.mkdir(path.join(home, ".cursor"), { recursive: true });
+  const claudeLogPath = path.join(root, "claude-calls.jsonl");
+  const env = cleanEnvironment({
+    home,
+    binRoot,
+    logPath,
+    extra: { PIXVERSE_API_AGENTS: "claude,cursor", CLAUDE_CALL_LOG: claudeLogPath },
+  });
+
+  const { stdout } = await execFileAsync("zsh", [path.join(packageRoot, "install.command")], { env, encoding: "utf8" });
+  assert.match(stdout, /installed for: Claude Code, Cursor\./);
+
+  const installRoot = path.join(npmPrefix, "lib/node_modules/pixverse-api");
+  const receiptPath = path.join(home, "Library/Application Support/PixVerse/api-plugin/install-receipt.json");
+  const cursorSkills = path.join(home, ".cursor/skills");
+  const receipt = JSON.parse(await fs.readFile(receiptPath, "utf8"));
+  assert.deepEqual(receipt.agents, [
+    { name: "claude" },
+    {
+      name: "cursor",
+      skill_dirs: ["pixverse-api-growth-studio", "pixverse-api-platform", "pixverse-api-start"]
+        .map((name) => path.join(cursorSkills, name)),
+    },
+  ]);
+  assert.deepEqual(await readCalls(claudeLogPath), [
+    ["plugin", "marketplace", "list", "--json"],
+    ["plugin", "marketplace", "add", installRoot],
+    ["plugin", "install", "pixverse-api@pixverse-private-beta", "--json"],
+  ]);
+  const skillText = await fs.readFile(path.join(cursorSkills, "pixverse-api-platform/SKILL.md"), "utf8");
+  assert.match(skillText, /^---\nname: pixverse-api-platform\n/);
+  assert.equal((await fs.stat(path.join(cursorSkills, "pixverse-api-platform/references/platform-operations.md"))).isFile(), true);
+  await assert.rejects(fs.access(logPath), { code: "ENOENT" });
+
+  await execFileAsync("zsh", [path.join(packageRoot, "uninstall.command")], { env, encoding: "utf8" });
+  assert.deepEqual((await readCalls(claudeLogPath)).slice(3), [
+    ["plugin", "uninstall", "pixverse-api@pixverse-private-beta", "--json"],
+    ["plugin", "marketplace", "remove", "pixverse-private-beta"],
+  ]);
+  assert.deepEqual(await fs.readdir(cursorSkills), []);
+  await assert.rejects(fs.access(installRoot), { code: "ENOENT" });
+  await assert.rejects(fs.access(receiptPath), { code: "ENOENT" });
+});
+
+macTest("installer makes no changes when no supported agent is found", async (t) => {
+  const { root, packageRoot } = await createExtractedPackage(t);
+  const home = path.join(root, "home");
+  const { binRoot, logPath, npmPrefix } = await createFakeCodex(root);
+  await fs.mkdir(home);
+  await fs.rm(path.join(binRoot, "codex"));
+  // Hide every real agent CLI on this machine: only the fake npm, node, and system tools remain.
+  await fs.symlink(process.execPath, path.join(binRoot, "node"));
+  const isolatedPath = `${binRoot}:/usr/bin:/bin`;
+  const autoEnv = cleanEnvironment({
+    home,
+    binRoot,
+    logPath,
+    extra: { PATH: isolatedPath, PIXVERSE_API_AGENTS: "auto" },
+  });
+  const codexEnv = { ...autoEnv, PIXVERSE_API_AGENTS: "codex" };
+
+  await assert.rejects(
+    execFileAsync("zsh", [path.join(packageRoot, "install.command")], { env: autoEnv, encoding: "utf8" }),
+    (error) => /No supported coding agent was found/.test(error.stderr),
+  );
+  await assert.rejects(
+    execFileAsync("zsh", [path.join(packageRoot, "install.command")], { env: codexEnv, encoding: "utf8" }),
+    (error) => /`codex` command was not found/.test(error.stderr) && /No changes were made/.test(error.stderr),
+  );
+  await assert.rejects(fs.access(path.join(npmPrefix, "lib/node_modules/pixverse-api")), { code: "ENOENT" });
+  await assert.rejects(fs.access(path.join(home, "Library")), { code: "ENOENT" });
 });

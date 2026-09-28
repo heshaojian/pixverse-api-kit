@@ -44,6 +44,25 @@ test("customer plugin manifests use the approved identity and policy", async () 
   assert.equal("hooks" in plugin, false);
 });
 
+test("Claude Code manifests share the plugin identity and version", async () => {
+  const marketplace = await readJson(".claude-plugin/marketplace.json");
+  const plugin = await readJson("plugin/.claude-plugin/plugin.json");
+  const codexPlugin = await readJson("plugin/.codex-plugin/plugin.json");
+
+  assert.equal(marketplace.name, "pixverse-private-beta");
+  assert.equal(marketplace.owner.name, "PixVerse");
+  assert.deepEqual(marketplace.plugins.map(({ name, source, version }) => ({ name, source, version })), [
+    { name: "pixverse-api", source: "./plugins/pixverse-api", version: codexPlugin.version },
+  ]);
+  assert.equal(plugin.name, codexPlugin.name);
+  assert.equal(plugin.version, codexPlugin.version);
+  assert.equal(plugin.description, codexPlugin.description);
+  assert.equal(plugin.author.name, "PixVerse");
+  for (const component of ["mcpServers", "hooks", "commands", "agents"]) {
+    assert.equal(component in plugin, false, component);
+  }
+});
+
 test("customer plugin exports three neutral wrapper-based skills", async () => {
   const skillDirectory = path.join(PLUGIN_ROOT, "skills");
   const skillNames = (await fs.readdir(skillDirectory, { withFileTypes: true }))
@@ -64,13 +83,18 @@ test("customer plugin exports three neutral wrapper-based skills", async () => {
     const skillText = await fs.readFile(path.join(skillDirectory, skillName, "SKILL.md"), "utf8");
     assert.match(skillText, new RegExp(`^---\\nname: ${skillName}\\n`, "m"));
     assert.match(skillText, /<plugin-root>\/scripts\/pixverse-api/);
+    assert.match(skillText, /installed as a standalone Agent Skill, run `pixverse-api`/);
+    assert.doesNotMatch(skillText, /<plugin-root>\/(?:docs|examples)\//);
   }
 });
 
 test("customer plugin includes the complete private-demo documentation set", async () => {
   const requiredFiles = [
+    ".claude-plugin/marketplace.json",
     "INSTALL-MACOS.md",
     "auth.command",
+    "dist/agents.js",
+    "plugin/.claude-plugin/plugin.json",
     "install.command",
     "plugin/LICENSE",
     "uninstall.command",

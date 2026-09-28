@@ -6,6 +6,8 @@ import { promisify } from "node:util";
 import {
   CUSTOMER_PLUGIN_ALLOWLIST,
   CUSTOMER_PLUGIN_RELEASE,
+  STANDALONE_SKILL_OWNER_MARKER,
+  STANDALONE_SKILL_PREFIX,
 } from "./config.js";
 
 const execFileAsync = promisify(execFile);
@@ -23,6 +25,8 @@ export async function stageCustomerPlugin({
 
   await fs.mkdir(pluginRoot, { recursive: true });
   await copyApprovedPluginSource(resolvedRepoRoot, packageRoot, pluginRoot);
+  await copySkillReferences(resolvedRepoRoot, pluginRoot);
+  await writeStandaloneSkills(packageRoot, pluginRoot);
   await copyRuntimeSources(resolvedRepoRoot, runtimeRoot);
   await sanitizeRuntimeSources(runtimeRoot);
   await writeRuntimeMetadata(resolvedRepoRoot, runtimeRoot);
@@ -50,6 +54,34 @@ async function copyApprovedPluginSource(repoRoot, packageRoot, pluginRoot) {
   for (const relativePath of CUSTOMER_PLUGIN_ALLOWLIST.apiDocuments) {
     const destination = path.join(pluginRoot, relativePath.replace(/^docs\//, "docs/"));
     await copyFile(path.join(repoRoot, relativePath), destination);
+  }
+}
+
+async function copySkillReferences(repoRoot, pluginRoot) {
+  for (const [skillName, references] of Object.entries(CUSTOMER_PLUGIN_ALLOWLIST.skillReferences)) {
+    for (const relativePath of references) {
+      await copyFile(
+        path.join(repoRoot, relativePath),
+        path.join(pluginRoot, "skills", skillName, "references", path.basename(relativePath)),
+      );
+    }
+  }
+}
+
+async function writeStandaloneSkills(packageRoot, pluginRoot) {
+  for (const skillName of Object.keys(CUSTOMER_PLUGIN_ALLOWLIST.skillReferences)) {
+    const standaloneName = `${STANDALONE_SKILL_PREFIX}${skillName}`;
+    const destination = path.join(packageRoot, "agent-skills", standaloneName);
+    await copyTree(path.join(pluginRoot, "skills", skillName), destination);
+    const skillPath = path.join(destination, "SKILL.md");
+    const skillText = await fs.readFile(skillPath, "utf8");
+    const renamed = skillText.replace(new RegExp(`^---\\nname: ${skillName}\\n`), `---\nname: ${standaloneName}\n`);
+    if (renamed === skillText) throw new Error(`Skill frontmatter is invalid: ${skillName}`);
+    await fs.writeFile(skillPath, renamed);
+    await fs.writeFile(
+      path.join(destination, STANDALONE_SKILL_OWNER_MARKER),
+      `Installed by PixVerse API Plugin ${CUSTOMER_PLUGIN_RELEASE.version}. Removed by its uninstaller.\n`,
+    );
   }
 }
 
@@ -125,10 +157,12 @@ async function writePackageEntrypoint(packageRoot) {
     version: CUSTOMER_PLUGIN_RELEASE.version,
     private: true,
     type: "module",
-    description: "PixVerse API CLI and Codex plugin for Platform API and Growth Studio API workflows.",
+    description: "PixVerse API CLI and coding-agent plugin for Platform API and Growth Studio API workflows.",
     bin: { "pixverse-api": "./dist/index.js" },
     files: [
       ".agents",
+      ".claude-plugin",
+      "agent-skills",
       "INSTALL-MACOS.md",
       "MANIFEST.sha256",
       "auth.command",
@@ -161,6 +195,7 @@ process.exit(result.status ?? 1);
     `${JSON.stringify(packageJson, null, 2)}\n`,
   );
   await fs.writeFile(path.join(packageRoot, "dist", "index.js"), entrypoint, { mode: 0o755 });
+  await fs.chmod(path.join(packageRoot, "dist", "agents.js"), 0o755);
   await fs.chmod(path.join(packageRoot, "dist", "index.js"), 0o755);
 }
 
