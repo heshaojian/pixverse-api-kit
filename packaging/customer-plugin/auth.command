@@ -99,4 +99,4 @@ process.stdout.write(`Platform API key: ${configured.platform ? "configured" : "
 process.stdout.write(`Growth Studio API key: ${configured.growthStudio ? "configured" : "missing"}\n`);
 NODE
 
-echo "Close and reopen Codex, then start a new task."
+echo "Close and reopen your coding agent, then start a new task."

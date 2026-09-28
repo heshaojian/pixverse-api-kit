@@ -1,0 +1,15 @@
+{
+  "name": "pixverse-api",
+  "version": "0.3.0-beta.2",
+  "description": "Operate PixVerse Platform API and Growth Studio API workflows through a safe embedded CLI.",
+  "author": {
+    "name": "PixVerse"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "keywords": [
+    "pixverse",
+    "platform-api",
+    "growth-studio",
+    "video-generation"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "pixverse-private-beta",
+  "description": "Private-beta PixVerse API Plugin for Platform API and Growth Studio API workflows.",
+  "owner": {
+    "name": "PixVerse"
+  },
+  "plugins": [
+    {
+      "name": "pixverse-api",
+      "source": "./plugins/pixverse-api",
+      "description": "Operate PixVerse Platform API and Growth Studio API workflows through a safe embedded CLI.",
+      "version": "0.3.0-beta.2",
+      "category": "development"
+    }
+  ]
+}

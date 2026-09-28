@@ -6,6 +6,5 @@
   - one guided choice for Codex, Claude Code, or both;
   - secure credential storage through macOS Keychain or Windows Credential Manager;
   - read-only connection verification, repair, update, and uninstall flows;
-  - a Claude Code plugin package generated from the same runtime and skill sources;
   - terminal-free setup, with ZIP and command-line installation retained only as support fallbacks;
   - no telemetry, remote web content, bundled credentials, or customer-specific data.

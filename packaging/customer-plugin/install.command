@@ -29,6 +29,11 @@ PRIOR_INSTALL_ROOT=""
 PRIOR_VERSION=""
 PRIOR_BIN_PATH=""
 PRIOR_BIN_TARGET=""
+PRIOR_RECEIPT_PATH=""
+CODEX_BIN=""
+SELECTED_AGENTS=()
+OTHER_AGENTS=()
+AGENT_RESULT_PATH=""
 
 set_install_paths() {
   INSTALL_PARENT="$NPM_PREFIX/lib/node_modules"
@@ -84,6 +89,9 @@ restore_previous_install() {
     /bin/mkdir -p -- "${BIN_PATH:h}"
     /bin/ln -s -- "$PRIOR_BIN_TARGET" "$BIN_PATH"
   fi
+  if [[ -z "$CODEX_BIN" ]]; then
+    return 0
+  fi
   if ! "$CODEX_BIN" plugin marketplace add "$restore_root" --json >/dev/null; then
     echo "The previous plugin files were restored, but Codex could not restore their marketplace registration." >&2
     return 1
@@ -125,6 +133,9 @@ cleanup() {
   if [[ -n "$TEMP_ROOT" && -d "$TEMP_ROOT" ]]; then
     safe_remove_directory "$TEMP_ROOT" || true
   fi
+  if [[ -n "$AGENT_RESULT_PATH" ]]; then
+    /bin/rm -f -- "$AGENT_RESULT_PATH" || true
+  fi
   return "$exit_status"
 }
 trap cleanup EXIT
@@ -142,12 +153,6 @@ fi
 NODE_MAJOR="$($NODE_BIN -p 'process.versions.node.split(".")[0]')"
 if [[ "$NODE_MAJOR" -lt 20 ]]; then
   echo "PixVerse API Plugin requires Node.js 20 or newer." >&2
-  exit 1
-fi
-
-CODEX_BIN="$(command -v codex || true)"
-if [[ -z "$CODEX_BIN" ]]; then
-  echo "Install and sign in to Codex, then run this installer again." >&2
   exit 1
 fi
 
@@ -227,6 +232,7 @@ process.stdout.write(`${installRoot}\n${receipt.version}\n${binPath}\n${binTarge
     echo "The existing PixVerse API Plugin installation receipt is invalid. No changes were made." >&2
     exit 1
   }
+  PRIOR_RECEIPT_PATH="$RECEIPT_TO_READ"
   PRIOR_RECEIPT_LINES=("${(@f)PRIOR_RECEIPT}")
   if [[ "${#PRIOR_RECEIPT_LINES[@]}" -lt 3 || "${#PRIOR_RECEIPT_LINES[@]}" -gt 4 ]]; then
     echo "The existing PixVerse API Plugin installation receipt is invalid. No changes were made." >&2
@@ -242,7 +248,7 @@ process.stdout.write(`${installRoot}\n${receipt.version}\n${binPath}\n${binTarge
   fi
 fi
 
-for required_file in .agents/plugins/marketplace.json MANIFEST.sha256 plugins/pixverse-api/.codex-plugin/plugin.json; do
+for required_file in .agents/plugins/marketplace.json .claude-plugin/marketplace.json MANIFEST.sha256 dist/agents.js plugins/pixverse-api/.codex-plugin/plugin.json plugins/pixverse-api/.claude-plugin/plugin.json; do
   if [[ ! -f "$SOURCE_ROOT/$required_file" ]]; then
     echo "The extracted plugin package is incomplete: $required_file is missing." >&2
     exit 1
@@ -301,6 +307,23 @@ if (manifest.name !== "pixverse-api" || manifest.version !== "0.3.0-beta.2") pro
   exit 1
 }
 
+# PIXVERSE_API_AGENTS=auto (default) registers every supported agent found on this Mac.
+# A comma-separated list such as "codex,claude,cursor" limits registration to those agents.
+SELECTED_OUTPUT="$("$NODE_BIN" "$SOURCE_ROOT/dist/agents.js" select)" || {
+  echo "No changes were made." >&2
+  exit 1
+}
+SELECTED_AGENTS=("${(@f)SELECTED_OUTPUT}")
+SELECTED_AGENTS=(${SELECTED_AGENTS:#})
+if [[ "${#SELECTED_AGENTS[@]}" -eq 0 ]]; then
+  echo "No supported coding agent was found. Install Codex, Claude Code, Gemini CLI, Cursor, GitHub Copilot CLI, or OpenCode, then run this installer again." >&2
+  exit 1
+fi
+if (( ${SELECTED_AGENTS[(Ie)codex]} )); then
+  CODEX_BIN="$(command -v codex)"
+fi
+OTHER_AGENTS=(${SELECTED_AGENTS:#codex})
+
 /bin/mkdir -p -- "$SUPPORT_ROOT" "$INSTALL_PARENT" "$BIN_ROOT"
 if [[ ! -f "$SUPPORT_ROOT/credentials.env" && -f "$LEGACY_SUPPORT_ROOT/credentials.env" ]]; then
   /bin/cp -p -- "$LEGACY_SUPPORT_ROOT/credentials.env" "$SUPPORT_ROOT/credentials.env"
@@ -329,14 +352,14 @@ INSTALLED_NEW=1
 /bin/ln -s -- "$BIN_TARGET" "$BIN_PATH"
 BIN_INSTALLED=1
 
-if [[ -n "$PRIOR_INSTALL_ROOT" && "$PRIOR_INSTALL_ROOT" != "$INSTALL_ROOT" ]]; then
+if [[ -n "$CODEX_BIN" && -n "$PRIOR_INSTALL_ROOT" && "$PRIOR_INSTALL_ROOT" != "$INSTALL_ROOT" ]]; then
   remove_registration_or_accept_absent \
     "$CODEX_BIN" plugin remove "$PLUGIN_NAME@$MARKETPLACE_NAME" --json || true
   remove_registration_or_accept_absent \
     "$CODEX_BIN" plugin marketplace remove "$MARKETPLACE_NAME" --json || true
 fi
 
-if ! "$CODEX_BIN" plugin marketplace add "$INSTALL_ROOT" --json >/dev/null; then
+if [[ -n "$CODEX_BIN" ]] && ! "$CODEX_BIN" plugin marketplace add "$INSTALL_ROOT" --json >/dev/null; then
   safe_remove_directory "$INSTALL_ROOT"
   INSTALLED_NEW=0
   if [[ -d "$BACKUP_ROOT" ]]; then
@@ -350,8 +373,10 @@ if ! "$CODEX_BIN" plugin marketplace add "$INSTALL_ROOT" --json >/dev/null; then
   echo "Codex could not register the PixVerse private marketplace. The installation was rolled back." >&2
   exit 1
 fi
-MARKETPLACE_ADDED=1
-if ! "$CODEX_BIN" plugin add "$PLUGIN_NAME@$MARKETPLACE_NAME" --json >/dev/null; then
+if [[ -n "$CODEX_BIN" ]]; then
+  MARKETPLACE_ADDED=1
+fi
+if [[ -n "$CODEX_BIN" ]] && ! "$CODEX_BIN" plugin add "$PLUGIN_NAME@$MARKETPLACE_NAME" --json >/dev/null; then
   "$CODEX_BIN" plugin marketplace remove "$MARKETPLACE_NAME" --json >/dev/null 2>&1 || true
   MARKETPLACE_ADDED=0
   safe_remove_directory "$INSTALL_ROOT"
@@ -364,12 +389,36 @@ if ! "$CODEX_BIN" plugin add "$PLUGIN_NAME@$MARKETPLACE_NAME" --json >/dev/null;
   echo "Codex could not install the PixVerse API Plugin. The installation was rolled back." >&2
   exit 1
 fi
-PLUGIN_ADDED=1
+REGISTERED_CODEX=0
+if [[ -n "$CODEX_BIN" ]]; then
+  PLUGIN_ADDED=1
+  REGISTERED_CODEX=1
+fi
+
+AGENT_RESULT_PATH="$SUPPORT_ROOT/.agent-result-$$.json"
+AGENT_INSTALL_ARGS=(install --root "$INSTALL_ROOT" --agents "${(j:,:)OTHER_AGENTS}" --result "$AGENT_RESULT_PATH")
+if [[ -n "$PRIOR_RECEIPT_PATH" ]]; then
+  AGENT_INSTALL_ARGS+=(--previous-receipt "$PRIOR_RECEIPT_PATH")
+fi
+if [[ -n "$PRIOR_INSTALL_ROOT" && "$PRIOR_INSTALL_ROOT" != "$INSTALL_ROOT" ]]; then
+  AGENT_INSTALL_ARGS+=(--replace)
+fi
+"$NODE_BIN" "$INSTALL_ROOT/dist/agents.js" "${AGENT_INSTALL_ARGS[@]}"
 
 RECEIPT_TEMP="$SUPPORT_ROOT/.install-receipt-$$.json"
 INSTALL_ROOT_VALUE="$INSTALL_ROOT" MARKETPLACE_VALUE="$MARKETPLACE_NAME" VERSION_VALUE="$VERSION" BIN_PATH_VALUE="$BIN_PATH" BIN_TARGET_VALUE="$BIN_TARGET" \
+  REGISTERED_CODEX_VALUE="$REGISTERED_CODEX" AGENT_RESULT_VALUE="$AGENT_RESULT_PATH" \
   "$NODE_BIN" -e '
 const fs = require("node:fs");
+const agentResult = JSON.parse(fs.readFileSync(process.env.AGENT_RESULT_VALUE, "utf8"));
+const agents = [
+  ...(process.env.REGISTERED_CODEX_VALUE === "1" ? [{ name: "codex" }] : []),
+  ...agentResult.agents,
+];
+if (agents.length === 0) {
+  process.stderr.write("PixVerse API Plugin could not be registered with any coding agent.\n");
+  process.exit(3);
+}
 const receipt = {
   install_root: process.env.INSTALL_ROOT_VALUE,
   marketplace: process.env.MARKETPLACE_VALUE,
@@ -377,6 +426,7 @@ const receipt = {
   version: process.env.VERSION_VALUE,
   bin_path: process.env.BIN_PATH_VALUE,
   bin_target: process.env.BIN_TARGET_VALUE,
+  agents,
 };
 fs.writeFileSync(process.argv[1], JSON.stringify(receipt, null, 2) + "\n", { mode: 0o600 });
 ' "$RECEIPT_TEMP"
@@ -395,4 +445,12 @@ if [[ -n "$PRIOR_INSTALL_ROOT" && "$PRIOR_INSTALL_ROOT" != "$INSTALL_ROOT" && -d
   safe_remove_directory "$PRIOR_INSTALL_ROOT" || \
     echo "The new plugin is installed, but the older package directory could not be removed." >&2
 fi
-echo "PixVerse API Plugin $VERSION is installed. Close and reopen Codex, then start a new task."
+AGENT_SUMMARY="$(REGISTERED_CODEX_VALUE="$REGISTERED_CODEX" AGENT_RESULT_VALUE="$AGENT_RESULT_PATH" "$NODE_BIN" -e '
+const fs = require("node:fs");
+const labels = { codex: "Codex", claude: "Claude Code", gemini: "Gemini CLI", cursor: "Cursor", copilot: "GitHub Copilot CLI", opencode: "OpenCode" };
+const result = JSON.parse(fs.readFileSync(process.env.AGENT_RESULT_VALUE, "utf8"));
+const names = [...(process.env.REGISTERED_CODEX_VALUE === "1" ? ["codex"] : []), ...result.agents.map(({ name }) => name)];
+process.stdout.write(names.map((name) => labels[name] ?? name).join(", "));
+')"
+echo "PixVerse API Plugin $VERSION is installed for: $AGENT_SUMMARY."
+echo "Close and reopen each agent, then start a new task."

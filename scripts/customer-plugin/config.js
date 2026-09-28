@@ -68,12 +68,35 @@ export const CUSTOMER_PLUGIN_ALLOWLIST = Object.freeze({
   pluginSource: "packaging/customer-plugin",
   packageRootFiles: Object.freeze([
     ".agents/plugins/marketplace.json",
+    ".claude-plugin/marketplace.json",
     "auth.command",
+    "dist/agents.js",
     "INSTALL-MACOS.md",
     "install.command",
     "uninstall.command",
   ]),
+  skillReferences: Object.freeze({
+    "growth-studio": Object.freeze([
+      "docs/api/growth-studio-pdp.md",
+      "docs/api/safety-and-recovery.md",
+      "packaging/customer-plugin/plugin/examples/pdp-standard-high.json",
+    ]),
+    platform: Object.freeze([
+      "docs/api/command-reference.md",
+      "docs/api/platform-operations.md",
+      "docs/api/safety-and-recovery.md",
+    ]),
+    start: Object.freeze([
+      "docs/api/command-reference.md",
+      "docs/api/safety-and-recovery.md",
+    ]),
+  }),
 });
+
+// Standalone Agent Skills for agents without a plugin marketplace (Gemini CLI, Cursor, and others).
+// Each is a copy of a plugin skill renamed with this prefix so it cannot collide with other skills.
+export const STANDALONE_SKILL_PREFIX = "pixverse-api-";
+export const STANDALONE_SKILL_OWNER_MARKER = ".pixverse-api-plugin";
 
 export const CUSTOMER_PLUGIN_DENIED_PATHS = Object.freeze([
   ".env",

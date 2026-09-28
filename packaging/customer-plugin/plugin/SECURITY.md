@@ -1,6 +1,6 @@
 # Security
 
-Keep PixVerse API credentials in the local process environment. Never paste credentials into Codex chat, store them in payloads, or include them in diagnostics.
+Keep PixVerse API credentials in the local process environment. Never paste credentials into an agent chat, store them in payloads, or include them in diagnostics.
 
 Before reporting a problem, remove authorization headers, API keys, cookies, private media, signed URLs, job artifacts, and customer data. Retain only the plugin version, command name, redacted error code, provider request ID, and safe reproduction steps.
 

@@ -5,13 +5,17 @@ description: Use PixVerse Platform API for discovery, uploads, image and video g
 
 # PixVerse Platform API
 
-Resolve the installed plugin root from this `SKILL.md` location and execute `<plugin-root>/scripts/pixverse-api platform ...`. Use only `PIXVERSE_PLATFORM_API_KEY` and keep all API identifiers as strings.
+Run `pixverse-api platform ...` as described under CLI location. Use only `PIXVERSE_PLATFORM_API_KEY` and keep all API identifiers as strings.
 
 If credentials are missing, route setup to `pixverse-api auth login platform --stdin` or the packaged `auth.command`. Do not ask the user to paste the key into chat.
 
+## CLI location
+
+When this skill is inside the installed plugin (`<plugin-root>/skills/platform/SKILL.md`), run `<plugin-root>/scripts/pixverse-api` so the skill and CLI versions always match. When it is installed as a standalone Agent Skill, run `pixverse-api`, which the PixVerse API Plugin installer places on `PATH`. Do not use a package checkout or package-manager link.
+
 ## Select the operation
 
-Read `<plugin-root>/docs/api/platform-operations.md` for the complete operation catalog and exact billing class. Common routes include:
+Read `references/platform-operations.md` beside this skill for the complete operation catalog and exact billing class. Common routes include:
 
 - `account balance` and `account usage` for read-only account information;
 - `resource templates`, `resource tts-speakers`, and `resource restyle-effects` for live catalogs;
@@ -30,3 +34,5 @@ Read `<plugin-root>/docs/api/platform-operations.md` for the complete operation 
 6. Treat success as transport success plus provider `ErrCode` equal to zero.
 
 Use `platform raw` only to diagnose a documented endpoint absent from the installed specialized catalog. Never use it to bypass validation, billing confirmation, authentication, trace, or recovery controls.
+
+See `references/safety-and-recovery.md` for billable-job recovery rules and `references/command-reference.md` for every command.

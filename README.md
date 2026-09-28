@@ -15,7 +15,7 @@ Historical pitch material remains in this repository's Git history. Share the cu
 
 ## Quick start
 
-### 1. Install the packaged CLI and Codex plugin
+### 1. Install the packaged CLI and agent plugin
 
 Build the self-contained package:
 
@@ -37,7 +37,20 @@ Command-line install from the extracted folder:
 zsh ./install.command
 ```
 
-The installer registers the Codex plugin and installs the CLI in a global Node-style layout:
+The installer registers the plugin with every supported coding agent it finds, and installs the CLI in a global Node-style layout:
+
+| Agent | How it is registered |
+|---|---|
+| Codex | Native plugin from the local `pixverse-private-beta` marketplace |
+| Claude Code | Native plugin from the same local marketplace (`claude plugin install pixverse-api@pixverse-private-beta`) |
+| Gemini CLI | Standalone Agent Skills in `~/.gemini/skills/` |
+| Cursor | Standalone Agent Skills in `~/.cursor/skills/` |
+| GitHub Copilot CLI | Standalone Agent Skills in `~/.copilot/skills/` |
+| OpenCode | Standalone Agent Skills in `~/.config/opencode/skills/` |
+
+Set `PIXVERSE_API_AGENTS=codex,claude,...` to choose agents explicitly (default `auto`). Any other Agent Skills client can use the three folders in the package's `agent-skills/` directory. See `packaging/customer-plugin/INSTALL-MACOS.md` for details.
+
+CLI layout:
 
 ```text
 <selected npm prefix>/lib/node_modules/pixverse-api
@@ -89,7 +102,7 @@ Credentials are saved for the current macOS user at:
 ~/Library/Application Support/PixVerse/api-plugin/credentials.env
 ```
 
-Never paste API keys into Codex chat, prompt files, payload JSON, or shell history as command arguments.
+Never paste API keys into agent chat, prompt files, payload JSON, or shell history as command arguments.
 
 ### 3. Verify read-only access
 
@@ -268,9 +281,9 @@ ls -l "$(npm prefix -g)/bin/pixverse-api"
 
 If the command exists but is not on `PATH`, open a new terminal or add `<npm prefix>/bin` to your shell path.
 
-### Codex does not see the plugin
+### An agent does not see the plugin
 
-After install, close and reopen Codex, then start a new task. The installer registers:
+After install, close and reopen the agent, then start a new task. Codex and Claude Code register:
 
 ```text
 pixverse-api@pixverse-private-beta
@@ -280,7 +293,11 @@ You can inspect registration with:
 
 ```bash
 codex plugin list
+claude plugin list
+ls ~/.gemini/skills ~/.cursor/skills ~/.copilot/skills ~/.config/opencode/skills
 ```
+
+The installer's last line names the agents it registered. If an agent was not detected, rerun the installer with `PIXVERSE_API_AGENTS` naming it.
 
 ### Force reinstall into the global npm prefix
 
