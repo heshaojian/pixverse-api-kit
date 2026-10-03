@@ -3,8 +3,8 @@ import path from "node:path";
 export const CUSTOMER_PLUGIN_RELEASE = Object.freeze({
   pluginName: "pixverse-api",
   marketplaceName: "pixverse-private-beta",
-  version: "0.3.0-beta.2",
-  archiveBaseName: "pixverse-api-plugin-0.3.0-beta.2",
+  version: "0.3.0-beta.3",
+  archiveBaseName: "pixverse-api-plugin-0.3.0-beta.3",
   sourceDateEpoch: 1_790_294_400,
 });
 

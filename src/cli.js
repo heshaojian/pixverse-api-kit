@@ -15,7 +15,7 @@ import {
 } from "./credentials.js";
 
 const LEGACY_WARNING = 'Warning: legacy command syntax is deprecated; use the "pixverse-api growth-studio" namespace.\n';
-export const CLI_VERSION = "0.3.0-beta.2";
+export const CLI_VERSION = "0.3.0-beta.3";
 
 export async function main(argv = [], context = {}) {
   const stdout = context.stdout ?? process.stdout;

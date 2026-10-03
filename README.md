@@ -26,7 +26,7 @@ npm run package:customer-plugin
 Open the generated archive:
 
 ```bash
-open dist/customer-plugin/0.3.0-beta.2/pixverse-api-plugin-0.3.0-beta.2.zip
+open dist/customer-plugin/0.3.0-beta.3/pixverse-api-plugin-0.3.0-beta.3.zip
 ```
 
 Then double-click `install.command` inside the extracted folder. If macOS blocks it, Control-click `install.command`, choose **Open**, and confirm.
@@ -128,10 +128,10 @@ For live/billable jobs, use `run-job` or the provider-specific create command wi
 
 ## Customer package contents
 
-The package artifacts are written to `dist/customer-plugin/0.3.0-beta.2/`:
+The package artifacts are written to `dist/customer-plugin/0.3.0-beta.3/`:
 
-- `pixverse-api-plugin-0.3.0-beta.2.zip`
-- `pixverse-api-plugin-0.3.0-beta.2.zip.sha256`
+- `pixverse-api-plugin-0.3.0-beta.3.zip`
+- `pixverse-api-plugin-0.3.0-beta.3.zip.sha256`
 - `release-report.json`
 
 The build requires Node.js 20+, npm, `zip`, and `unzip`. It stages only approved CLI, API documentation, plugin, and production dependency files; validates the extracted archive; and never reads API credentials or sends paid PixVerse requests. The archive includes double-click macOS install and uninstall helpers plus command-line fallback instructions.

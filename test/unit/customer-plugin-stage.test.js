@@ -104,7 +104,7 @@ test("staged CLI launches with Codex bundled Node when node is absent from PATH"
     encoding: "utf8",
   });
 
-  assert.equal(stdout, "0.3.0-beta.2\n");
+  assert.equal(stdout, "0.3.0-beta.3\n");
   assert.equal(stderr, "");
 });
 
