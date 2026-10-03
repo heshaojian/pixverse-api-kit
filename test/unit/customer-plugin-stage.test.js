@@ -1,11 +1,15 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { promisify } from "node:util";
 
 import { CUSTOMER_PLUGIN_ALLOWLIST } from "../../scripts/customer-plugin/config.js";
 import { stageCustomerPlugin } from "../../scripts/customer-plugin/stage.js";
+
+const execFileAsync = promisify(execFile);
 
 async function exists(filePath) {
   try {
@@ -72,8 +76,36 @@ test("staging creates the self-contained marketplace from approved sources", asy
   assert.notEqual(wrapperMode & 0o100, 0);
   const entrypointMode = (await fs.stat(path.join(result.packageRoot, "dist/index.js"))).mode;
   assert.notEqual(entrypointMode & 0o100, 0);
+  const entrypoint = await fs.readFile(path.join(result.packageRoot, "dist/index.js"), "utf8");
+  assert.match(entrypoint, /^#!\/bin\/sh/);
+  const wrapper = await fs.readFile(path.join(result.pluginRoot, "scripts/pixverse-api"), "utf8");
+  assert.match(wrapper, /CODEX_MCP_NODE_PATH/);
   const packageJson = JSON.parse(await fs.readFile(path.join(result.packageRoot, "package.json"), "utf8"));
   assert.deepEqual(packageJson.bin, { "pixverse-api": "./dist/index.js" });
+});
+
+test("staged CLI launches with Codex bundled Node when node is absent from PATH", async (t) => {
+  const stageRoot = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-customer-codex-node-"));
+  t.after(() => fs.rm(stageRoot, { recursive: true, force: true }));
+
+  const result = await stageCustomerPlugin({
+    repoRoot: process.cwd(),
+    stageRoot,
+    installDependencies: false,
+  });
+
+  const executable = path.join(result.packageRoot, "dist/index.js");
+  const { stdout, stderr } = await execFileAsync(executable, ["--version"], {
+    env: {
+      HOME: os.homedir(),
+      PATH: "/usr/bin:/bin",
+      CODEX_MCP_NODE_PATH: process.execPath,
+    },
+    encoding: "utf8",
+  });
+
+  assert.equal(stdout, "0.3.0-beta.2\n");
+  assert.equal(stderr, "");
 });
 
 test("staged runtime metadata includes only production dependencies", async (t) => {

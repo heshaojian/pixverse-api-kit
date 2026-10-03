@@ -9,6 +9,10 @@ SCRIPT_PATH="${0:A}"
 SOURCE_ROOT="${SCRIPT_PATH:h}"
 SUPPORT_ROOT="$HOME/Library/Application Support/PixVerse/api-plugin"
 LEGACY_SUPPORT_ROOT="$HOME/Library/Application Support/PixVerse/API Plugin"
+CREDENTIALS_ROOT="$HOME/.pixverse-api-kit"
+CREDENTIALS_PATH="$CREDENTIALS_ROOT/credentials.env"
+LEGACY_CREDENTIALS_PATH="$SUPPORT_ROOT/credentials.env"
+OLDER_LEGACY_CREDENTIALS_PATH="$LEGACY_SUPPORT_ROOT/credentials.env"
 RECEIPT_PATH="$SUPPORT_ROOT/install-receipt.json"
 LEGACY_RECEIPT_PATH="$LEGACY_SUPPORT_ROOT/install-receipt.json"
 TEMP_ROOT=""
@@ -324,10 +328,13 @@ if (( ${SELECTED_AGENTS[(Ie)codex]} )); then
 fi
 OTHER_AGENTS=(${SELECTED_AGENTS:#codex})
 
-/bin/mkdir -p -- "$SUPPORT_ROOT" "$INSTALL_PARENT" "$BIN_ROOT"
-if [[ ! -f "$SUPPORT_ROOT/credentials.env" && -f "$LEGACY_SUPPORT_ROOT/credentials.env" ]]; then
-  /bin/cp -p -- "$LEGACY_SUPPORT_ROOT/credentials.env" "$SUPPORT_ROOT/credentials.env"
-  /bin/chmod 600 "$SUPPORT_ROOT/credentials.env"
+/bin/mkdir -p -- "$SUPPORT_ROOT" "$CREDENTIALS_ROOT" "$INSTALL_PARENT" "$BIN_ROOT"
+if [[ ! -f "$CREDENTIALS_PATH" && -f "$LEGACY_CREDENTIALS_PATH" ]]; then
+  /bin/cp -p -- "$LEGACY_CREDENTIALS_PATH" "$CREDENTIALS_PATH"
+  /bin/chmod 600 "$CREDENTIALS_PATH"
+elif [[ ! -f "$CREDENTIALS_PATH" && -f "$OLDER_LEGACY_CREDENTIALS_PATH" ]]; then
+  /bin/cp -p -- "$OLDER_LEGACY_CREDENTIALS_PATH" "$CREDENTIALS_PATH"
+  /bin/chmod 600 "$CREDENTIALS_PATH"
 fi
 TEMP_ROOT="$(/usr/bin/mktemp -d "$INSTALL_PARENT/.pixverse-api-install-$VERSION-XXXXXX")"
 /usr/bin/ditto "$SOURCE_ROOT" "$TEMP_ROOT"

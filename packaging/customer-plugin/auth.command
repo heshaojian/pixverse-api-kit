@@ -1,9 +1,10 @@
 #!/bin/zsh
 set -euo pipefail
 
-SUPPORT_ROOT="$HOME/Library/Application Support/PixVerse/api-plugin"
+SUPPORT_ROOT="$HOME/.pixverse-api-kit"
 CREDENTIALS_PATH="$SUPPORT_ROOT/credentials.env"
-LEGACY_CREDENTIALS_PATH="$HOME/Library/Application Support/PixVerse/API Plugin/credentials.env"
+LEGACY_CREDENTIALS_PATH="$HOME/Library/Application Support/PixVerse/api-plugin/credentials.env"
+OLDER_LEGACY_CREDENTIALS_PATH="$HOME/Library/Application Support/PixVerse/API Plugin/credentials.env"
 
 NODE_BIN="$(command -v node || true)"
 if [[ -z "$NODE_BIN" ]]; then
@@ -33,18 +34,21 @@ else
 fi
 echo
 
-if [[ -z "$platform_key" && -z "$growth_key" && ! -f "$CREDENTIALS_PATH" && ! -f "$LEGACY_CREDENTIALS_PATH" ]]; then
+if [[ -z "$platform_key" && -z "$growth_key" && ! -f "$CREDENTIALS_PATH" && ! -f "$LEGACY_CREDENTIALS_PATH" && ! -f "$OLDER_LEGACY_CREDENTIALS_PATH" ]]; then
   echo "No keys were entered, so no credential file was created."
   exit 0
 fi
 
 /bin/mkdir -p -- "$SUPPORT_ROOT"
-PLATFORM_KEY="$platform_key" GROWTH_KEY="$growth_key" CREDENTIALS_PATH="$CREDENTIALS_PATH" LEGACY_CREDENTIALS_PATH="$LEGACY_CREDENTIALS_PATH" "$NODE_BIN" <<'NODE'
+PLATFORM_KEY="$platform_key" GROWTH_KEY="$growth_key" CREDENTIALS_PATH="$CREDENTIALS_PATH" LEGACY_CREDENTIALS_PATH="$LEGACY_CREDENTIALS_PATH" OLDER_LEGACY_CREDENTIALS_PATH="$OLDER_LEGACY_CREDENTIALS_PATH" "$NODE_BIN" <<'NODE'
 const fs = require("node:fs");
 const path = require("node:path");
 
 const credentialsPath = process.env.CREDENTIALS_PATH;
-const legacyCredentialsPath = process.env.LEGACY_CREDENTIALS_PATH;
+const legacyCredentialPaths = [
+  process.env.LEGACY_CREDENTIALS_PATH,
+  process.env.OLDER_LEGACY_CREDENTIALS_PATH,
+].filter(Boolean);
 const platformKey = (process.env.PLATFORM_KEY || "").trim();
 const growthKey = (process.env.GROWTH_KEY || "").trim();
 if (growthKey && !growthKey.startsWith("mh_live_")) {
@@ -59,9 +63,7 @@ const allowed = new Set([
 const values = {};
 const readFromPath = fs.existsSync(credentialsPath)
   ? credentialsPath
-  : fs.existsSync(legacyCredentialsPath)
-    ? legacyCredentialsPath
-    : null;
+  : legacyCredentialPaths.find((filePath) => fs.existsSync(filePath)) || null;
 if (readFromPath) {
   for (const line of fs.readFileSync(readFromPath, "utf8").split(/\r?\n/)) {
     const trimmed = line.trim();

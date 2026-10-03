@@ -50,7 +50,7 @@ Installed CLI layout:
 
 ## Credentials
 
-Most users should use `auth.command`. It saves keys for the current macOS user under `~/Library/Application Support/PixVerse/api-plugin/credentials.env` with private file permissions. Platform and Growth Studio use dedicated API keys and never substitute for one another.
+Most users should use `auth.command`. It saves keys for the current macOS user under `~/.pixverse-api-kit/credentials.env` with private file permissions. Platform and Growth Studio use dedicated API keys and never substitute for one another. Older credentials under `~/Library/Application Support/PixVerse/api-plugin/credentials.env` or `~/Library/Application Support/PixVerse/API Plugin/credentials.env` remain readable as legacy fallbacks.
 
 Command-line fallback:
 

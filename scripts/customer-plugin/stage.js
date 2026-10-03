@@ -173,20 +173,13 @@ async function writePackageEntrypoint(packageRoot) {
     ],
     engines: { node: ">=20" },
   };
-  const entrypoint = `#!/usr/bin/env node
-import { spawnSync } from "node:child_process";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+  const entrypoint = `#!/bin/sh
+set -eu
 
-const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const wrapper = path.join(packageRoot, "plugins", "pixverse-api", "scripts", "pixverse-api");
-const result = spawnSync(wrapper, process.argv.slice(2), { stdio: "inherit" });
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+WRAPPER="$SCRIPT_DIR/../plugins/pixverse-api/scripts/pixverse-api"
 
-if (result.error) {
-  console.error(result.error.message);
-  process.exit(1);
-}
-process.exit(result.status ?? 1);
+exec "$WRAPPER" "$@"
 `;
 
   await fs.mkdir(path.join(packageRoot, "dist"), { recursive: true });
@@ -207,7 +200,21 @@ set -eu
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 CLI_ENTRY="$SCRIPT_DIR/../runtime/src/cli.js"
-NODE_BIN=$(command -v node || true)
+
+NODE_BIN=""
+if [ -n "\${CODEX_MCP_NODE_PATH:-}" ] && [ -x "$CODEX_MCP_NODE_PATH" ]; then
+  NODE_DIR=$(CDPATH= cd -- "$(dirname -- "$CODEX_MCP_NODE_PATH")" && pwd)
+  PATH="$NODE_DIR\${PATH:+:$PATH}"
+  export PATH
+  NODE_BIN="$CODEX_MCP_NODE_PATH"
+elif [ -n "\${HOME:-}" ] && [ -x "$HOME/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node" ]; then
+  NODE_BIN="$HOME/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node"
+  NODE_DIR=$(CDPATH= cd -- "$(dirname -- "$NODE_BIN")" && pwd)
+  PATH="$NODE_DIR\${PATH:+:$PATH}"
+  export PATH
+else
+  NODE_BIN=$(command -v node || true)
+fi
 
 if [ -z "$NODE_BIN" ]; then
   echo "PixVerse API Plugin requires Node.js 20 or newer." >&2

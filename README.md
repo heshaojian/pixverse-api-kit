@@ -99,8 +99,12 @@ pbpaste | tr -d '\r\n' | pixverse-api auth login growth-studio --stdin
 Credentials are saved for the current macOS user at:
 
 ```text
-~/Library/Application Support/PixVerse/api-plugin/credentials.env
+~/.pixverse-api-kit/credentials.env
 ```
+
+Existing installs that still have credentials under `~/Library/Application Support/PixVerse/api-plugin/credentials.env`
+or `~/Library/Application Support/PixVerse/API Plugin/credentials.env` are read as legacy fallbacks and migrated by
+the installer/helper the next time credentials are saved.
 
 Never paste API keys into agent chat, prompt files, payload JSON, or shell history as command arguments.
 

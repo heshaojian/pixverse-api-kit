@@ -74,7 +74,7 @@ test("customer plugin exports three neutral wrapper-based skills", async () => {
   const textFiles = await collectTextFiles(SOURCE_ROOT);
   const allText = (await Promise.all(textFiles.map((file) => fs.readFile(file, "utf8")))).join("\n");
   assert.doesNotMatch(allText, /\/Users\/|docs\/superpowers|brand-pitches|revolve|feishu\.cn/i);
-  assert.doesNotMatch(allText, /npm run cli|pixverse-api-kit/);
+  assert.doesNotMatch(allText, /npm run cli|Projects\/Codex\/Projects\/pixverse-api-kit/);
   assert.match(allText, /scripts\/pixverse-api/);
   assert.match(allText, /PIXVERSE_PLATFORM_API_KEY/);
   assert.match(allText, /PIXVERSE_GROWTH_API_KEY/);
@@ -117,6 +117,8 @@ test("customer plugin includes the complete private-demo documentation set", asy
 
 test("credential helper confirms paste without echoing key contents", async () => {
   const helper = await fs.readFile(path.join(SOURCE_ROOT, "auth.command"), "utf8");
+  assert.match(helper, /\$HOME\/\.pixverse-api-kit/);
+  assert.match(helper, /Application Support\/PixVerse\/api-plugin\/credentials\.env/);
   assert.match(helper, /Platform API key captured: \$\{#platform_key\} characters\./);
   assert.match(helper, /Growth Studio API key captured: \$\{#growth_key\} characters\./);
   assert.match(helper, /Platform API key: \$\{configured\.platform \? "configured" : "missing"\}/);

@@ -21,7 +21,15 @@ const PROVIDER_KEYS = Object.freeze({
 
 export function getUserCredentialsPath(env = process.env) {
   const home = env.HOME || os.homedir();
-  return path.join(home, "Library", "Application Support", "PixVerse", "api-plugin", "credentials.env");
+  return path.join(home, ".pixverse-api-kit", "credentials.env");
+}
+
+export function getLegacyUserCredentialsPaths(env = process.env) {
+  const home = env.HOME || os.homedir();
+  return [
+    path.join(home, "Library", "Application Support", "PixVerse", "api-plugin", "credentials.env"),
+    path.join(home, "Library", "Application Support", "PixVerse", "API Plugin", "credentials.env"),
+  ];
 }
 
 export function loadUserCredentials(env = process.env, filePath = getUserCredentialsPath(env)) {
@@ -32,9 +40,10 @@ export function loadUserCredentials(env = process.env, filePath = getUserCredent
 }
 
 export function readCredentialFile(filePath = getUserCredentialsPath()) {
+  const resolvedPath = resolveCredentialFilePath(filePath);
   let stats;
   try {
-    stats = fs.statSync(filePath);
+    stats = fs.statSync(resolvedPath);
   } catch (error) {
     if (error?.code === "ENOENT") return {};
     throw error;
@@ -42,7 +51,7 @@ export function readCredentialFile(filePath = getUserCredentialsPath()) {
   if (!stats.isFile()) return {};
 
   const values = {};
-  for (const line of fs.readFileSync(filePath, "utf8").split(/\r?\n/)) {
+  for (const line of fs.readFileSync(resolvedPath, "utf8").split(/\r?\n/)) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("#")) continue;
     const separator = trimmed.indexOf("=");
@@ -106,6 +115,16 @@ export function getCredentialStatus(env = process.env, filePath = getUserCredent
     platform: providerStatus("platform", env, saved),
     growthStudio: providerStatus("growth-studio", env, saved),
   });
+}
+
+function resolveCredentialFilePath(filePath) {
+  if (fs.existsSync(filePath)) return filePath;
+  const parent = path.dirname(filePath);
+  if (path.basename(filePath) !== "credentials.env" || path.basename(parent) !== ".pixverse-api-kit") {
+    return filePath;
+  }
+  const home = path.dirname(parent);
+  return getLegacyUserCredentialsPaths({ HOME: home }).find((legacyPath) => fs.existsSync(legacyPath)) ?? filePath;
 }
 
 function providerStatus(provider, env, saved) {

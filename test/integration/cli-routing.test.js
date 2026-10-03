@@ -199,7 +199,7 @@ test("auth commands store dedicated Platform and Growth Studio API keys", async 
   assert.equal(statusJson.growthStudio.source, "user-file");
   assert.doesNotMatch(status.stdout(), /platform-fixture-key|mh_live_fixture_key/);
 
-  const credentialsPath = path.join(home, "Library/Application Support/PixVerse/api-plugin/credentials.env");
+  const credentialsPath = path.join(home, ".pixverse-api-kit/credentials.env");
   const stats = await fs.stat(credentialsPath);
   assert.equal(stats.mode & 0o077, 0);
   const saved = await fs.readFile(credentialsPath, "utf8");
@@ -229,6 +229,32 @@ test("auth logout removes only the selected dedicated API key", async (t) => {
   const statusJson = JSON.parse(status.stdout());
   assert.equal(statusJson.platform.configured, false);
   assert.equal(statusJson.growthStudio.configured, true);
+});
+
+test("auth status reads legacy Application Support credentials as a fallback", async (t) => {
+  const home = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-api-legacy-auth-home-"));
+  t.after(() => fs.rm(home, { recursive: true, force: true }));
+  const legacyRoot = path.join(home, "Library/Application Support/PixVerse/api-plugin");
+  await fs.mkdir(legacyRoot, { recursive: true });
+  await fs.writeFile(path.join(legacyRoot, "credentials.env"), [
+    "PIXVERSE_PLATFORM_API_KEY=legacy-platform-fixture",
+    "PIXVERSE_GROWTH_API_KEY=mh_live_legacy_fixture",
+    "",
+  ].join("\n"), { mode: 0o600 });
+
+  const status = captureOutput();
+  assert.equal(await main(["auth", "status"], {
+    env: { HOME: home },
+    ...status.context,
+  }), 0);
+
+  const statusJson = JSON.parse(status.stdout());
+  assert.equal(statusJson.filePath, path.join(home, ".pixverse-api-kit/credentials.env"));
+  assert.equal(statusJson.platform.configured, true);
+  assert.equal(statusJson.platform.source, "user-file");
+  assert.equal(statusJson.growthStudio.configured, true);
+  assert.equal(statusJson.growthStudio.source, "user-file");
+  assert.doesNotMatch(status.stdout(), /legacy-platform-fixture|mh_live_legacy_fixture/);
 });
 
 test("CLI module import is process-isolated and has no output", async () => {
@@ -348,7 +374,7 @@ test("Platform executable lazily loads only its provider configuration from cwd 
 test("executable routes load dedicated API credentials from the user auth store", async (t) => {
   const home = await fs.mkdtemp(path.join(os.tmpdir(), "pixverse-api-user-store-"));
   t.after(() => fs.rm(home, { recursive: true, force: true }));
-  const supportRoot = path.join(home, "Library/Application Support/PixVerse/api-plugin");
+  const supportRoot = path.join(home, ".pixverse-api-kit");
   await fs.mkdir(supportRoot, { recursive: true });
 
   const server = http.createServer((request, response) => {
